@@ -132,3 +132,5 @@ D:\Internships\Pfe\backend\backend\obj\Debug\net8.0\refint\backend.dll
 D:\Internships\Pfe\backend\backend\obj\Debug\net8.0\backend.pdb
 D:\Internships\Pfe\backend\backend\obj\Debug\net8.0\backend.genruntimeconfig.cache
 D:\Internships\Pfe\backend\backend\obj\Debug\net8.0\ref\backend.dll
+D:\Internships\Pfe\backend\backend\obj\Debug\net8.0\backend.sourcelink.json
+D:\Internships\Pfe\backend\backend\bin\Debug\net8.0\BCrypt.Net-Next.dll

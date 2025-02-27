@@ -1,9 +1,10 @@
 {
   "version": 2,
-  "dgSpecHash": "w5cp/xlVHW7HxoG7Y3lBdafMC7MR59jiXEL5tdHcsAQX3lIHHU1PnZsUSFZXfy+InWOj0j4bZCXbC+PFO+VRwA==",
+  "dgSpecHash": "WX7YZAxjYTCa24N2C43K/XcgeeBjykUAlIorYQBz7TIEesOE/8Q6yXE6cBr8WYMqOrVaa/kn/jRYJX1aqWkd/w==",
   "success": true,
   "projectFilePath": "D:\\Internships\\Pfe\\backend\\backend\\backend.csproj",
   "expectedPackageFiles": [
+    "C:\\Users\\USER\\.nuget\\packages\\bcrypt.net-next\\4.0.3\\bcrypt.net-next.4.0.3.nupkg.sha512",
     "C:\\Users\\USER\\.nuget\\packages\\humanizer.core\\2.14.1\\humanizer.core.2.14.1.nupkg.sha512",
     "C:\\Users\\USER\\.nuget\\packages\\microsoft.bcl.asyncinterfaces\\7.0.0\\microsoft.bcl.asyncinterfaces.7.0.0.nupkg.sha512",
     "C:\\Users\\USER\\.nuget\\packages\\microsoft.build.framework\\17.8.3\\microsoft.build.framework.17.8.3.nupkg.sha512",
