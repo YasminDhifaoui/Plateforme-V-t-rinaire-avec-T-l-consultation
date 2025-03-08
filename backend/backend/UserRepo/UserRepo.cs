@@ -21,26 +21,26 @@ namespace backend.Data
             return _context.Users
                 .Select(user => new UserDto
                 {
-                    Id = user.Id,
-                    Username = user.Username,
+                    Id = user.Id,  
+                    Username = user.UserName,
                     Email = user.Email,
-                    Password = user.Password,
+                    Password = user.PasswordHash, 
                     Role = user.Role
                 })
                 .ToList();
         }
 
         //GetUserById
-        public UserDto GetUserById(int id)
+        public UserDto GetUserById(Guid id)  
         {
             var user = _context.Users
                 .Where(u => u.Id == id)
                 .Select(u => new UserDto
                 {
                     Id = u.Id,
-                    Username = u.Username,
+                    Username = u.UserName,
                     Email = u.Email,
-                    Password = u.Password,
+                    Password = u.PasswordHash,  
                     Role = u.Role
                 })
                 .FirstOrDefault();
@@ -52,13 +52,13 @@ namespace backend.Data
         public UserDto GetUserByUsername(string username)
         {
             var user = _context.Users
-                .Where(u => u.Username == username)
+                .Where(u => u.UserName == username)
                 .Select(u => new UserDto
                 {
                     Id = u.Id,
-                    Username = u.Username,
+                    Username = u.UserName,
                     Email = u.Email,
-                    Password = u.Password,
+                    Password = u.PasswordHash,  
                     Role = u.Role
                 })
                 .FirstOrDefault();
@@ -69,14 +69,17 @@ namespace backend.Data
         // Register 
         public UserRegisterDto Register(User user)
         {
+            
+            user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(user.PasswordHash);
+
             _context.Users.Add(user);
             _context.SaveChanges();
 
             return new UserRegisterDto
             {
-                Username = user.Username,
-                Email = user.Email, 
-                Password = user.Password,
+                Username = user.UserName,
+                Email = user.Email,
+                Password = user.PasswordHash,  
                 Role = user.Role
             };
         }
@@ -84,28 +87,27 @@ namespace backend.Data
         // Login
         public UserLoginDto Login(string username, string password)
         {
-            var user = _context.Users.SingleOrDefault(u => u.Username == username);
+            var user = _context.Users.SingleOrDefault(u => u.UserName == username);
 
-            if (user != null && BCrypt.Net.BCrypt.Verify(password, user.Password))
+            if (user != null && BCrypt.Net.BCrypt.Verify(password, user.PasswordHash))
             {
                 return new UserLoginDto
                 {
-                    
-                    Username = user.Username,
-                    Password = user.Password
+                    Username = user.UserName,
+                    Password = user.PasswordHash  
                 };
             }
-            return null; 
+            return null;
         }
 
         // Reset password 
-        public bool ResetPassword(int userId, string newPassword)
+        public bool ResetPassword(Guid userId, string newPassword)  
         {
             var user = _context.Users.Find(userId);
 
             if (user != null)
             {
-                user.Password = BCrypt.Net.BCrypt.HashPassword(newPassword);
+                user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(newPassword);
                 _context.SaveChanges();
                 return true;
             }
@@ -114,23 +116,23 @@ namespace backend.Data
         }
 
         // Update user 
-        public void UpdateUser(UserDto user,UserDto updatedUser)
+        public void UpdateUser(UserDto user, UserDto updatedUser)
         {
-            var userc = _context.Users.Find(user.Id);
+            var userToUpdate = _context.Users.Find(user.Id);
 
-            if (userc != null)
+            if (userToUpdate != null)
             {
-                userc.Username = updatedUser.Username;
-                userc.Email = updatedUser.Email;
-                userc.Role = updatedUser.Role;
+                userToUpdate.UserName = updatedUser.Username;
+                userToUpdate.Email = updatedUser.Email;
+                userToUpdate.Role = updatedUser.Role;
 
-                _context.Users.Update(userc);
+                _context.Users.Update(userToUpdate);
                 _context.SaveChanges();
             }
         }
 
         // Delete user by Id
-        public void DeleteUser(int id)
+        public void DeleteUser(Guid id)  
         {
             var user = _context.Users.Find(id);
             if (user != null)

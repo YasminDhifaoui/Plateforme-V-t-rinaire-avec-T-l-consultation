@@ -7,17 +7,19 @@ namespace backend.Data
     public interface IUserRepo
     {
         IEnumerable<UserDto> GetUsers();
-        UserDto GetUserById(int id);
+
+        UserDto GetUserById(Guid id);
+
         UserDto GetUserByUsername(string username);
 
-        // User Management
+      
         UserRegisterDto Register(User user);
         UserLoginDto Login(string username, string password);
-        bool ResetPassword(int userId, string newPassword);
+        bool ResetPassword(Guid userId, string newPassword); 
 
-        // CRUD 
-        void UpdateUser(UserDto user,UserDto updatedUser);
-        void DeleteUser(int id);
+      
+        void UpdateUser(UserDto user, UserDto updatedUser);
+        void DeleteUser(Guid id);
 
         void SaveChanges();
     }

@@ -1,6 +1,10 @@
 using backend.Data;
+using backend.Models;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using System;
+
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -21,6 +25,8 @@ builder.Services.AddCors(options =>
 builder.Services.AddControllers();
 builder.Services.AddScoped<IUserRepo, UserRepo>();
 
+
+
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
@@ -29,6 +35,10 @@ builder.Services.AddSwaggerGen();
 // Add PostgreSQL DB connection
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("PostgresConnection")));
+
+builder.Services.AddIdentity<User, IdentityRole<Guid>>()  
+    .AddEntityFrameworkStores<AppDbContext>()
+    .AddDefaultTokenProviders();
 
 
 var app = builder.Build();
