@@ -1,46 +1,48 @@
-﻿using backend.Dtos;
+﻿using backend.Data;
+using backend.Dtos;
+using backend.Dtos.AdminDtos.AdminAuthDto;
 using backend.Models;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace backend.Data
+namespace backend.Repo.AdminRepo
 {
-    public class UserRepo : IUserRepo
+    public class AdminRepo : IAdminRepo
     {
         private readonly AppDbContext _context;
 
-        public UserRepo(AppDbContext context)
+        public AdminRepo(AppDbContext context)
         {
             _context = context;
         }
 
         //UsersList
-        public IEnumerable<UserDto> GetUsers()
+        public IEnumerable<AdminDto> GetUsers()
         {
             return _context.Users
-                .Select(user => new UserDto
+                .Select(user => new AdminDto
                 {
-                    Id = user.Id,  
+                    Id = user.Id,
                     Username = user.UserName,
                     Email = user.Email,
-                    Password = user.PasswordHash, 
+                    Password = user.PasswordHash,
                     Role = user.Role
                 })
                 .ToList();
         }
 
         //GetUserById
-        public UserDto GetUserById(Guid id)  
+        public AdminDto GetUserById(Guid id)
         {
             var user = _context.Users
                 .Where(u => u.Id == id)
-                .Select(u => new UserDto
+                .Select(u => new AdminDto
                 {
                     Id = u.Id,
                     Username = u.UserName,
                     Email = u.Email,
-                    Password = u.PasswordHash,  
+                    Password = u.PasswordHash,
                     Role = u.Role
                 })
                 .FirstOrDefault();
@@ -49,16 +51,16 @@ namespace backend.Data
         }
 
         //getUserByUsername
-        public UserDto GetUserByUsername(string username)
+        public AdminDto GetUserByUsername(string username)
         {
             var user = _context.Users
                 .Where(u => u.UserName == username)
-                .Select(u => new UserDto
+                .Select(u => new AdminDto
                 {
                     Id = u.Id,
                     Username = u.UserName,
                     Email = u.Email,
-                    Password = u.PasswordHash,  
+                    Password = u.PasswordHash,
                     Role = u.Role
                 })
                 .FirstOrDefault();
@@ -67,41 +69,41 @@ namespace backend.Data
         }
 
         // Register 
-        public UserRegisterDto Register(User user)
+        public AdminRegisterDto Register(AppUser user)
         {
-            
+
             user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(user.PasswordHash);
 
             _context.Users.Add(user);
             _context.SaveChanges();
 
-            return new UserRegisterDto
+            return new AdminRegisterDto
             {
                 Username = user.UserName,
                 Email = user.Email,
-                Password = user.PasswordHash,  
+                Password = user.PasswordHash,
                 Role = user.Role
             };
         }
 
         // Login
-        public UserLoginDto Login(string username, string password)
+        public AdminLoginDto Login(string username, string password)
         {
             var user = _context.Users.SingleOrDefault(u => u.UserName == username);
 
             if (user != null && BCrypt.Net.BCrypt.Verify(password, user.PasswordHash))
             {
-                return new UserLoginDto
+                return new AdminLoginDto
                 {
-                    Username = user.UserName,
-                    Password = user.PasswordHash  
+                    Email = user.Email,
+                    Password = user.PasswordHash
                 };
             }
             return null;
         }
 
         // Reset password 
-        public bool ResetPassword(Guid userId, string newPassword)  
+        public bool ResetPassword(Guid userId, string newPassword)
         {
             var user = _context.Users.Find(userId);
 
@@ -116,7 +118,7 @@ namespace backend.Data
         }
 
         // Update user 
-        public void UpdateUser(UserDto user, UserDto updatedUser)
+        public void UpdateUser(AdminDto user, AdminDto updatedUser)
         {
             var userToUpdate = _context.Users.Find(user.Id);
 
@@ -132,7 +134,7 @@ namespace backend.Data
         }
 
         // Delete user by Id
-        public void DeleteUser(Guid id)  
+        public void DeleteUser(Guid id)
         {
             var user = _context.Users.Find(id);
             if (user != null)

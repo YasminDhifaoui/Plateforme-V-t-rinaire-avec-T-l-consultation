@@ -1,5 +1,6 @@
-﻿using backend.Data;
-using backend.Dtos;
+﻿using backend.Dtos;
+using backend.Dtos.AdminDtos.AdminAuthDto;
+using backend.Repo.AdminRepo;
 using Microsoft.AspNetCore.Mvc;
 using System;
 
@@ -9,9 +10,9 @@ namespace backend.Controllers.AdminControllers
     [ApiController]
     public class AdminUsersController : ControllerBase
     {
-        private readonly IUserRepo _userRepo;
+        private readonly IAdminRepo _userRepo;
 
-        public AdminUsersController(IUserRepo userRepo)
+        public AdminUsersController(IAdminRepo userRepo)
         {
             _userRepo = userRepo;
         }
@@ -44,7 +45,7 @@ namespace backend.Controllers.AdminControllers
 
         // updateUser
         [HttpPut("updateUser/{id}")]
-        public IActionResult UpdateUser(Guid id, [FromBody] UserDto updatedUser)  
+        public IActionResult UpdateUser(Guid id, [FromBody] AdminDto updatedUser)  
         {
             var user = _userRepo.GetUserById(id);
 

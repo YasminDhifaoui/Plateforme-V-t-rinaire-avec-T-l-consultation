@@ -23,7 +23,7 @@ builder.Services.AddCors(options =>
 
 
 builder.Services.AddControllers();
-builder.Services.AddScoped<IUserRepo, UserRepo>();
+//builder.Services.AddScoped<IUserRepo, UserRepo>();
 
 
 
@@ -36,7 +36,7 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("PostgresConnection")));
 
-builder.Services.AddIdentity<User, IdentityRole<Guid>>()  
+builder.Services.AddIdentity<AppUser, IdentityRole<Guid>>()  
     .AddEntityFrameworkStores<AppDbContext>()
     .AddDefaultTokenProviders();
 

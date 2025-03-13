@@ -66,13 +66,13 @@ namespace backend.Controllers
                 return NotFound(new { message = "Animal not found." });
             }
 
-            animal.Name = updatedAnimal.Name;
+           /* animal.Name = updatedAnimal.Name;
             animal.Species = updatedAnimal.Species;
             animal.Breed = updatedAnimal.Breed;
             animal.Age = updatedAnimal.Age;
             animal.Sex = updatedAnimal.Sex;
             animal.Allergies = updatedAnimal.Allergies;
-            animal.MedicalHistory = updatedAnimal.MedicalHistory;
+            animal.MedicalHistory = updatedAnimal.MedicalHistory;*/
 
 
             animal.UpdatedAt = DateTime.UtcNow; 
@@ -84,16 +84,16 @@ namespace backend.Controllers
         [HttpGet("searchAnimal")]
         public IActionResult SearchAnimal([FromQuery] string name)
         {
-            var animals = _context.Animals
+           /* var animals = _context.Animals
                 .Where(a => a.Name.Contains(name))
                 .ToList();
 
             if (animals.Count == 0)
             {
                 return NotFound(new { message = "No animals found with the given name." });
-            }
+            }*/
 
-            return Ok(animals);
+            return Ok(/*animals*/);
         }
     }
 }
