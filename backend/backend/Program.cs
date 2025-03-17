@@ -1,5 +1,7 @@
 using backend.Data;
+using backend.Mail;
 using backend.Models;
+using backend.Repo.AdminRepo;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -31,14 +33,22 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+//email smtp service 
+builder.Services.AddScoped<IMailService, MailService>();
+builder.Services.AddScoped<IAdminRepo, AdminRepo>();
+
+
 
 // Add PostgreSQL DB connection
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("PostgresConnection")));
 
-builder.Services.AddIdentity<AppUser, IdentityRole<Guid>>()  
+builder.Services.AddIdentity<AppUser, ApplicationRole>()
     .AddEntityFrameworkStores<AppDbContext>()
     .AddDefaultTokenProviders();
+
+
+
 
 
 var app = builder.Build();

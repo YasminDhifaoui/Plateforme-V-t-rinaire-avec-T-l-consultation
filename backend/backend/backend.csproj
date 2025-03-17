@@ -8,6 +8,7 @@
 
   <ItemGroup>
     <PackageReference Include="BCrypt.Net-Next" Version="4.0.3" />
+    <PackageReference Include="MailKit" Version="4.11.0" />
     <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="8.0.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.2" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.2">
@@ -24,7 +25,6 @@
     <Folder Include="Controllers\ClientControllers\" />
     <Folder Include="Controllers\VetControllers\" />
     <Folder Include="Data\" />
-    <Folder Include="Dtos\AdminDtos\" />
     <Folder Include="Dtos\ClientDtos\" />
     <Folder Include="Dtos\VetDtos\" />
     <Folder Include="Migrations\" />

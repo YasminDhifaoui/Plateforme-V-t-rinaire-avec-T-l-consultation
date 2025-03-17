@@ -26,8 +26,7 @@ namespace backend.Repo.AdminRepo
                     Id = user.Id,
                     Username = user.UserName,
                     Email = user.Email,
-                    Password = user.PasswordHash,
-                    Role = user.Role
+                    Password = user.PasswordHash
                 })
                 .ToList();
         }
@@ -42,8 +41,7 @@ namespace backend.Repo.AdminRepo
                     Id = u.Id,
                     Username = u.UserName,
                     Email = u.Email,
-                    Password = u.PasswordHash,
-                    Role = u.Role
+                    Password = u.PasswordHash
                 })
                 .FirstOrDefault();
 
@@ -60,8 +58,7 @@ namespace backend.Repo.AdminRepo
                     Id = u.Id,
                     Username = u.UserName,
                     Email = u.Email,
-                    Password = u.PasswordHash,
-                    Role = u.Role
+                    Password = u.PasswordHash
                 })
                 .FirstOrDefault();
 
@@ -81,8 +78,7 @@ namespace backend.Repo.AdminRepo
             {
                 Username = user.UserName,
                 Email = user.Email,
-                Password = user.PasswordHash,
-                Role = user.Role
+                Password = user.PasswordHash
             };
         }
 
@@ -126,7 +122,6 @@ namespace backend.Repo.AdminRepo
             {
                 userToUpdate.UserName = updatedUser.Username;
                 userToUpdate.Email = updatedUser.Email;
-                userToUpdate.Role = updatedUser.Role;
 
                 _context.Users.Update(userToUpdate);
                 _context.SaveChanges();

@@ -9,9 +9,6 @@ namespace backend.Models
     [Key]
     public Guid Id { get; set; } = Guid.NewGuid();
     
-    [Required]
-    public string Role { get; set; }
-
     public bool TwoFactorEnabled { get; set; } = false;
     public string? TwoFactorCode { get; set; }
     public DateTime? TwoFactorExpiration { get; set; }

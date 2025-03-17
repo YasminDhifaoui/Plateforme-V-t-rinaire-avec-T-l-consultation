@@ -2,6 +2,7 @@
 using backend.Data;
 using backend.Dtos;
 using backend.Dtos.AdminDtos.AdminAuthDto;
+using backend.Mail;
 using backend.Models;
 using backend.Repo.AdminRepo;
 using MailKit;
@@ -14,6 +15,7 @@ using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using System;
 using System.IdentityModel.Tokens.Jwt;
+using System.Net;
 using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
@@ -27,17 +29,22 @@ namespace backend.Controllers.AdminControllers
         private readonly IConfiguration _configuration;
         private readonly IAdminRepo _repository;
         private readonly UserManager<AppUser> _userManager;
+        private readonly RoleManager<ApplicationRole> _roleManager;
+
 
         private readonly ILogger _logger;
-        private readonly IMailService _emailService;
+        private readonly Mail.IMailService _emailService;
         private readonly IOptions<DataProtectionTokenProviderOptions> _tokenOptions;
         private readonly AppDbContext _context;
+
         public AdminAuthenticationController(
             IConfiguration configuration,
             IAdminRepo repository,
             UserManager<AppUser> userManager,
+            RoleManager<ApplicationRole> roleManager,
+
             ILogger<AdminAuthenticationController> logger,
-            IMailService emailService,
+            Mail.IMailService emailService,
             IOptions<DataProtectionTokenProviderOptions> tokenOptions,
             AppDbContext context
         )
@@ -45,13 +52,125 @@ namespace backend.Controllers.AdminControllers
             _configuration = configuration;
             _repository = repository;
             _userManager = userManager;
+            _roleManager = roleManager;
             _logger = logger;
             _emailService = emailService;
             _tokenOptions = tokenOptions;
             _context = context;
         }
 
-        [HttpPost("login")]
+
+        [HttpPost("register")]
+        public async Task<IActionResult> Register([FromBody] AdminRegisterDto adminRegister)
+        {
+            var userEmailExists = await _userManager.FindByEmailAsync(adminRegister.Email);
+            var userNameExists = await _userManager.FindByNameAsync(adminRegister.Username);
+
+
+            if (userEmailExists != null)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, new ApiResponse
+                {
+                    Status = "Error",
+                    Message = "User email already exists"
+                });
+            }
+            
+            if ( userNameExists != null)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, new ApiResponse
+                {
+                    Status = "Error",
+                    Message="User name already exists"
+                });
+            }
+
+            AppUser user = new()
+            {
+                Id = Guid.NewGuid(),
+                SecurityStamp = Guid.NewGuid().ToString(),
+                Email = adminRegister.Email,
+                UserName = adminRegister.Username,
+                CreatedAt = DateTime.UtcNow,  
+                UpdatedAt = DateTime.UtcNow
+            };
+            
+            var result =await _userManager.CreateAsync(user, adminRegister.Password);
+            if (!result.Succeeded)
+            {
+                var errors = string.Join(", ", result.Errors.Select(e => e.Description));
+                
+                return StatusCode(StatusCodes.Status500InternalServerError, new ApiResponse
+                {
+                    Status = "Error",
+                    Message = "Failed to create user , "+ errors
+                });
+            }
+            if (!await _roleManager.RoleExistsAsync(UserRole.Admin))
+            {
+                var role = new ApplicationRole(UserRole.Admin);
+                await _roleManager.CreateAsync(role);
+            }
+
+            if (!await _roleManager.RoleExistsAsync(UserRole.Client))
+            {
+                var role = new ApplicationRole(UserRole.Client);
+                await _roleManager.CreateAsync(role);
+            }
+
+            if (!await _roleManager.RoleExistsAsync(UserRole.Veterinaire))
+            {
+                var role = new ApplicationRole(UserRole.Veterinaire);
+                await _roleManager.CreateAsync(role);
+            }
+            
+
+            await _userManager.AddToRoleAsync(user, UserRole.Admin);
+
+            _repository.Register(user);
+
+            string code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+            user.TwoFactorCode = code;
+            await _context.SaveChangesAsync();
+
+            string encodedCode = WebUtility.UrlEncode(code);
+            string Url = $"{_configuration["AdminBaseUrl"]}/confirm-admin-email?email={user.Email}&code={encodedCode}";
+
+
+            var Variables = new Dictionary<string, string>();
+            Variables["Url"] = Url;
+            Variables["BaseUrl"] = _configuration["BaseUrl"];
+            Variables["ApiBaseUrl"] = _configuration["ApiBaseUrl"];
+
+            HTMLTemplateMailData mailData = new HTMLTemplateMailData()
+            {
+                TemplateName = "AdminEmailConfirmation",
+                EmailSubject = "Inscription Admin : Confirmation d\'email",
+                EmailToName = user.UserName,
+                EmailToId = user.Email,
+                Variables = Variables
+            };
+
+            try
+            {
+                _emailService.SendHTMLTemplateMail(mailData);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("Error send email" + ex.Message, ex);
+                return StatusCode(StatusCodes.Status500InternalServerError, new ApiResponse
+                {
+                    Status = "Error send email",
+                    Message = ex.ToString()
+                });
+            }
+            return Ok(new ApiResponse { Status = "Success", Message = "User successfully created!" });
+
+        }
+
+
+
+        /*[HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] AdminLoginDto adminLogin)
         {
             var user = await _userManager.FindByEmailAsync(adminLogin.Email);
@@ -120,29 +239,6 @@ namespace backend.Controllers.AdminControllers
 
         }
 
-        [HttpPost("register")]
-        public async Task<IActionResult> Register([FromBody] AdminRegisterDto userReg)
-        {
-            var existingUser = await _userManager.FindByNameAsync(userReg.Username);
-            if (existingUser != null)
-                return BadRequest(new { message = "Username already exists" });
-
-            var user = new AppUser
-            {
-                UserName = userReg.Username,
-                Email = userReg.Email,
-                Role = "Admin",
-                TwoFactorEnabled = true 
-            };
-
-            var result = await _userManager.CreateAsync(user, userReg.Password);
-            if (!result.Succeeded)
-                return BadRequest(result.Errors);
-
-            return Ok(new { message = "User registered successfully!" });
-        }
-
-        
 
         [HttpPost("2fa-verify")]
         public async Task<IActionResult> Verify2FA([FromBody] TwoFactorDto twoFactorDto)
@@ -194,6 +290,6 @@ namespace backend.Controllers.AdminControllers
                 signingCredentials: creds);
 
             return new JwtSecurityTokenHandler().WriteToken(token);
-        }
+        }*/
     }
 }
