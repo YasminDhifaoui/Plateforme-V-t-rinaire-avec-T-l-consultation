@@ -1,7 +1,6 @@
-﻿namespace backend.Mail
+﻿using backend.Mail;
+
+public interface IMailService
 {
-    public interface IMailService
-    {
-        void SendHTMLTemplateMail(HTMLTemplateMailData mailData);
-    }
+    bool SendHTMLTemplateMail(HTMLTemplateMailData mailData);
 }

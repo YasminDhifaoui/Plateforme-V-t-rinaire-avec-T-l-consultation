@@ -5,7 +5,6 @@ using backend.Dtos.AdminDtos.AdminAuthDto;
 using backend.Mail;
 using backend.Models;
 using backend.Repo.AdminRepo;
-using MailKit;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -19,6 +18,7 @@ using System.Net;
 using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
+using MailKit;
 
 namespace backend.Controllers.AdminControllers
 {
@@ -33,7 +33,7 @@ namespace backend.Controllers.AdminControllers
 
 
         private readonly ILogger _logger;
-        private readonly Mail.IMailService _emailService;
+        private readonly IMailService _emailService;
         private readonly IOptions<DataProtectionTokenProviderOptions> _tokenOptions;
         private readonly AppDbContext _context;
 
@@ -44,7 +44,7 @@ namespace backend.Controllers.AdminControllers
             RoleManager<ApplicationRole> roleManager,
 
             ILogger<AdminAuthenticationController> logger,
-            Mail.IMailService emailService,
+            IMailService emailService,
             IOptions<DataProtectionTokenProviderOptions> tokenOptions,
             AppDbContext context
         )
@@ -61,27 +61,25 @@ namespace backend.Controllers.AdminControllers
 
 
         [HttpPost("register")]
-        public async Task<IActionResult> Register([FromBody] AdminRegisterDto adminRegister)
+        public async Task<IActionResult> RegisterAdmin([FromBody] AdminRegisterDto adminRegister)
         {
             var userEmailExists = await _userManager.FindByEmailAsync(adminRegister.Email);
-            var userNameExists = await _userManager.FindByNameAsync(adminRegister.Username);
-
-
             if (userEmailExists != null)
             {
                 return StatusCode(StatusCodes.Status500InternalServerError, new ApiResponse
                 {
                     Status = "Error",
-                    Message = "User email already exists"
+                    Message = "User email already exists!"
                 });
             }
-            
-            if ( userNameExists != null)
+
+            var userNameExists = await _userManager.FindByNameAsync(adminRegister.Username);
+            if (userNameExists != null)
             {
                 return StatusCode(StatusCodes.Status500InternalServerError, new ApiResponse
                 {
                     Status = "Error",
-                    Message="User name already exists"
+                    Message = "User name already exists!"
                 });
             }
 
@@ -89,65 +87,161 @@ namespace backend.Controllers.AdminControllers
             {
                 Id = Guid.NewGuid(),
                 SecurityStamp = Guid.NewGuid().ToString(),
+                Role = ApplicationRole.Admin,
                 Email = adminRegister.Email,
                 UserName = adminRegister.Username,
-                CreatedAt = DateTime.UtcNow,  
-                UpdatedAt = DateTime.UtcNow
+                EmailConfirmed = false,
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow,
+
+                TwoFactorEnabled = true,
+                TwoFactorExpiration = DateTime.UtcNow.AddMinutes(5),
+                PhoneNumber = "00000000",
+                LockoutEnd = null,
+                LockoutEnabled = true,
+                AccessFailedCount = 0
+
             };
-            
-            var result =await _userManager.CreateAsync(user, adminRegister.Password);
+
+            var result = await _userManager.CreateAsync(user, adminRegister.Password);
             if (!result.Succeeded)
             {
                 var errors = string.Join(", ", result.Errors.Select(e => e.Description));
-                
                 return StatusCode(StatusCodes.Status500InternalServerError, new ApiResponse
                 {
                     Status = "Error",
-                    Message = "Failed to create user , "+ errors
+                    Message = "Failed to create user, " + errors
                 });
             }
-            if (!await _roleManager.RoleExistsAsync(UserRole.Admin))
+            var userCreated = await _userManager.FindByEmailAsync(adminRegister.Email);
+            if (userCreated == null)
             {
-                var role = new ApplicationRole(UserRole.Admin);
-                await _roleManager.CreateAsync(role);
+                return BadRequest("User was not found after creation.");
             }
 
-            if (!await _roleManager.RoleExistsAsync(UserRole.Client))
+            Admin admin = new()
             {
-                var role = new ApplicationRole(UserRole.Client);
-                await _roleManager.CreateAsync(role);
+                AdminId = user.Id
+
+            };
+
+            _repository.RegisterAdmin(admin);
+
+            if (!await _roleManager.RoleExistsAsync(ApplicationRole.Admin))
+            {
+                await _roleManager.CreateAsync(new ApplicationRole(ApplicationRole.Admin));
             }
 
-            if (!await _roleManager.RoleExistsAsync(UserRole.Veterinaire))
+            if (await _roleManager.RoleExistsAsync(ApplicationRole.Admin))
             {
-                var role = new ApplicationRole(UserRole.Veterinaire);
-                await _roleManager.CreateAsync(role);
+                var role = await _roleManager.FindByNameAsync(ApplicationRole.Admin);
+                var applicationUserRole = new IdentityUserRole<Guid>
+                {
+                    UserId = user.Id,
+                    RoleId = role.Id
+                };
+
+                _context.UserRoles.AddAsync(applicationUserRole);
+                await _context.SaveChangesAsync();
             }
+
+            if (user == null || string.IsNullOrEmpty(user.Email))
+            {
+                return BadRequest("User not found or email is invalid.");
+            }
+            var tokenProvider = _userManager.Options.Tokens.EmailConfirmationTokenProvider;
+            Console.WriteLine("Token Provider: " + tokenProvider);
+
+
+            var savedUser = await _userManager.FindByEmailAsync(adminRegister.Email);
             
+            var token = Guid.NewGuid().ToString();
+//            var token = await _userManager.GenerateEmailConfirmationTokenAsync(savedUser);
 
-            await _userManager.AddToRoleAsync(user, UserRole.Admin);
+            if (string.IsNullOrEmpty(token))
+            {
+                Console.WriteLine("Failed to generate a confirmation token.");
+                return BadRequest("Token generation failed.");
+            }
 
-            _repository.Register(user);
 
-            string code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
-            user.TwoFactorCode = code;
+            user.TwoFactorCode = token;
             await _context.SaveChangesAsync();
 
-            string encodedCode = WebUtility.UrlEncode(code);
-            string Url = $"{_configuration["AdminBaseUrl"]}/confirm-admin-email?email={user.Email}&code={encodedCode}";
 
+            string confirmationUrl = $"{_configuration["ApiUrls:ConfirmAdminEmailUrl"]}/?email={user.Email}&code={token}";
 
-            var Variables = new Dictionary<string, string>();
-            Variables["Url"] = Url;
-            Variables["BaseUrl"] = _configuration["BaseUrl"];
-            Variables["ApiBaseUrl"] = _configuration["ApiBaseUrl"];
-
-            HTMLTemplateMailData mailData = new HTMLTemplateMailData()
+            var Variables = new Dictionary<string, string>
             {
-                TemplateName = "AdminEmailConfirmation",
-                EmailSubject = "Inscription Admin : Confirmation d\'email",
+                { "UserName", user.UserName },
+                { "ConfirmationUrl", confirmationUrl },
+            };
+
+            HTMLTemplateMailData mailData = new()
+            {
+                TemplateName = "AdminRegisterEmailTemplate.html",
                 EmailToName = user.UserName,
                 EmailToId = user.Email,
+                EmailSubject = "Admin Registration: Email Confirmation",
+                Variables = Variables
+            };
+
+            try
+            {
+                _emailService.SendHTMLTemplateMail(mailData);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("Error sending email: " + ex.Message, ex);
+                return StatusCode(StatusCodes.Status500InternalServerError, new ApiResponse
+                {
+                    Status = "Error sending email",
+                    Message = ex.ToString()
+                });
+            }
+
+            return Ok(new ApiResponse { Status = "Success", Message = "User successfully created check your email for confirmation!" });
+        }
+
+        [HttpPost]
+        [Route("confirm-admin-email")]
+        public async Task<IActionResult> confirmAdminEmail([FromBody] AdminConfirmEmailDto EmailCodeModel )
+        {
+            var user = await _userManager.FindByEmailAsync(EmailCodeModel.Email);
+            if (user == null)
+                return StatusCode(StatusCodes.Status500InternalServerError, new ApiResponse
+                {
+                    Status = "Error finding user",
+                    Message = "User with email " + user.Email + " do not exist"
+                });
+
+            var admin = _context.admins.FirstOrDefault(x => x.AdminId == user.Id);
+            if (admin == null)
+                return StatusCode(StatusCodes.Status500InternalServerError, new ApiResponse
+                {
+                    Status = "Error finding admin",
+                    Message = "admin not found"
+                });
+            var result = await _userManager.ConfirmEmailAsync(user, EmailCodeModel.Code);
+            if (!result.Succeeded)
+                return StatusCode(StatusCodes.Status500InternalServerError, new ApiResponse
+                {
+                    Status = "Error",
+                    Message = "Invalid confirmation code"
+                });
+            user.EmailConfirmed = true;
+            await _context.SaveChangesAsync();
+            var Variables = new Dictionary<string, string>
+            {
+                { "UserName", user.UserName },
+            };
+
+            HTMLTemplateMailData mailData = new()
+            {
+                TemplateName = "AdminConfirmEmailTemplate",
+                EmailToName = user.UserName,
+                EmailToId = user.Email,
+                EmailSubject = "Admin Email Confirmation",
                 Variables = Variables
             };
 
@@ -164,27 +258,30 @@ namespace backend.Controllers.AdminControllers
                     Message = ex.ToString()
                 });
             }
-            return Ok(new ApiResponse { Status = "Success", Message = "User successfully created!" });
+            return Ok(new ApiResponse { Status = "Success", Message = "Email confirmed successfully!" });
 
         }
 
 
 
-        /*[HttpPost("login")]
-        public async Task<IActionResult> Login([FromBody] AdminLoginDto adminLogin)
+
+        /*[HttpPost]
+        [Route("login")]
+        public async Task<IActionResult> Login([FromBody] AdminLoginDto model)
         {
-            var user = await _userManager.FindByEmailAsync(adminLogin.Email);
-           if (user != null && await _userManager.CheckPasswordAsync(user,adminLogin.Password) && user.EmailConfirmed)
+            var user = await _userManager.FindByEmailAsync(model.Email);
+
+            if (user != null && await _userManager.CheckPasswordAsync(user, model.Password) && user.EmailConfirmed)
             {
+
                 var UserRoles = await _userManager.GetRolesAsync(user);
                 var TwoFactorTokenAsyncToken = await _userManager.GenerateTwoFactorTokenAsync(user, "Email");
                 var Variables = new Dictionary<string, string>();
                 Variables["UserName"] = user.UserName;
                 Variables["AuthentificationCode"] = TwoFactorTokenAsyncToken;
                 Variables["TokenLifeSpan"] = _configuration.GetSection("2FA:TokenLifeSpan").Get<int>().ToString();
-                Variables["BaseUrl"] = _configuration["BaseUrl"];
-                Variables["ApiBaseUrl"] = _configuration["ApiBaseUrl"];
-                var admin = _context.AppUsers.FirstOrDefault(x => x.Id == user.Id);
+                
+                var admin = _context.admins.FirstOrDefault(x => x.AdminId == user.Id);
 
                 if (admin == null)
                 {
@@ -194,8 +291,7 @@ namespace backend.Controllers.AdminControllers
                 HTMLTemplateMailData mailData = new HTMLTemplateMailData()
                 {
                     TemplateName = "AdminEmailAuthenticationCode",
-                    EmailSubject = "Authentication code",
-
+                    EmailSubject = "Code d\'authentification",
                     EmailToName = user.UserName,
                     EmailToId = user.Email,
                     Variables = Variables
@@ -203,60 +299,40 @@ namespace backend.Controllers.AdminControllers
 
                 try
                 {
-                    await _emailService.SendHTMLTemplateMail(mailData);
+                    _emailService.SendHTMLTemplateMail(mailData);
                 }
                 catch (Exception ex)
                 {
                     _logger.LogError("Error send email" + ex.Message, ex);
                     return StatusCode(StatusCodes.Status500InternalServerError, new ApiResponse
                     {
-                        Status = "Error sending email",
+                        Status = "Error send email",
                         Message = ex.ToString()
                     });
 
 
-
                 }
-                user.TwoFactorCode = TwoFactorTokenAsyncToken;
-                user.TwoFactorExpiration = DateTime.UtcNow.AddMinutes(10);
 
+                user.CodeConfirmationLogin = TwoFactorTokenAsyncToken;
+                user.TokenCreationTime = DateTime.Now.ToUniversalTime();
 
                 await _context.SaveChangesAsync();
-                return StatusCode(StatusCodes.Status500InternalServerError, new ApiResponse
-                {
-                    Status = "Success",
-                    Message = " your authentication code!"
-                });
+                return Ok(new ApiResponse { Status = "Success", Message = " your authentication code!" });
 
 
             }
-
             else
             {
-                _logger.LogWarning("User " + adminLogin.Email + " login fail");
+                _logger.LogWarning("User " + model.Email + " login fail");
                 return Unauthorized();
             }
 
-        }
+        }*/
 
 
-        [HttpPost("2fa-verify")]
-        public async Task<IActionResult> Verify2FA([FromBody] TwoFactorDto twoFactorDto)
-        {
-            var user = await _userManager.FindByIdAsync(twoFactorDto.UserId.ToString());
-            if (user == null)
-                return Unauthorized(new { message = "Invalid user!" });
-
-            var isValidCode = await _userManager.VerifyTwoFactorTokenAsync(user, "Email", twoFactorDto.Code);
-            if (!isValidCode)
-                return Unauthorized(new { message = "Invalid 2FA code!" });
-
-            var token = GenerateJwtToken(user);
-            return Ok(new { message = "2FA verification successful!", token });
-        }
 
 
-        [HttpPut("reset-password/{id}")]
+       /* [HttpPut("reset-password/{id}")]
         public async Task<IActionResult> ResetPassword(string id, [FromBody] ChangePasswordDto changePassword)
         {
             var user = await _userManager.FindByIdAsync(id);

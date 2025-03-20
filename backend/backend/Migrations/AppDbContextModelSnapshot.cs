@@ -161,6 +161,17 @@ namespace backend.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
+            modelBuilder.Entity("backend.Models.Admin", b =>
+                {
+                    b.Property<Guid>("AdminId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.HasKey("AdminId");
+
+                    b.ToTable("admins");
+                });
+
             modelBuilder.Entity("backend.Models.Animal", b =>
                 {
                     b.Property<Guid>("Id")
@@ -222,6 +233,10 @@ namespace backend.Migrations
                     b.Property<int>("AccessFailedCount")
                         .HasColumnType("integer");
 
+                    b.Property<string>("CodeConfirmationLogin")
+                        .IsRequired()
+                        .HasColumnType("text");
+
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()
                         .HasColumnType("text");
@@ -259,8 +274,15 @@ namespace backend.Migrations
                     b.Property<bool>("PhoneNumberConfirmed")
                         .HasColumnType("boolean");
 
+                    b.Property<string>("Role")
+                        .IsRequired()
+                        .HasColumnType("text");
+
                     b.Property<string>("SecurityStamp")
                         .HasColumnType("text");
+
+                    b.Property<DateTime>("TokenCreationTime")
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("TwoFactorCode")
                         .HasColumnType("text");

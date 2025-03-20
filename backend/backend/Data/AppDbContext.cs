@@ -11,6 +11,12 @@ namespace backend.Data
 
         public DbSet<AppUser> AppUsers { get; set; }
         public DbSet<ApplicationRole> ApplicationRole { get; set; }
+        public DbSet<IdentityUserRole<Guid>> UserRoles { get; set; }
+        public DbSet<Admin> admins { get; set; }
+
+
+
+
         public DbSet<Animal> Animals { get; set; }
         public DbSet<Vaccination> Vaccinations { get; set; }
         public DbSet<CategorieProd> Categories { get; set; }
@@ -25,21 +31,10 @@ namespace backend.Data
         {
             base.OnModelCreating(builder);
 
-            builder.Entity<IdentityUserRole<Guid>>()
-                .HasKey(r => new { r.UserId, r.RoleId });
-
-            builder.Entity<IdentityUserRole<Guid>>()
-                .HasOne<AppUser>()
-                .WithMany()
-                .HasForeignKey(r => r.UserId)
-                .IsRequired();
-
-            builder.Entity<IdentityUserRole<Guid>>()
-                .HasOne<ApplicationRole>()
-                .WithMany()
-                .HasForeignKey(r => r.RoleId)
-                .IsRequired();
+            builder.Entity<IdentityUserRole<Guid>>().HasKey(ur => new { ur.UserId, ur.RoleId });
         }
+
+
 
     }
 

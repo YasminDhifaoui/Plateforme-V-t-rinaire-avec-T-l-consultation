@@ -1,50 +1,83 @@
 ﻿using System.Net;
 using System.Net.Mail;
-using backend.Mail;
+using backend.Models;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Logging;
+using backend.Mail;
 
-public class MailService : IMailService
+namespace backend.Mail
 {
-    private readonly IConfiguration _configuration;
-    private readonly ILogger<MailService> _logger;
-
-    public MailService(IConfiguration configuration, ILogger<MailService> logger)
+    public class MailService : IMailService
     {
-        _configuration = configuration;
-        _logger = logger;
-    }
+        private readonly IConfiguration _configuration;
 
-    public void SendHTMLTemplateMail(HTMLTemplateMailData mailData)
-    {
-        try
+        public MailService(IConfiguration configuration)
         {
-            var smtpClient = new SmtpClient(_configuration["Smtp:Host"])
-            {
-                Port = int.Parse(_configuration["Smtp:Port"]),
-                Credentials = new NetworkCredential(_configuration["Smtp:Username"], _configuration["Smtp:Password"]),
-                EnableSsl = true
-            };
-
-            var mailMessage = new MailMessage
-            {
-                From = new MailAddress(_configuration["Smtp:FromEmail"]),
-                Subject = mailData.EmailSubject,
-                Body = mailData.GenerateEmailBody(mailData.EmailSubject,mailData.Variables),
-                IsBodyHtml = true
-            };
-            mailMessage.To.Add(mailData.EmailToId);
-
-            smtpClient.Send(mailMessage);
+            _configuration = configuration;
         }
-        catch (Exception ex)
+
+        public bool SendHTMLTemplateMail(HTMLTemplateMailData mailData)
         {
-            _logger.LogError($"Error sending email: {ex.Message}", ex);
-            throw;
+            try
+            {
+                
+                var smtpClient = new SmtpClient(_configuration["SmtpSettings:Server"])
+                {
+                    Port = int.TryParse(_configuration["SmtpSettings:Port"], out int port) ? port : 587,
+                    Credentials = new NetworkCredential(
+                    _configuration["SmtpSettings:Username"],
+                    _configuration["SmtpSettings:Password"]),
+                    EnableSsl = bool.TryParse(_configuration["SmtpSettings:EnableSsl"], out bool enableSsl) ? enableSsl : true
+                };
+
+               
+
+                var mailMessage = new MailMessage
+                {
+                    From = new MailAddress(_configuration["SmtpSettings:SenderEmail"]),
+                    Subject = mailData.EmailSubject,
+                    Body = GenerateHtmlBody(mailData),
+                    IsBodyHtml = true
+                };
+                mailMessage.To.Add(mailData.EmailToId);
+
+                smtpClient.Send(mailMessage);
+
+                Console.WriteLine("Email sent successfully.");
+                return true;
+            }
+            catch (SmtpException smtpEx)
+            {
+                Console.WriteLine($"SMTP Error: {smtpEx.Message}");
+                return false;
+            }
+            catch (Exception ex)
+            {
+                
+                Console.WriteLine($"Error sending email: {ex.StackTrace}");
+                return false;
+            }
         }
+
+        // cz l body fih barcha parametres tejmch t7othom f string lezm dictionary 
+
+        private string GenerateHtmlBody(HTMLTemplateMailData mailData)
+        {
+            string templatePath = Path.Combine(Directory.GetCurrentDirectory(), "Templates", mailData.TemplateName);
+
+            if (!File.Exists(templatePath))
+            {
+                throw new FileNotFoundException("Email template file not found.", templatePath);
+            }
+
+            string template = File.ReadAllText(templatePath);
+
+            foreach (var variable in mailData.Variables)
+            {
+                template = template.Replace($"{{{variable.Key}}}", variable.Value);
+            }
+
+            return template;
+        }
+
     }
-    
-
-
-
 }

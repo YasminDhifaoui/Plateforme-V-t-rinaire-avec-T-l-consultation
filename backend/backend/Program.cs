@@ -4,7 +4,9 @@ using backend.Models;
 using backend.Repo.AdminRepo;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using System;
+
 
 
 
@@ -43,12 +45,27 @@ builder.Services.AddScoped<IAdminRepo, AdminRepo>();
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("PostgresConnection")));
 
-builder.Services.AddIdentity<AppUser, ApplicationRole>()
-    .AddEntityFrameworkStores<AppDbContext>()
-    .AddDefaultTokenProviders();
+
+
+builder.Services.AddIdentity<AppUser, ApplicationRole>(options =>
+{
+    options.User.RequireUniqueEmail = true;
+    options.SignIn.RequireConfirmedEmail = false;
+
+})
+.AddEntityFrameworkStores<AppDbContext>()
+//.AddDefaultTokenProviders();
+.AddTokenProvider<DataProtectorTokenProvider<AppUser>>(TokenOptions.DefaultProvider);
+
+
+builder.Services.Configure<IdentityOptions>(options =>
+{
+    options.SignIn.RequireConfirmedEmail = true;
+});
 
 
 
+//builder.Configuration.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
 
 
 var app = builder.Build();

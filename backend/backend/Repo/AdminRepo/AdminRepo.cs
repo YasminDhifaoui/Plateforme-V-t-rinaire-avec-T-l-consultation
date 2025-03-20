@@ -66,20 +66,13 @@ namespace backend.Repo.AdminRepo
         }
 
         // Register 
-        public AdminRegisterDto Register(AppUser user)
+        public string RegisterAdmin(Admin admin)
         {
 
-            user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(user.PasswordHash);
-
-            _context.Users.Add(user);
+            _context.admins.Add(admin);
             _context.SaveChanges();
 
-            return new AdminRegisterDto
-            {
-                Username = user.UserName,
-                Email = user.Email,
-                Password = user.PasswordHash
-            };
+            return "Admin added successfully";
         }
 
         // Login

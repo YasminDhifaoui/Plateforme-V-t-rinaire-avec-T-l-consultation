@@ -3,28 +3,28 @@
   "WorkspaceRootPath": "D:\\Internships\\Pfe\\backend\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{26F21D31-1B72-4CCD-BEDC-8662D6E3799E}|backend\\backend.csproj|d:\\internships\\pfe\\backend\\backend\\models\\applicationrole.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{26F21D31-1B72-4CCD-BEDC-8662D6E3799E}|backend\\backend.csproj|solutionrelative:backend\\models\\applicationrole.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
       "AbsoluteMoniker": "D:0:0:{26F21D31-1B72-4CCD-BEDC-8662D6E3799E}|backend\\backend.csproj|d:\\internships\\pfe\\backend\\backend\\controllers\\admincontrollers\\adminauthenticationcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{26F21D31-1B72-4CCD-BEDC-8662D6E3799E}|backend\\backend.csproj|solutionrelative:backend\\controllers\\admincontrollers\\adminauthenticationcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{26F21D31-1B72-4CCD-BEDC-8662D6E3799E}|backend\\backend.csproj|d:\\internships\\pfe\\backend\\backend\\data\\appdbcontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{26F21D31-1B72-4CCD-BEDC-8662D6E3799E}|backend\\backend.csproj|solutionrelative:backend\\data\\appdbcontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{26F21D31-1B72-4CCD-BEDC-8662D6E3799E}|backend\\backend.csproj|d:\\internships\\pfe\\backend\\backend\\templates\\adminconfirmemailtemplate.html||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{26F21D31-1B72-4CCD-BEDC-8662D6E3799E}|backend\\backend.csproj|solutionrelative:backend\\templates\\adminconfirmemailtemplate.html||{40D31677-CBC0-4297-A9EF-89D907823A98}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{26F21D31-1B72-4CCD-BEDC-8662D6E3799E}|backend\\backend.csproj|D:\\Internships\\Pfe\\backend\\backend\\dtos\\admindtos\\adminauthdto\\apiresponse.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{26F21D31-1B72-4CCD-BEDC-8662D6E3799E}|backend\\backend.csproj|solutionrelative:backend\\dtos\\admindtos\\adminauthdto\\apiresponse.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{26F21D31-1B72-4CCD-BEDC-8662D6E3799E}|backend\\backend.csproj|d:\\internships\\pfe\\backend\\backend\\templates\\adminregisteremailtemplate.html||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{26F21D31-1B72-4CCD-BEDC-8662D6E3799E}|backend\\backend.csproj|solutionrelative:backend\\templates\\adminregisteremailtemplate.html||{40D31677-CBC0-4297-A9EF-89D907823A98}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{26F21D31-1B72-4CCD-BEDC-8662D6E3799E}|backend\\backend.csproj|d:\\internships\\pfe\\backend\\backend\\models\\appuser.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{26F21D31-1B72-4CCD-BEDC-8662D6E3799E}|backend\\backend.csproj|solutionrelative:backend\\models\\appuser.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{26F21D31-1B72-4CCD-BEDC-8662D6E3799E}|backend\\backend.csproj|D:\\Internships\\Pfe\\backend\\backend\\mail\\mailservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{26F21D31-1B72-4CCD-BEDC-8662D6E3799E}|backend\\backend.csproj|solutionrelative:backend\\mail\\mailservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{26F21D31-1B72-4CCD-BEDC-8662D6E3799E}|backend\\backend.csproj|d:\\internships\\pfe\\backend\\backend\\models\\userrole.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{26F21D31-1B72-4CCD-BEDC-8662D6E3799E}|backend\\backend.csproj|solutionrelative:backend\\models\\userrole.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{26F21D31-1B72-4CCD-BEDC-8662D6E3799E}|backend\\backend.csproj|d:\\internships\\pfe\\backend\\backend\\mail\\htmltemplatemaildata.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{26F21D31-1B72-4CCD-BEDC-8662D6E3799E}|backend\\backend.csproj|solutionrelative:backend\\mail\\htmltemplatemaildata.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{26F21D31-1B72-4CCD-BEDC-8662D6E3799E}|backend\\backend.csproj|D:\\Internships\\Pfe\\backend\\backend\\dtos\\admindtos\\adminauthdto\\adminconfirmemaildto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{26F21D31-1B72-4CCD-BEDC-8662D6E3799E}|backend\\backend.csproj|solutionrelative:backend\\dtos\\admindtos\\adminauthdto\\adminconfirmemaildto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     }
   ],
   "DocumentGroupContainers": [
@@ -43,85 +43,85 @@
           ]
         },
         {
-          "DockedWidth": 102,
-          "SelectedChildIndex": 3,
+          "DockedWidth": 131,
+          "SelectedChildIndex": 5,
           "Children": [
             {
               "$type": "Document",
-              "DocumentIndex": 4,
-              "Title": "AppUser.cs",
-              "DocumentMoniker": "D:\\Internships\\Pfe\\backend\\backend\\Models\\AppUser.cs",
-              "RelativeDocumentMoniker": "backend\\Models\\AppUser.cs",
-              "ToolTip": "D:\\Internships\\Pfe\\backend\\backend\\Models\\AppUser.cs",
-              "RelativeToolTip": "backend\\Models\\AppUser.cs",
-              "ViewState": "AQIAAAUAAAAAAAAAAAAxwAoAAAAEAAAA",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-03-17T15:53:16.893Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
               "DocumentIndex": 1,
-              "Title": "AdminAuthenticationController.cs",
-              "DocumentMoniker": "D:\\Internships\\Pfe\\backend\\backend\\Controllers\\AdminControllers\\AdminAuthenticationController.cs",
-              "RelativeDocumentMoniker": "backend\\Controllers\\AdminControllers\\AdminAuthenticationController.cs",
-              "ToolTip": "D:\\Internships\\Pfe\\backend\\backend\\Controllers\\AdminControllers\\AdminAuthenticationController.cs",
-              "RelativeToolTip": "backend\\Controllers\\AdminControllers\\AdminAuthenticationController.cs",
-              "ViewState": "AQIAAGQAAAAAAAAAAAAkwH4AAAAAAAAA",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-03-12T20:22:41.376Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 3,
-              "Title": "ApiResponse.cs",
-              "DocumentMoniker": "D:\\Internships\\Pfe\\backend\\backend\\Dtos\\AdminDtos\\AdminAuthDto\\ApiResponse.cs",
-              "RelativeDocumentMoniker": "backend\\Dtos\\AdminDtos\\AdminAuthDto\\ApiResponse.cs",
-              "ToolTip": "D:\\Internships\\Pfe\\backend\\backend\\Dtos\\AdminDtos\\AdminAuthDto\\ApiResponse.cs",
-              "RelativeToolTip": "backend\\Dtos\\AdminDtos\\AdminAuthDto\\ApiResponse.cs",
-              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAUAAAArAAAA",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-03-13T19:58:26.408Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 0,
-              "Title": "ApplicationRole.cs",
-              "DocumentMoniker": "D:\\Internships\\Pfe\\backend\\backend\\Models\\ApplicationRole.cs",
-              "RelativeDocumentMoniker": "backend\\Models\\ApplicationRole.cs",
-              "ToolTip": "D:\\Internships\\Pfe\\backend\\backend\\Models\\ApplicationRole.cs",
-              "RelativeToolTip": "backend\\Models\\ApplicationRole.cs",
-              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAgAAAAAAAAA",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-03-17T15:45:49.624Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 5,
-              "Title": "UserRole.cs",
-              "DocumentMoniker": "D:\\Internships\\Pfe\\backend\\backend\\Models\\UserRole.cs",
-              "RelativeDocumentMoniker": "backend\\Models\\UserRole.cs",
-              "ToolTip": "D:\\Internships\\Pfe\\backend\\backend\\Models\\UserRole.cs",
-              "RelativeToolTip": "backend\\Models\\UserRole.cs",
-              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAMAAAAqAAAA",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-03-17T15:18:43.319Z",
+              "Title": "AdminConfirmEmailTemplate.html",
+              "DocumentMoniker": "D:\\Internships\\Pfe\\backend\\backend\\Templates\\AdminConfirmEmailTemplate.html",
+              "RelativeDocumentMoniker": "backend\\Templates\\AdminConfirmEmailTemplate.html",
+              "ToolTip": "D:\\Internships\\Pfe\\backend\\backend\\Templates\\AdminConfirmEmailTemplate.html",
+              "RelativeToolTip": "backend\\Templates\\AdminConfirmEmailTemplate.html",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAYAAAAhAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001512|",
+              "WhenOpened": "2025-03-20T21:36:48.335Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
               "DocumentIndex": 2,
-              "Title": "AppDbContext.cs",
-              "DocumentMoniker": "D:\\Internships\\Pfe\\backend\\backend\\Data\\AppDbContext.cs",
-              "RelativeDocumentMoniker": "backend\\Data\\AppDbContext.cs",
-              "ToolTip": "D:\\Internships\\Pfe\\backend\\backend\\Data\\AppDbContext.cs",
-              "RelativeToolTip": "backend\\Data\\AppDbContext.cs",
-              "ViewState": "AQIAAAEAAAAAAAAAAAAiwAoAAAAAAAAA",
+              "Title": "AdminRegisterEmailTemplate.html",
+              "DocumentMoniker": "D:\\Internships\\Pfe\\backend\\backend\\Templates\\AdminRegisterEmailTemplate.html",
+              "RelativeDocumentMoniker": "backend\\Templates\\AdminRegisterEmailTemplate.html",
+              "ToolTip": "D:\\Internships\\Pfe\\backend\\backend\\Templates\\AdminRegisterEmailTemplate.html",
+              "RelativeToolTip": "backend\\Templates\\AdminRegisterEmailTemplate.html",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAsAAAAAAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001512|",
+              "WhenOpened": "2025-03-20T21:22:39.207Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "HTMLTemplateMailData.cs",
+              "DocumentMoniker": "D:\\Internships\\Pfe\\backend\\backend\\Mail\\HTMLTemplateMailData.cs",
+              "RelativeDocumentMoniker": "backend\\Mail\\HTMLTemplateMailData.cs",
+              "ToolTip": "D:\\Internships\\Pfe\\backend\\backend\\Mail\\HTMLTemplateMailData.cs",
+              "RelativeToolTip": "backend\\Mail\\HTMLTemplateMailData.cs",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAgAAAAtAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-03-17T15:46:25.473Z",
+              "WhenOpened": "2025-03-20T21:22:22.075Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "MailService.cs",
+              "DocumentMoniker": "D:\\Internships\\Pfe\\backend\\backend\\Mail\\MailService.cs",
+              "RelativeDocumentMoniker": "backend\\Mail\\MailService.cs",
+              "ToolTip": "D:\\Internships\\Pfe\\backend\\backend\\Mail\\MailService.cs",
+              "RelativeToolTip": "backend\\Mail\\MailService.cs",
+              "ViewState": "AQIAADAAAAAAAAAAAAAYwCUAAABKAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-03-18T09:58:55.332Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
+              "Title": "AdminConfirmEmailDto.cs",
+              "DocumentMoniker": "D:\\Internships\\Pfe\\backend\\backend\\Dtos\\AdminDtos\\AdminAuthDto\\AdminConfirmEmailDto.cs",
+              "RelativeDocumentMoniker": "backend\\Dtos\\AdminDtos\\AdminAuthDto\\AdminConfirmEmailDto.cs",
+              "ToolTip": "D:\\Internships\\Pfe\\backend\\backend\\Dtos\\AdminDtos\\AdminAuthDto\\AdminConfirmEmailDto.cs",
+              "RelativeToolTip": "backend\\Dtos\\AdminDtos\\AdminAuthDto\\AdminConfirmEmailDto.cs",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAMAAAAFAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-03-20T12:55:59.185Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "AdminAuthenticationController.cs",
+              "DocumentMoniker": "D:\\Internships\\Pfe\\backend\\backend\\Controllers\\AdminControllers\\AdminAuthenticationController.cs",
+              "RelativeDocumentMoniker": "backend\\Controllers\\AdminControllers\\AdminAuthenticationController.cs",
+              "ToolTip": "D:\\Internships\\Pfe\\backend\\backend\\Controllers\\AdminControllers\\AdminAuthenticationController.cs",
+              "RelativeToolTip": "backend\\Controllers\\AdminControllers\\AdminAuthenticationController.cs",
+              "ViewState": "AQIAANEAAAAAAAAAAAAgwPQAAAAfAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-03-12T20:22:41.376Z",
               "EditorCaption": ""
             }
           ]

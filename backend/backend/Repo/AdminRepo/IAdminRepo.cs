@@ -14,7 +14,7 @@ namespace backend.Repo.AdminRepo
         AdminDto GetUserByUsername(string username);
 
 
-        AdminRegisterDto Register(AppUser user);
+        string RegisterAdmin(Admin admin);
         AdminLoginDto Login(string username, string password);
         bool ResetPassword(Guid userId, string newPassword);
 
