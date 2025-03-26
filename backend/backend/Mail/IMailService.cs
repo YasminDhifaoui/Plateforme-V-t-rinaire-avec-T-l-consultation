@@ -2,5 +2,5 @@
 
 public interface IMailService
 {
-    bool SendHTMLTemplateMail(HTMLTemplateMailData mailData);
+    bool SendHTMLTemplateMail(MailDataModel mailData);
 }

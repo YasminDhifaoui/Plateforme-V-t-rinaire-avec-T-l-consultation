@@ -15,7 +15,7 @@ namespace backend.Mail
             _configuration = configuration;
         }
 
-        public bool SendHTMLTemplateMail(HTMLTemplateMailData mailData)
+        public bool SendHTMLTemplateMail(MailDataModel mailData)
         {
             try
             {
@@ -60,7 +60,7 @@ namespace backend.Mail
 
         // cz l body fih barcha parametres tejmch t7othom f string lezm dictionary 
 
-        private string GenerateHtmlBody(HTMLTemplateMailData mailData)
+        private string GenerateHtmlBody(MailDataModel mailData)
         {
             string templatePath = Path.Combine(Directory.GetCurrentDirectory(), "Templates", mailData.TemplateName);
 

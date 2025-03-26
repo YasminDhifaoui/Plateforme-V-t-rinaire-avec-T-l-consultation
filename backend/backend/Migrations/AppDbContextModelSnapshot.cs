@@ -167,6 +167,9 @@ namespace backend.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
+                    b.Property<Guid>("AppUserId")
+                        .HasColumnType("uuid");
+
                     b.HasKey("AdminId");
 
                     b.ToTable("admins");
@@ -233,6 +236,13 @@ namespace backend.Migrations
                     b.Property<int>("AccessFailedCount")
                         .HasColumnType("integer");
 
+                    b.Property<string>("Address")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<DateTime?>("BirthDate")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<string>("CodeConfirmationLogin")
                         .IsRequired()
                         .HasColumnType("text");
@@ -240,6 +250,10 @@ namespace backend.Migrations
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()
                         .HasColumnType("text");
+
+                    b.Property<string>("ConfirmationToken")
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
@@ -249,6 +263,37 @@ namespace backend.Migrations
                         .HasColumnType("character varying(256)");
 
                     b.Property<bool>("EmailConfirmed")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool?>("EmailValidated")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("EmailValidationCode")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<bool>("Enabled")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("Expired")
+                        .HasColumnType("boolean");
+
+                    b.Property<DateTime?>("ExpiresAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("FirstName")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<string>("Gender")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("LastName")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<bool>("Locked")
                         .HasColumnType("boolean");
 
                     b.Property<bool>("LockoutEnabled")
@@ -273,6 +318,13 @@ namespace backend.Migrations
 
                     b.Property<bool>("PhoneNumberConfirmed")
                         .HasColumnType("boolean");
+
+                    b.Property<bool?>("PhoneValidated")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("PhoneValidationCode")
+                        .HasMaxLength(25)
+                        .HasColumnType("character varying(25)");
 
                     b.Property<string>("Role")
                         .IsRequired()
@@ -299,6 +351,10 @@ namespace backend.Migrations
                     b.Property<string>("UserName")
                         .HasMaxLength(256)
                         .HasColumnType("character varying(256)");
+
+                    b.Property<string>("ZipCode")
+                        .HasMaxLength(10)
+                        .HasColumnType("character varying(10)");
 
                     b.HasKey("Id");
 
@@ -624,7 +680,7 @@ namespace backend.Migrations
             modelBuilder.Entity("backend.Models.Animal", b =>
                 {
                     b.HasOne("backend.Models.AppUser", "Owner")
-                        .WithMany("Animals")
+                        .WithMany()
                         .HasForeignKey("OwnerId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -737,11 +793,6 @@ namespace backend.Migrations
             modelBuilder.Entity("backend.Models.Animal", b =>
                 {
                     b.Navigation("Vaccinations");
-                });
-
-            modelBuilder.Entity("backend.Models.AppUser", b =>
-                {
-                    b.Navigation("Animals");
                 });
 
             modelBuilder.Entity("backend.Models.CategorieProd", b =>

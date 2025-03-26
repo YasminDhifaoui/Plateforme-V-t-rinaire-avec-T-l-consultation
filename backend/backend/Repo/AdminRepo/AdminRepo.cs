@@ -1,6 +1,8 @@
 ﻿using backend.Data;
 using backend.Dtos;
 using backend.Dtos.AdminDtos.AdminAuthDto;
+using backend.Dtos.AdminUsersDto;
+using backend.Dtos.UsersDto;
 using backend.Models;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
@@ -16,57 +18,8 @@ namespace backend.Repo.AdminRepo
         {
             _context = context;
         }
-
-        //UsersList
-        public IEnumerable<AdminDto> GetUsers()
-        {
-            return _context.Users
-                .Select(user => new AdminDto
-                {
-                    Id = user.Id,
-                    Username = user.UserName,
-                    Email = user.Email,
-                    Password = user.PasswordHash
-                })
-                .ToList();
-        }
-
-        //GetUserById
-        public AdminDto GetUserById(Guid id)
-        {
-            var user = _context.Users
-                .Where(u => u.Id == id)
-                .Select(u => new AdminDto
-                {
-                    Id = u.Id,
-                    Username = u.UserName,
-                    Email = u.Email,
-                    Password = u.PasswordHash
-                })
-                .FirstOrDefault();
-
-            return user;
-        }
-
-        //getUserByUsername
-        public AdminDto GetUserByUsername(string username)
-        {
-            var user = _context.Users
-                .Where(u => u.UserName == username)
-                .Select(u => new AdminDto
-                {
-                    Id = u.Id,
-                    Username = u.UserName,
-                    Email = u.Email,
-                    Password = u.PasswordHash
-                })
-                .FirstOrDefault();
-
-            return user;
-        }
-
-        // Register 
-        public string RegisterAdmin(Admin admin)
+        //Authentification
+        public string AdminRegister(Admin admin)
         {
 
             _context.admins.Add(admin);
@@ -75,62 +28,179 @@ namespace backend.Repo.AdminRepo
             return "Admin added successfully";
         }
 
-        // Login
-        public AdminLoginDto Login(string username, string password)
+        //UsersList
+        public IEnumerable<UserDto> GetAllUsers()
         {
-            var user = _context.Users.SingleOrDefault(u => u.UserName == username);
-
-            if (user != null && BCrypt.Net.BCrypt.Verify(password, user.PasswordHash))
-            {
-                return new AdminLoginDto
+            return _context.Users
+                .Select(user => new UserDto
                 {
+                    Id = user.Id,
+                    Username = user.UserName,
                     Email = user.Email,
-                    Password = user.PasswordHash
-                };
-            }
-            return null;
-        }
+                    Role = user.Role,
+                    PhoneNumber = user.PhoneNumber,
 
-        // Reset password 
-        public bool ResetPassword(Guid userId, string newPassword)
+                    CreatedAt = user.CreatedAt,
+                    UpdatedAt = user.UpdatedAt,
+                    TwoFactorEnabled = user.TwoFactorEnabled,
+                    LockoutEnabled = user.LockoutEnabled,
+                    LockoutEnd = (DateTimeOffset)user.LockoutEnd,
+
+                    EmailConfirmed = user.EmailConfirmed,
+                    PhoneConfirmed = user.PhoneNumberConfirmed,
+
+                    AccessFailedCount = user.AccessFailedCount
+                })
+                .ToList();
+        }
+        //Get Users By Role
+        public IEnumerable <UserDto> GetUsersByRole(string Role) 
         {
-            var user = _context.Users.Find(userId);
+            var user = _context.Users
+                .Where(user => user.Role == Role)
+                .Select(user => new UserDto
+                {
+                    Id = user.Id,
+                    Username = user.UserName,
+                    Email = user.Email,
+                    Role = user.Role,
+                    PhoneNumber = user.PhoneNumber,
 
-            if (user != null)
-            {
-                user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(newPassword);
-                _context.SaveChanges();
-                return true;
-            }
+                    CreatedAt = user.CreatedAt,
+                    UpdatedAt = user.UpdatedAt,
+                    TwoFactorEnabled = user.TwoFactorEnabled,
+                    LockoutEnabled = user.LockoutEnabled,
+                    LockoutEnd = (DateTimeOffset)user.LockoutEnd,
 
-            return false;
+
+                    EmailConfirmed = user.EmailConfirmed,
+                    PhoneConfirmed = user.PhoneNumberConfirmed,
+
+                    AccessFailedCount = user.AccessFailedCount
+                }).ToList();
+            return user;
+
         }
+        //GetUserById
+        public UserDto GetUserById(Guid id)
+        {
+            var user = _context.Users
+                .Where(user => user.Id == id)
+                .Select(user => new UserDto
+                {
+                    Id = user.Id,
+                    Username = user.UserName,
+                    Email = user.Email,
+                    Role = user.Role,
+                    PhoneNumber = user.PhoneNumber,
+
+                    CreatedAt = user.CreatedAt,
+                    UpdatedAt = user.UpdatedAt,
+                    TwoFactorEnabled = user.TwoFactorEnabled,
+                    LockoutEnabled = user.LockoutEnabled,
+                    LockoutEnd = (DateTimeOffset)user.LockoutEnd,
+
+
+                    EmailConfirmed = user.EmailConfirmed,
+                    PhoneConfirmed = user.PhoneNumberConfirmed,
+
+                    AccessFailedCount = user.AccessFailedCount
+                })
+                .FirstOrDefault();
+
+            return user;
+        }
+
+        //getUserByUsername
+        public UserDto GetUserByUsername(string username)
+        {
+            var user = _context.Users
+                .Where(user => user.UserName == username)
+                .Select(user => new UserDto
+                {
+                    Id = user.Id,
+                    Username = user.UserName,
+                    Email = user.Email,
+                    Role = user.Role,
+                    PhoneNumber = user.PhoneNumber,
+
+                    CreatedAt = user.CreatedAt,
+                    UpdatedAt = user.UpdatedAt,
+                    TwoFactorEnabled = user.TwoFactorEnabled,
+                    LockoutEnabled = user.LockoutEnabled,
+                    LockoutEnd = (DateTimeOffset)user.LockoutEnd,
+
+
+                    EmailConfirmed = user.EmailConfirmed,
+                    PhoneConfirmed = user.PhoneNumberConfirmed,
+
+                    AccessFailedCount = user.AccessFailedCount
+                })
+                .FirstOrDefault();
+
+            return user;
+        }
+
+
 
         // Update user 
-        public void UpdateUser(AdminDto user, AdminDto updatedUser)
+        public string UpdateUser(Guid UserId, UserUpdateDto updatedUser)
         {
-            var userToUpdate = _context.Users.Find(user.Id);
+            var userToUpdate = _context.Users.Find(UserId);
 
-            if (userToUpdate != null)
-            {
-                userToUpdate.UserName = updatedUser.Username;
-                userToUpdate.Email = updatedUser.Email;
+            if (userToUpdate == null)
+                return "User not found !";
+            
+            userToUpdate.UserName = updatedUser.Username;
+            userToUpdate.Email = updatedUser.Email;
+            userToUpdate.PasswordHash = updatedUser.Password;
+            userToUpdate.Role = updatedUser.Role;
+            userToUpdate.PhoneNumber = updatedUser.PhoneNumber;
+            userToUpdate.TwoFactorEnabled = updatedUser.TwoFactorEnabled;
+            userToUpdate.LockoutEnabled = updatedUser.LockoutEnabled;
+            userToUpdate.LockoutEnd = updatedUser.LockoutEnd;
+            userToUpdate.EmailConfirmed = updatedUser.EmailConfirmed;
+            userToUpdate.PhoneNumberConfirmed = updatedUser.PhoneConfirmed;
+            userToUpdate.UpdatedAt= DateTime.UtcNow;
 
-                _context.Users.Update(userToUpdate);
-                _context.SaveChanges();
-            }
+            _context.Users.Update(userToUpdate);
+            _context.SaveChanges();
+            return "User updated successfully";
         }
 
         // Delete user by Id
-        public void DeleteUser(Guid id)
+        public string DeleteUser(Guid id)
         {
             var user = _context.Users.Find(id);
-            if (user != null)
-            {
-                _context.Users.Remove(user);
-                _context.SaveChanges();
-            }
+            if (user == null)
+                return "User not found!";
+            _context.Users.Remove(user);
+            _context.SaveChanges();
+            return "User deleted successfully";
         }
+        
+       /* 
+        //Add user 
+        public string AddUser (UserDto user)
+        {
+            var userId = _context.Users.Find(user.Id);
+            var userRole = _context.Users.Find(user.Role);
+            if (userRole == null || userId==null)
+                return "Check Id or role of the user!";
+            if (userRole == "Admin")
+                _context.admins.Add(user);
+            if (userRole == "Client")
+                _context.clients.Add(user);
+            if (userRole == "Client")
+                _context.clients.Add(user);
+
+            return "User added successfully";
+
+
+        }
+       */
+
+       
 
         public void SaveChanges()
         {

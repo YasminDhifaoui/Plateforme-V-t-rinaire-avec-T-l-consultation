@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using System.ComponentModel.DataAnnotations;
+using System.Runtime.Serialization;
 
 namespace backend.Models
 {
@@ -16,8 +17,83 @@ namespace backend.Models
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
 
-    public List<Animal> Animals { get; set; }
         public string CodeConfirmationLogin { get; internal set; }
         public DateTime TokenCreationTime { get; internal set; }
+
+
+
+        [Display(Name = "Gender")]
+        [DataMember]
+        public string Gender { get; set; }
+
+        [MaxLength(100)]
+        [Display(Name = "First Name")]
+        [DataMember]
+        public string? FirstName { get; set; }
+
+        [MaxLength(100)]
+        [Display(Name = "Last Name")]
+        [DataMember]
+        public string? LastName { get; set; }
+        [DisplayFormat(DataFormatString = "{0:d}", ApplyFormatInEditMode = true)]
+        [Display(Name = "Birth Date")]
+        [DataMember]
+        public DateTime? BirthDate { get; set; }
+
+        [MaxLength(500)]
+        [Display(Name = "Address")]
+        [DataMember]
+        public string? Address { get; set; }
+
+        [MaxLength(10)]
+        [Display(Name = "Zip Code")]
+        [DataMember]
+        public string? ZipCode { get; set; }
+       
+        [Display(Name = "Phone Validated")]
+        [DataMember]
+        public bool? PhoneValidated { get; set; }
+
+        [MaxLength(25)]
+        [Display(Name = "Phone Validation Code")]
+        [DataMember]
+        public string? PhoneValidationCode { get; set; }
+
+        [Display(Name = "Email Validated")]
+        [DataMember]
+        [DataType(DataType.EmailAddress)]
+        public bool? EmailValidated { get; set; }
+       
+        [MaxLength(500)]
+        [Display(Name = "Email Validation Code")]
+        [DataMember]
+        [DataType(DataType.EmailAddress)]
+        public string? EmailValidationCode { get; set; }
+   
+        [Required]
+        [Display(Name = "Enabled")]
+        [DataMember]
+        public bool? Enabled { get; set; }
+ 
+        [MaxLength(255)]
+        [Display(Name = "Confirmation Token")]
+        [DataMember]
+        public string? ConfirmationToken { get; set; }
+  
+		[Required]
+        [Display(Name = "Locked")]
+        [DataMember]
+        public bool? Locked { get; set; }
+
+        [Required]
+        [Display(Name = "Expired")]
+        [DataMember]
+        public bool? Expired { get; set; }
+ 
+        [DisplayFormat(DataFormatString = "{0:d}", ApplyFormatInEditMode = true)]
+        [Display(Name = "Expires At")]
+        [DataMember]
+        public DateTime? ExpiresAt { get; set; }
+
     }
 }

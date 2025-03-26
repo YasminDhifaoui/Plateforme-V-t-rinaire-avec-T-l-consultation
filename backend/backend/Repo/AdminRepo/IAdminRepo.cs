@@ -1,5 +1,7 @@
 ﻿using backend.Dtos;
 using backend.Dtos.AdminDtos.AdminAuthDto;
+using backend.Dtos.AdminUsersDto;
+using backend.Dtos.UsersDto;
 using backend.Models;
 using System.Collections.Generic;
 
@@ -7,20 +9,33 @@ namespace backend.Repo.AdminRepo
 {
     public interface IAdminRepo
     {
-        IEnumerable<AdminDto> GetUsers();
+        /*
+         Admin controllers:
+            authcontroller: register/login/confirmEmail/TokenJwt
+            adminController:crud (not sure)
+            ClientController: crud
+            VetController: crud
+            ApplicationController
+         */
 
-        AdminDto GetUserById(Guid id);
+        //Authentification:
+        string AdminRegister(Admin admin);
 
-        AdminDto GetUserByUsername(string username);
+        /*AdminLoginDto AdminLogin(string username, string password);
+        bool AdminResetPassword(Guid userId, string newPassword);*/
+
+        //AdminUsers Controller:
+        IEnumerable<UserDto> GetAllUsers(); 
+
+        IEnumerable<UserDto> GetUsersByRole(string role);
+        UserDto GetUserById(Guid id);
+        UserDto GetUserByUsername(string username);
 
 
-        string RegisterAdmin(Admin admin);
-        AdminLoginDto Login(string username, string password);
-        bool ResetPassword(Guid userId, string newPassword);
+        string UpdateUser(Guid UserId, UserUpdateDto updatedUser);
+        string DeleteUser(Guid id);
 
-
-        void UpdateUser(AdminDto user, AdminDto updatedUser);
-        void DeleteUser(Guid id);
+        //string AddUser(UserDto user);  
 
         void SaveChanges();
     }
