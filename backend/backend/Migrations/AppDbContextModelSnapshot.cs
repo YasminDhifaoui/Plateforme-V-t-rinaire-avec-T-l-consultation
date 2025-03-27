@@ -389,6 +389,20 @@ namespace backend.Migrations
                     b.ToTable("Categories");
                 });
 
+            modelBuilder.Entity("backend.Models.Client", b =>
+                {
+                    b.Property<Guid>("ClientId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("AppUserId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("ClientId");
+
+                    b.ToTable("clients");
+                });
+
             modelBuilder.Entity("backend.Models.Commande", b =>
                 {
                     b.Property<Guid>("Id")

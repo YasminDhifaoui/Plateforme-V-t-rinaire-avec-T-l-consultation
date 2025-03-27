@@ -14,6 +14,8 @@ namespace backend.Data
         public DbSet<IdentityUserRole<Guid>> UserRoles { get; set; }
         public DbSet<Admin> admins { get; set; }
 
+        public DbSet<Client> clients { get; set; }
+
 
 
 

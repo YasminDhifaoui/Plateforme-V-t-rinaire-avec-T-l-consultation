@@ -2,6 +2,7 @@ using backend.Data;
 using backend.Mail;
 using backend.Models;
 using backend.Repo.AdminRepo;
+using backend.Repo.ClientsRepo;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -58,7 +59,10 @@ builder.Services.AddSwaggerGen();
 
 //email smtp service 
 builder.Services.AddScoped<IMailService, MailService>();
+
+//add services
 builder.Services.AddScoped<IAdminRepo, AdminRepo>();
+builder.Services.AddScoped<IClientRepo, ClientRepo>();
 
 
 // Add PostgreSQL DB connection

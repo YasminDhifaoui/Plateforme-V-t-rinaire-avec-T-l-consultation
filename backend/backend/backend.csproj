@@ -26,7 +26,6 @@
     <Folder Include="Controllers\ClientControllers\" />
     <Folder Include="Controllers\VetControllers\" />
     <Folder Include="Data\" />
-    <Folder Include="Dtos\ClientDtos\" />
     <Folder Include="Dtos\VetDtos\" />
     <Folder Include="Migrations\" />
   </ItemGroup>
