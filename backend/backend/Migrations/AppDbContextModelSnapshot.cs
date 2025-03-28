@@ -633,6 +633,20 @@ namespace backend.Migrations
                     b.ToTable("Vaccinations");
                 });
 
+            modelBuilder.Entity("backend.Models.Veterinaire", b =>
+                {
+                    b.Property<Guid>("VeterinaireId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("AppUserId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("VeterinaireId");
+
+                    b.ToTable("veterinaires");
+                });
+
             modelBuilder.Entity("ApplicationRole", b =>
                 {
                     b.HasBaseType("Microsoft.AspNetCore.Identity.IdentityRole<System.Guid>");

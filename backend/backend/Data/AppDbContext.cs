@@ -13,8 +13,8 @@ namespace backend.Data
         public DbSet<ApplicationRole> ApplicationRole { get; set; }
         public DbSet<IdentityUserRole<Guid>> UserRoles { get; set; }
         public DbSet<Admin> admins { get; set; }
-
         public DbSet<Client> clients { get; set; }
+        public DbSet<Veterinaire> veterinaires { get; set; }
 
 
 

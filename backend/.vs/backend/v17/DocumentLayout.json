@@ -3,34 +3,34 @@
   "WorkspaceRootPath": "D:\\Internships\\Pfe\\backend\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{26F21D31-1B72-4CCD-BEDC-8662D6E3799E}|backend\\backend.csproj|D:\\Internships\\Pfe\\backend\\backend\\controllers\\admincontrollers\\adminclientscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{26F21D31-1B72-4CCD-BEDC-8662D6E3799E}|backend\\backend.csproj|solutionrelative:backend\\controllers\\admincontrollers\\adminclientscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{26F21D31-1B72-4CCD-BEDC-8662D6E3799E}|backend\\backend.csproj|d:\\internships\\pfe\\backend\\backend\\migrations\\20250328132325_addveterinairemodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{26F21D31-1B72-4CCD-BEDC-8662D6E3799E}|backend\\backend.csproj|solutionrelative:backend\\migrations\\20250328132325_addveterinairemodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{26F21D31-1B72-4CCD-BEDC-8662D6E3799E}|backend\\backend.csproj|d:\\internships\\pfe\\backend\\backend\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{26F21D31-1B72-4CCD-BEDC-8662D6E3799E}|backend\\backend.csproj|solutionrelative:backend\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{26F21D31-1B72-4CCD-BEDC-8662D6E3799E}|backend\\backend.csproj|d:\\internships\\pfe\\backend\\backend\\data\\appdbcontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{26F21D31-1B72-4CCD-BEDC-8662D6E3799E}|backend\\backend.csproj|solutionrelative:backend\\data\\appdbcontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{26F21D31-1B72-4CCD-BEDC-8662D6E3799E}|backend\\backend.csproj|d:\\internships\\pfe\\backend\\backend\\repo\\adminrepo\\adminrepo.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{26F21D31-1B72-4CCD-BEDC-8662D6E3799E}|backend\\backend.csproj|solutionrelative:backend\\repo\\adminrepo\\adminrepo.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{26F21D31-1B72-4CCD-BEDC-8662D6E3799E}|backend\\backend.csproj|d:\\internships\\pfe\\backend\\backend\\models\\veterinaire.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{26F21D31-1B72-4CCD-BEDC-8662D6E3799E}|backend\\backend.csproj|solutionrelative:backend\\models\\veterinaire.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{26F21D31-1B72-4CCD-BEDC-8662D6E3799E}|backend\\backend.csproj|d:\\internships\\pfe\\backend\\backend\\repo\\clientsrepo\\iclientrepo.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{26F21D31-1B72-4CCD-BEDC-8662D6E3799E}|backend\\backend.csproj|solutionrelative:backend\\repo\\clientsrepo\\iclientrepo.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{26F21D31-1B72-4CCD-BEDC-8662D6E3799E}|backend\\backend.csproj|d:\\internships\\pfe\\backend\\backend\\models\\client.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{26F21D31-1B72-4CCD-BEDC-8662D6E3799E}|backend\\backend.csproj|solutionrelative:backend\\models\\client.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{26F21D31-1B72-4CCD-BEDC-8662D6E3799E}|backend\\backend.csproj|d:\\internships\\pfe\\backend\\backend\\repo\\clientsrepo\\clientrepo.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{26F21D31-1B72-4CCD-BEDC-8662D6E3799E}|backend\\backend.csproj|solutionrelative:backend\\repo\\clientsrepo\\clientrepo.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{26F21D31-1B72-4CCD-BEDC-8662D6E3799E}|backend\\backend.csproj|d:\\internships\\pfe\\backend\\backend\\controllers\\admincontrollers\\clientscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{26F21D31-1B72-4CCD-BEDC-8662D6E3799E}|backend\\backend.csproj|solutionrelative:backend\\controllers\\admincontrollers\\clientscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     }
   ],
   "DocumentGroupContainers": [
     {
       "Orientation": 0,
-      "VerticalTabListWidth": 256,
+      "VerticalTabListWidth": 224,
       "DocumentGroups": [
         {
           "DockedWidth": 276,
-          "SelectedChildIndex": 5,
+          "SelectedChildIndex": 1,
           "Children": [
             {
               "$type": "Bookmark",
@@ -38,67 +38,67 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 1,
-              "Title": "Program.cs",
-              "DocumentMoniker": "D:\\Internships\\Pfe\\backend\\backend\\Program.cs",
-              "RelativeDocumentMoniker": "backend\\Program.cs",
-              "ToolTip": "D:\\Internships\\Pfe\\backend\\backend\\Program.cs",
-              "RelativeToolTip": "backend\\Program.cs",
-              "ViewState": "AQIAACsAAAAAAAAAAAAAAEAAAAAyAAAA",
+              "DocumentIndex": 0,
+              "Title": "20250328132325_addVeterinaireModel.cs",
+              "DocumentMoniker": "D:\\Internships\\Pfe\\backend\\backend\\Migrations\\20250328132325_addVeterinaireModel.cs",
+              "RelativeDocumentMoniker": "backend\\Migrations\\20250328132325_addVeterinaireModel.cs",
+              "ToolTip": "D:\\Internships\\Pfe\\backend\\backend\\Migrations\\20250328132325_addVeterinaireModel.cs",
+              "RelativeToolTip": "backend\\Migrations\\20250328132325_addVeterinaireModel.cs",
+              "ViewState": "AQIAAA0AAAAAAAAAAAAQwCIAAAAAAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-03-26T22:40:55.75Z",
+              "WhenOpened": "2025-03-28T13:23:28.062Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "AppDbContext.cs",
+              "DocumentMoniker": "D:\\Internships\\Pfe\\backend\\backend\\Data\\AppDbContext.cs",
+              "RelativeDocumentMoniker": "backend\\Data\\AppDbContext.cs",
+              "ToolTip": "D:\\Internships\\Pfe\\backend\\backend\\Data\\AppDbContext.cs",
+              "RelativeToolTip": "backend\\Data\\AppDbContext.cs",
+              "ViewState": "AQIAAAgAAAAAAAAAAAAAwBAAAAAuAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-03-28T13:22:46.656Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
               "DocumentIndex": 2,
-              "Title": "AdminRepo.cs",
-              "DocumentMoniker": "D:\\Internships\\Pfe\\backend\\backend\\Repo\\AdminRepo\\AdminRepo.cs",
-              "RelativeDocumentMoniker": "backend\\Repo\\AdminRepo\\AdminRepo.cs",
-              "ToolTip": "D:\\Internships\\Pfe\\backend\\backend\\Repo\\AdminRepo\\AdminRepo.cs",
-              "RelativeToolTip": "backend\\Repo\\AdminRepo\\AdminRepo.cs",
-              "ViewState": "AQIAAAkAAAAAAAAAAAAAABAAAAAJAAAA",
+              "Title": "Veterinaire.cs",
+              "DocumentMoniker": "D:\\Internships\\Pfe\\backend\\backend\\Models\\Veterinaire.cs",
+              "RelativeDocumentMoniker": "backend\\Models\\Veterinaire.cs",
+              "ToolTip": "D:\\Internships\\Pfe\\backend\\backend\\Models\\Veterinaire.cs",
+              "RelativeToolTip": "backend\\Models\\Veterinaire.cs",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAgAAAAfAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-03-26T22:34:31.219Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 4,
-              "Title": "ClientRepo.cs",
-              "DocumentMoniker": "D:\\Internships\\Pfe\\backend\\backend\\Repo\\ClientsRepo\\ClientRepo.cs",
-              "RelativeDocumentMoniker": "backend\\Repo\\ClientsRepo\\ClientRepo.cs",
-              "ToolTip": "D:\\Internships\\Pfe\\backend\\backend\\Repo\\ClientsRepo\\ClientRepo.cs",
-              "RelativeToolTip": "backend\\Repo\\ClientsRepo\\ClientRepo.cs",
-              "ViewState": "AQIAABAAAAAAAAAAAAAQwAEAAAAAAAAA",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-03-26T22:07:34.414Z",
+              "WhenOpened": "2025-03-28T13:22:18.715Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
               "DocumentIndex": 3,
-              "Title": "IClientRepo.cs",
-              "DocumentMoniker": "D:\\Internships\\Pfe\\backend\\backend\\Repo\\ClientsRepo\\IClientRepo.cs",
-              "RelativeDocumentMoniker": "backend\\Repo\\ClientsRepo\\IClientRepo.cs",
-              "ToolTip": "D:\\Internships\\Pfe\\backend\\backend\\Repo\\ClientsRepo\\IClientRepo.cs",
-              "RelativeToolTip": "backend\\Repo\\ClientsRepo\\IClientRepo.cs",
-              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAQAAAAgAAAA",
+              "Title": "Client.cs",
+              "DocumentMoniker": "D:\\Internships\\Pfe\\backend\\backend\\Models\\Client.cs",
+              "RelativeDocumentMoniker": "backend\\Models\\Client.cs",
+              "ToolTip": "D:\\Internships\\Pfe\\backend\\backend\\Models\\Client.cs",
+              "RelativeToolTip": "backend\\Models\\Client.cs",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAwAAAAAAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-03-26T22:05:01.095Z",
+              "WhenOpened": "2025-03-28T13:21:59.568Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 0,
-              "Title": "AdminClientsController.cs",
-              "DocumentMoniker": "D:\\Internships\\Pfe\\backend\\backend\\Controllers\\AdminControllers\\AdminClientsController.cs",
-              "RelativeDocumentMoniker": "backend\\Controllers\\AdminControllers\\AdminClientsController.cs",
-              "ToolTip": "D:\\Internships\\Pfe\\backend\\backend\\Controllers\\AdminControllers\\AdminClientsController.cs",
-              "RelativeToolTip": "backend\\Controllers\\AdminControllers\\AdminClientsController.cs",
-              "ViewState": "AQIAAAMAAAAAAAAAAAAqwA0AAAAIAAAA",
+              "DocumentIndex": 4,
+              "Title": "ClientsController.cs",
+              "DocumentMoniker": "D:\\Internships\\Pfe\\backend\\backend\\Controllers\\AdminControllers\\ClientsController.cs",
+              "RelativeDocumentMoniker": "backend\\Controllers\\AdminControllers\\ClientsController.cs",
+              "ToolTip": "D:\\Internships\\Pfe\\backend\\backend\\Controllers\\AdminControllers\\ClientsController.cs",
+              "RelativeToolTip": "backend\\Controllers\\AdminControllers\\ClientsController.cs",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-03-26T15:52:13.924Z",
+              "WhenOpened": "2025-03-28T13:21:22.132Z",
               "EditorCaption": ""
             }
           ]
