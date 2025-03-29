@@ -77,25 +77,13 @@ namespace backend.Controllers.AdminControllers
 
         [HttpPut]
         [Route("update-client/{id}")]
-        public async Task<IActionResult> UpdateUser(Guid id, [FromBody] UpdateClientDto updatedClient)
+        public async Task<IActionResult> UpdateClient(Guid id, [FromBody] UpdateClientDto updatedClient)
         {
             var appUser = await _userManager.FindByIdAsync(id.ToString());
             if (appUser == null)
                 return NotFound(new { message = "User not found" });
-
-            appUser.UserName = updatedClient.Username ?? appUser.UserName;
-            appUser.Email = updatedClient.Email ?? appUser.Email;
-            appUser.PhoneNumber = updatedClient.PhoneNumber ?? appUser.PhoneNumber;
-            appUser.TwoFactorEnabled = updatedClient.TwoFactorEnabled;
-            appUser.LockoutEnabled = updatedClient.LockoutEnabled;
-            appUser.LockoutEnd = updatedClient.LockoutEnd;
-            appUser.EmailConfirmed = updatedClient.EmailConfirmed;
-            appUser.PhoneNumberConfirmed = updatedClient.PhoneConfirmed;
-            appUser.UpdatedAt = DateTime.UtcNow;
-
-            var updateResult = await _userManager.UpdateAsync(appUser);
-            if (!updateResult.Succeeded)
-                return BadRequest(new { message = "Failed to update user", errors = updateResult.Errors });
+            
+            _clientRepo.UpdateClient(id, updatedClient);
 
             if (!string.IsNullOrEmpty(updatedClient.Role))
             {
@@ -141,12 +129,8 @@ namespace backend.Controllers.AdminControllers
         // DeleteClient
         [HttpDelete]
         [Route("delete-client/{id}")]
-        public async Task<IActionResult> DeleteUser(Guid id)
+        public async Task<IActionResult> DeleteClient(Guid id)
         {
-            var user = _clientRepo.GetClientById(id);
-            if (user == null)
-                return NotFound(new { message = "Client not found" });
-
             var appUser = await _userManager.FindByIdAsync(id.ToString());
             if (appUser != null) 
             {

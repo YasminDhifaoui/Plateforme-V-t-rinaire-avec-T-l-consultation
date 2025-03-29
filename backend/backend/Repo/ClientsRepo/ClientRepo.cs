@@ -17,7 +17,7 @@ namespace backend.Repo.ClientsRepo
         //Get Users By Role
         public IEnumerable<ClientDto> GetClients()
         {
-            var user = _context.Users
+            var clients = _context.Users
                 .Where(user => user.Role == "Client")
                 .Select(user => new ClientDto
                 {
@@ -39,13 +39,13 @@ namespace backend.Repo.ClientsRepo
 
                     AccessFailedCount = user.AccessFailedCount
                 }).ToList();
-            return user;
+            return clients;
 
         }
-        //GetUserById
+        //GetClientById
         public ClientDto GetClientById(Guid id)
         {
-            var user = _context.Users
+            var client = _context.Users
                 .Where(user => user.Id == id)
                 .Select(user => new ClientDto
                 {
@@ -69,13 +69,13 @@ namespace backend.Repo.ClientsRepo
                 })
                 .FirstOrDefault();
 
-            return user;
+            return client;
         }
 
-        //getUserByUsername
+        //getClientByUsername
         public ClientDto GetClientByUsername(string username)
         {
-            var user = _context.Users
+            var client = _context.Users
                 .Where(user => user.UserName == username)
                 .Select(user => new ClientDto
                 {
@@ -99,14 +99,18 @@ namespace backend.Repo.ClientsRepo
                 })
                 .FirstOrDefault();
 
-            return user;
+            return client;
         }
 
-
-
-        // Update user 
+        // Update client 
         public string UpdateClient(Guid UserId, UpdateClientDto updatedUser)
         {
+
+            var clientExist =this.GetClientById(UserId);
+            if (clientExist == null)
+            {
+                return "Client not found";
+            }
             var userToUpdate = _context.Users.Find(UserId);
 
             if (userToUpdate == null)
@@ -125,27 +129,29 @@ namespace backend.Repo.ClientsRepo
             userToUpdate.UpdatedAt = DateTime.UtcNow;
 
             _context.Users.Update(userToUpdate);
-            _context.SaveChanges();
+            this.SaveChanges();
             return "User updated successfully";
         }
 
-        // Delete user by Id
+        // Delete client by Id
         public string DeleteClient(Guid id)
         {
-            var user = _context.Users.Find(id);
-            if (user == null)
-                return "User not found!";
-            _context.Users.Remove(user);
-            _context.SaveChanges();
-            return "User deleted successfully";
+            var client = _context.clients.Find(id);
+            if (client == null)
+            {
+                return "Client not found";
+            }
+            _context.clients.Remove(client);
+            this.SaveChanges();
+            return "Client deleted successfully";
         }
 
          
-         //Add user 
+         //Add client 
          public string AddClient (Client client)
          {
             _context.clients.Add(client);
-            _context.SaveChanges();
+            this.SaveChanges();
 
             return "Client added successfully";
         

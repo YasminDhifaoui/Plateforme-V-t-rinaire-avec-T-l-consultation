@@ -1,6 +1,6 @@
 ﻿using backend.Dtos;
-using backend.Dtos.AdminDtos.AdminAuthDto;
-using backend.Dtos.AdminDtos.UsersDto;
+using backend.Dtos.AdminDtos;
+using backend.Dtos.ClientDtos;
 using backend.Models;
 using System.Collections.Generic;
 
@@ -17,12 +17,14 @@ namespace backend.Repo.AdminRepo
             ApplicationController
          */
 
-        //Authentification:
-        string AdminRegister(Admin admin);
+        IEnumerable<AdminDto> GetAdmins(); 
+        AdminDto GetAdminById(Guid id);
+        AdminDto GetAdminByUsername(string username);
 
-        //AdminUsers Controller:
-        IEnumerable<UserDto> GetAllUsers(); 
-       
+        string UpdateAdmin(Guid UserId, UpdateAdminDto updatedAdmin);
+        string DeleteAdmin(Guid id);
+        string AddAdmin(Admin admin);
+
         void SaveChanges();
     }
 }

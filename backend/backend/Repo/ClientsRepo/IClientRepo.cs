@@ -12,7 +12,6 @@ namespace backend.Repo.ClientsRepo
 
         string UpdateClient(Guid UserId, UpdateClientDto updatedUser);
         string DeleteClient(Guid id);
-
         string AddClient(Client client);  
         void SaveChanges();
 

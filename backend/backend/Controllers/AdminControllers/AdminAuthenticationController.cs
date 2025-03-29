@@ -136,7 +136,7 @@ namespace backend.Controllers.AdminControllers
                 AppUserId = user.Id
             };
 
-            _repository.AdminRegister(admin);
+            _repository.AddAdmin(admin);
 
             if (!await _roleManager.RoleExistsAsync(ApplicationRole.Admin))
             {
