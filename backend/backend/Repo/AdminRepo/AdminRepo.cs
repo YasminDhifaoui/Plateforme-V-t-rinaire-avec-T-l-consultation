@@ -121,8 +121,6 @@ namespace backend.Repo.AdminRepo
 
             userToUpdate.UserName = updatedAdmin.Username;
             userToUpdate.Email = updatedAdmin.Email;
-            userToUpdate.PasswordHash = updatedAdmin.Password;
-            userToUpdate.Role = updatedAdmin.Role;
             userToUpdate.PhoneNumber = updatedAdmin.PhoneNumber;
             userToUpdate.TwoFactorEnabled = updatedAdmin.TwoFactorEnabled;
             userToUpdate.LockoutEnabled = updatedAdmin.LockoutEnabled;

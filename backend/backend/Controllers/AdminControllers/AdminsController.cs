@@ -13,7 +13,7 @@ namespace backend.Controllers.AdminControllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class AdminController : ControllerBase
+    public class AdminsController : ControllerBase
     {
         public readonly IAdminRepo _adminRepo;
         private readonly UserManager<AppUser> _userManager;
@@ -23,7 +23,7 @@ namespace backend.Controllers.AdminControllers
         private readonly IConfiguration _configuration;
         private readonly IMailService _emailService;
 
-        public AdminController(
+        public AdminsController(
             IAdminRepo adminRepo,
             UserManager<AppUser> userManager,
             RoleManager<ApplicationRole> roleManager,
@@ -82,7 +82,7 @@ namespace backend.Controllers.AdminControllers
             if (appUser == null)
                 return NotFound(new { message = "User not found" });
 
-            _adminRepo.UpdateAdmin(id, updatedAdmin);
+            var adminEmailExists = await _userManager.FindByEmailAsync(updatedAdmin.Username);
 
             if (!string.IsNullOrEmpty(updatedAdmin.Role))
             {
@@ -102,6 +102,7 @@ namespace backend.Controllers.AdminControllers
                 if (!addPassResult.Succeeded)
                     return BadRequest(new { message = "Failed to set new password", errors = addPassResult.Errors });
             }
+            _adminRepo.UpdateAdmin(id, updatedAdmin);
 
             return Ok(new { message = "Admin updated successfully" });
         }
@@ -278,7 +279,6 @@ namespace backend.Controllers.AdminControllers
                     Message = ex.ToString()
                 });
             }
-
             return Ok(new ApiResponse { Status = "Success", Message = "Admin successfully created, he must check his email for confirmation!" });
 
         }

@@ -82,7 +82,7 @@ namespace backend.Controllers.AdminControllers
             var appUser = await _userManager.FindByIdAsync(id.ToString());
             if (appUser == null)
                 return NotFound(new { message = "User not found" });
-            
+
             _clientRepo.UpdateClient(id, updatedClient);
 
             if (!string.IsNullOrEmpty(updatedClient.Role))
@@ -151,6 +151,7 @@ namespace backend.Controllers.AdminControllers
         public async Task<IActionResult> AddClientAsync(AddClientDto addedClient)
         {
             var clientEmailExists = await _userManager.FindByEmailAsync(addedClient.Email);
+            
             if (clientEmailExists != null)
             {
                 return StatusCode(StatusCodes.Status500InternalServerError, new ApiResponse
