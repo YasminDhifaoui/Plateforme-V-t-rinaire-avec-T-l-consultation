@@ -23,7 +23,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Controllers\ClientControllers\" />
     <Folder Include="Data\" />
     <Folder Include="Migrations\" />
   </ItemGroup>

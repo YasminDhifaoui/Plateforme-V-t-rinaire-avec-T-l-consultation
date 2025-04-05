@@ -1,6 +1,5 @@
 ﻿using backend.Controllers.AdminControllers;
 using backend.Data;
-using backend.Dtos.AdminDtos.AdminAuthDto;
 using backend.Dtos.VetDtos.VetAuthDtos;
 using backend.Mail;
 using backend.Models;
@@ -389,7 +388,7 @@ namespace backend.Controllers.VetControllers
             var user = await _userManager.FindByEmailAsync(model.Email);
             if (user == null)
 
-                return StatusCode(StatusCodes.Status500InternalServerError, new ApiResponse
+                return StatusCode(StatusCodes.Status500InternalServerError, new Dtos.VetDtos.VetAuthDtos.ApiResponse
                 {
                     Status = "Error",
                     Message = "No user associated with this email"

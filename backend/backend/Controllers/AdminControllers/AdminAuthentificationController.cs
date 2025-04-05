@@ -27,7 +27,7 @@ namespace backend.Controllers.AdminControllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class AdminAuthenticationController : ControllerBase
+    public class AdminAuthentificationController : ControllerBase
     {
         private readonly IConfiguration _configuration;
         private readonly IAdminRepo _repository;
@@ -40,13 +40,13 @@ namespace backend.Controllers.AdminControllers
         private readonly IOptions<DataProtectionTokenProviderOptions> _tokenOptions;
         private readonly AppDbContext _context;
 
-        public AdminAuthenticationController(
+        public AdminAuthentificationController(
             IConfiguration configuration,
             IAdminRepo repository,
             UserManager<AppUser> userManager,
             RoleManager<ApplicationRole> roleManager,
 
-            ILogger<AdminAuthenticationController> logger,
+            ILogger<AdminAuthentificationController> logger,
             IMailService emailService,
             IOptions<DataProtectionTokenProviderOptions> tokenOptions,
             AppDbContext context

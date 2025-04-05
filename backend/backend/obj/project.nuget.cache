@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "vT4mTG+S2ThGJDiNeLGK9+7PZJoXavQM0XAd1bOVE+mZ5rPEaTCzW2pFc7MJ+zE1yo6rOPTLguzghd7T5H0JPg==",
+  "dgSpecHash": "SHCpzTdYvToiiEiPhgjOHIqb49Lh7o416FDRESsnvncm/VgnCT+VS2D4XZjYPl+ZcjK/MBiJaL2UxX4a7COiZw==",
   "success": true,
-  "projectFilePath": "D:\\Internships\\Pfe\\backend\\backend\\backend.csproj",
+  "projectFilePath": "D:\\Internships\\Pfe\\Plateforme-V-t-rinaire-avec-T-l-consultation\\backend\\backend\\backend.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\USER\\.nuget\\packages\\azure.core\\1.38.0\\azure.core.1.38.0.nupkg.sha512",
     "C:\\Users\\USER\\.nuget\\packages\\azure.identity\\1.11.4\\azure.identity.1.11.4.nupkg.sha512",

@@ -2,6 +2,7 @@ using backend.Data;
 using backend.Mail;
 using backend.Models;
 using backend.Repo.AdminRepo;
+using backend.Repo.AnimalRepo;
 using backend.Repo.ClientsRepo;
 using backend.Repo.VetRepo;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -65,6 +66,7 @@ builder.Services.AddScoped<IMailService, MailService>();
 builder.Services.AddScoped<IAdminRepo, AdminRepo>();
 builder.Services.AddScoped<IClientRepo, ClientRepo>();
 builder.Services.AddScoped<IVetRepo, VetRepo>();
+builder.Services.AddScoped<IAnimalRepo, AnimalRepo>();
 
 
 // Add PostgreSQL DB connection
