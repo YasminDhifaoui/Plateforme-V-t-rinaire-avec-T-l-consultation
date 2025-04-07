@@ -133,7 +133,7 @@ namespace backend.Controllers.AdminControllers
             return Ok(new { message = "Veterinaire deleted successfully" });
         }
         //add vet
-        [HttpPut]
+        [HttpPost]
         [Route("add-veterinaire")]
         public async Task<IActionResult> AddVeterinaire(AddVetDto addedVet)
         {

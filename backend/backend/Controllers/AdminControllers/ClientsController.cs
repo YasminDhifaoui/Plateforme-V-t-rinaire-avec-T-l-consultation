@@ -145,7 +145,7 @@ namespace backend.Controllers.AdminControllers
         }
 
         //AddClient
-        [HttpPut]
+        [HttpPost]
         [Route("add-client")]
 
         public async Task<IActionResult> AddClientAsync(AddClientDto addedClient)

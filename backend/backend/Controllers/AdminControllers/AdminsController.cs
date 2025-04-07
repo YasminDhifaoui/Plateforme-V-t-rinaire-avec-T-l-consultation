@@ -145,7 +145,7 @@ namespace backend.Controllers.AdminControllers
         }
 
         //AddAdmin
-        [HttpPut]
+        [HttpPost]
         [Route("add-admin")]
 
         public async Task<IActionResult> AddAdminAsync(AddAdminDto addedAdmin)

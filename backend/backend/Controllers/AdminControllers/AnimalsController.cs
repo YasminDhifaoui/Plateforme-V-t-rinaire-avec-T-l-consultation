@@ -90,7 +90,7 @@ namespace backend.Controllers.AdminControllers
             return Ok(animals);
 
         }
-        [HttpPut]
+        [HttpPost]
         [Route("add-animal")]
         public IActionResult AddAnimal([FromBody] AddAnimalDto model)
         {
