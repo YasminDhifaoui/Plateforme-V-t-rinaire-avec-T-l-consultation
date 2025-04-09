@@ -135,7 +135,7 @@ namespace backend.Controllers.AdminControllers
         //add vet
         [HttpPost]
         [Route("add-veterinaire")]
-        public async Task<IActionResult> AddVeterinaire(AddVetDto addedVet)
+        public async Task<IActionResult> AddVeterinaire([FromBody] AddVetDto addedVet)
         {
             var vetEmailExists = await _userManager.FindByEmailAsync(addedVet.Email);
 

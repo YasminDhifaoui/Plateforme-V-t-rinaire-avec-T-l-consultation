@@ -50,6 +50,8 @@ namespace backend.Controllers.AdminControllers
                 return BadRequest("No Owner with this Id !");
 
             var animals = _repo.getAnimalsByOwnerId(ownerId);
+            if (animals == null)
+                return BadRequest("No animals for this owner !");
             return Ok(animals);
 
         }

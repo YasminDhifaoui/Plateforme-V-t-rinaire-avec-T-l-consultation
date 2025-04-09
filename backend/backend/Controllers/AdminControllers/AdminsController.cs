@@ -39,12 +39,21 @@ namespace backend.Controllers.AdminControllers
             _configuration = configuration;
             _emailService = mailService;
         }
+        [HttpGet("test-auth")]
+        [Authorize]
+        public IActionResult TestAuth()
+        {
+            return Ok("Auth works!");
+        }
 
         //AdminList
         [HttpGet]
         [Route("get-all-admins")]
+        [Authorize(Roles = "Admin")]
         public IActionResult GetAllAdmins()
         {
+            Console.WriteLine("GET /api/admins/get-all-admins was hit.");
+
             var admins = _adminRepo.GetAdmins();
             return Ok(admins);
         }

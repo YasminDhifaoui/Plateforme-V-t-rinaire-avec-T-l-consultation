@@ -6,12 +6,11 @@ namespace backend.Repo.Rendez_vousRepo
     public interface IRendezVousRepo
     {
         public IEnumerable<RendezVous> getAllRendezVous();
-        public IEnumerable<RendezVous> getRendezVousById();
-        public IEnumerable<RendezVous> getRendezVousByVetId();
-        public IEnumerable<RendezVous> getRendezVousByClientId();
-        public IEnumerable<RendezVous> getRendezVousByAnimalId();
-        public IEnumerable<RendezVous> getRendezVousByDate();
-        public IEnumerable<RendezVous> getRendezVousByStatus();
+        public IEnumerable<RendezVous> getRendezVousById(Guid id);
+        public IEnumerable<RendezVous> getRendezVousByVetId(Guid vetId);
+        public IEnumerable<RendezVous> getRendezVousByClientId(Guid clientId);
+        public IEnumerable<RendezVous> getRendezVousByAnimalId(Guid animalId);
+        public IEnumerable<RendezVous> getRendezVousByStatus(RendezVousStatus status);
 
         public string AddRendezVous(RendezVous rendezVous);
         public string UpdateRendezVous(Guid id,UpdateRendezVousDto updatedRendezVous);

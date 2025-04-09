@@ -4,17 +4,15 @@ using backend.Models;
 using backend.Repo.AdminRepo;
 using backend.Repo.AnimalRepo;
 using backend.Repo.ClientsRepo;
+using backend.Repo.Rendez_vousRepo;
 using backend.Repo.VetRepo;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
-using System;
+using Microsoft.OpenApi.Models;
 using System.Text;
-
-
-
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -24,8 +22,9 @@ var jwtSettings = builder.Configuration.GetSection("JWT");
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
 })
-.AddJwtBearer(options =>
+.AddJwtBearer(JwtBearerDefaults.AuthenticationScheme, options =>
 {
     options.TokenValidationParameters = new TokenValidationParameters
     {
@@ -35,12 +34,19 @@ builder.Services.AddAuthentication(options =>
         ValidateIssuerSigningKey = true,
         ValidIssuer = jwtSettings["ValidIssuer"],
         ValidAudience = jwtSettings["ValidAudience"],
-        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings["Secret"]))
+        IssuerSigningKey = new SymmetricSecurityKey(
+            Encoding.UTF8.GetBytes(jwtSettings["SecretKey"]))
     };
 });
+//add authorization with role
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("Admin", policy => policy.RequireRole("Admin"));
 
+});
 
 builder.WebHost.UseUrls("http://localhost:5000", "https://localhost:7000");
+
 // Add services to the container.
 builder.Services.AddCors(options =>
 {
@@ -52,29 +58,48 @@ builder.Services.AddCors(options =>
     });
 });
 
-
 builder.Services.AddControllers();
 
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+// Swagger Configuration
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(Options =>
+{
+    var jwtSecurityScheme = new OpenApiSecurityScheme
+    {
+        BearerFormat = "JWT",
+        Name = "Authorization",
+        In = ParameterLocation.Header,
+        Type = SecuritySchemeType.Http,
+        Scheme = JwtBearerDefaults.AuthenticationScheme,
+        Description = "Enter your JWT Access Token",
+        Reference = new OpenApiReference
+        {
+            Id = JwtBearerDefaults.AuthenticationScheme,
+            Type = ReferenceType.SecurityScheme,
+        }
+    };
+    Options.AddSecurityDefinition("Bearer", jwtSecurityScheme);
+    Options.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        { jwtSecurityScheme, Array.Empty<string>() }
+    });
+});
 
-//email smtp service 
+// Email SMTP Service
 builder.Services.AddScoped<IMailService, MailService>();
 
-//add services
+// Add Repositories
 builder.Services.AddScoped<IAdminRepo, AdminRepo>();
 builder.Services.AddScoped<IClientRepo, ClientRepo>();
 builder.Services.AddScoped<IVetRepo, VetRepo>();
 builder.Services.AddScoped<IAnimalRepo, AnimalRepo>();
-
+builder.Services.AddScoped<IRendezVousRepo, RendezVousRepo>();
 
 // Add PostgreSQL DB connection
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("PostgresConnection")));
 
-
-
+// Configure Identity
 builder.Services.AddIdentity<AppUser, ApplicationRole>(options =>
 {
     options.User.RequireUniqueEmail = true;
@@ -82,24 +107,17 @@ builder.Services.AddIdentity<AppUser, ApplicationRole>(options =>
     options.Tokens.PasswordResetTokenProvider = TokenOptions.DefaultEmailProvider;
     options.Tokens.EmailConfirmationTokenProvider = TokenOptions.DefaultEmailProvider;
     options.SignIn.RequireConfirmedAccount = true;
-    // Configuration pour 2FA
     options.Tokens.AuthenticatorTokenProvider = TokenOptions.DefaultAuthenticatorProvider;
-
 })
 .AddEntityFrameworkStores<AppDbContext>()
 .AddDefaultTokenProviders();
-
 
 builder.Services.Configure<IdentityOptions>(options =>
 {
     options.SignIn.RequireConfirmedEmail = true;
 });
 
-
-
 var app = builder.Build();
-
-
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
@@ -112,8 +130,10 @@ if (app.Environment.IsDevelopment())
 app.UseCors("AllowAll");
 
 app.UseHttpsRedirection();
+app.UseRouting();
 
-app.UseAuthorization();
+app.UseAuthentication();  // Authentication middleware comes first
+app.UseAuthorization();   // Authorization middleware should come after authentication
 
 app.MapControllers();
 

@@ -7,7 +7,7 @@ namespace backend.Repo.AnimalRepo
     public interface IAnimalRepo
     {
         public IEnumerable<AnimalDto> getAllAnimals();
-        public IEnumerable<AnimalDto> getAnimalById(Guid id);
+        public AnimalDto getAnimalById(Guid id);
 
         public IEnumerable<AnimalDto> getAnimalsByOwnerId(Guid userId);
         public IEnumerable<AnimalDto> getAnimalsByName(string name);

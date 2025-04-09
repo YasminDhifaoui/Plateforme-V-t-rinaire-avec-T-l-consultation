@@ -33,7 +33,7 @@ namespace backend.Repo.AnimalRepo
             }).ToList();
             return animals;
         }
-        public IEnumerable<AnimalDto> getAnimalById(Guid id)
+        public AnimalDto getAnimalById(Guid id)
         {
             var animals = _context.Animals
                 .Where(animal => animal.Id == id)
@@ -50,7 +50,7 @@ namespace backend.Repo.AnimalRepo
                     OwnerId = Animal.OwnerId,
                     CreatedAt = Animal.CreatedAt,
                     UpdatedAt = Animal.UpdatedAt,
-                }).ToList();
+                }).FirstOrDefault();
             return animals;
         }
         public IEnumerable<AnimalDto> getAnimalsByOwnerId(Guid userId)
