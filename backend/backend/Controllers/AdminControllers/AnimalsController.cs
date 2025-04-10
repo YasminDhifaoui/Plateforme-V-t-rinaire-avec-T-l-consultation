@@ -1,7 +1,7 @@
 ﻿using backend.Data;
-using backend.Dtos.AnimalDtos;
+using backend.Dtos.AdminDtos.AnimalDtos;
 using backend.Models;
-using backend.Repo.AnimalRepo;
+using backend.Repo.AdminRepo.AnimalRepo;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 

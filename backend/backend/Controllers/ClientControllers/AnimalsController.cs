@@ -1,7 +1,7 @@
 ﻿using backend.Data;
-using backend.Dtos.AnimalDtos.client;
+using backend.Dtos.ClientDtos.AnimalDtos;
 using backend.Models;
-using backend.Repo.AnimalRepo;
+using backend.Repo.ClientRepo.AnimalRepo;
 using Microsoft.AspNetCore.Mvc;
 
 namespace backend.Controllers.ClientControllers
@@ -12,8 +12,8 @@ namespace backend.Controllers.ClientControllers
     {
 
         public readonly AppDbContext _context;
-        public IAnimalRepo _repo;
-        public AnimalsController(AppDbContext context, IAnimalRepo repo)
+        public IAnimalCRepo _repo;
+        public AnimalsController(AppDbContext context, IAnimalCRepo repo)
         {
 
             _context = context;

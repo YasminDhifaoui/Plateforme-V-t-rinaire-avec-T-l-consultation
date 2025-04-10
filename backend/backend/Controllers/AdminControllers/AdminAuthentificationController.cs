@@ -7,20 +7,13 @@ using backend.Models;
 using backend.Repo.AdminRepo;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using System;
 using System.IdentityModel.Tokens.Jwt;
-using System.Net;
 using System.Security.Claims;
 using System.Text;
-using System.Threading.Tasks;
-using MailKit;
 using Microsoft.AspNetCore.WebUtilities;
-using Org.BouncyCastle.Asn1.Pkcs;
 using Microsoft.AspNetCore.Authorization;
 
 namespace backend.Controllers.AdminControllers

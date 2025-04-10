@@ -7,7 +7,7 @@ using backend.Models;
 using Microsoft.EntityFrameworkCore;
 using backend.Data;
 using backend.Mail;
-using backend.Dtos.AdminDtos;
+using backend.Dtos.AdminDtos.AdminDtos;
 
 namespace backend.Controllers.AdminControllers
 {
@@ -39,13 +39,7 @@ namespace backend.Controllers.AdminControllers
             _configuration = configuration;
             _emailService = mailService;
         }
-        [HttpGet("test-auth")]
-        [Authorize]
-        public IActionResult TestAuth()
-        {
-            return Ok("Auth works!");
-        }
-
+   
         //AdminList
         [HttpGet]
         [Route("get-all-admins")]

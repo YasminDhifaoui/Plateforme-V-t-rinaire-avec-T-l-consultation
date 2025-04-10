@@ -1,10 +1,9 @@
 ﻿using backend.Data;
 using backend.Dtos.AdminDtos.AdminAuthDto;
-using backend.Dtos.VetDtos;
+using backend.Dtos.AdminDtos.VetDtos;
 using backend.Mail;
 using backend.Models;
-using backend.Repo.ClientsRepo;
-using backend.Repo.VetRepo;
+using backend.Repo.AdminRepo.VetRepo;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;

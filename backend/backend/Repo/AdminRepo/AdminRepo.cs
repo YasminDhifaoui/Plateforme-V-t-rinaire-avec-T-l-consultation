@@ -1,5 +1,5 @@
 ﻿using backend.Data;
-using backend.Dtos.AdminDtos;
+using backend.Dtos.AdminDtos.AdminDtos;
 using backend.Dtos.ClientDtos;
 using backend.Models;
 using Microsoft.EntityFrameworkCore;

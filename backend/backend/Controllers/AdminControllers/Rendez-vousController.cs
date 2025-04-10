@@ -1,11 +1,10 @@
 ﻿using backend.Data;
-using backend.Dtos.AnimalDtos;
-using backend.Dtos.RendezVousDtos;
+using backend.Dtos.AdminDtos.RendezVousDtos;
 using backend.Models;
-using backend.Repo.AnimalRepo;
-using backend.Repo.ClientsRepo;
+using backend.Repo.AdminRepo.AnimalRepo;
+using backend.Repo.AdminRepo.ClientsRepo;
+using backend.Repo.AdminRepo.VetRepo;
 using backend.Repo.Rendez_vousRepo;
-using backend.Repo.VetRepo;
 using Microsoft.AspNetCore.Mvc;
 
 namespace backend.Controllers.AdminControllers
@@ -151,6 +150,7 @@ namespace backend.Controllers.AdminControllers
             }
 
             var result = _repo.DeleteRendezVous(id);
+            
 
             return Ok(new { message = result });
         }

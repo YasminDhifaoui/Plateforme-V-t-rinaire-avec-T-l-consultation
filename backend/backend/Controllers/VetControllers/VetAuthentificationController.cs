@@ -4,7 +4,7 @@ using backend.Dtos.VetDtos.VetAuthDtos;
 using backend.Mail;
 using backend.Models;
 using backend.Repo.AdminRepo;
-using backend.Repo.VetRepo;
+using backend.Repo.AdminRepo.VetRepo;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.WebUtilities;

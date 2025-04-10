@@ -15,8 +15,8 @@ using System.Text;
 using Microsoft.AspNetCore.WebUtilities;
 using Org.BouncyCastle.Asn1.Pkcs;
 using Microsoft.AspNetCore.Authorization;
-using backend.Repo.ClientsRepo;
 using backend.Dtos.ClientDtos.ClientAuthDtos;
+using backend.Repo.AdminRepo.ClientsRepo;
 
 namespace backend.Controllers.ClientControllers
 {

@@ -1,14 +1,14 @@
 ﻿using backend.Dtos.AdminDtos.AdminAuthDto;
-using backend.Dtos.ClientDtos;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using backend.Repo.ClientsRepo;
 using backend.Repo.AdminRepo;
 using Microsoft.AspNetCore.Identity;
 using backend.Models;
 using Microsoft.EntityFrameworkCore;
 using backend.Data;
 using backend.Mail;
+using backend.Dtos.AdminDtos.ClientDtos;
+using backend.Repo.AdminRepo.ClientsRepo;
 
 namespace backend.Controllers.AdminControllers
 {
