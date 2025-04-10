@@ -4,14 +4,17 @@ using backend.Dtos.AdminDtos.VetDtos;
 using backend.Mail;
 using backend.Models;
 using backend.Repo.AdminRepo.VetRepo;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace backend.Controllers.AdminControllers
 {
-    [Route("api/[Controller]")]
+    [Route("api/admin/[Controller]")]
     [Controller]
+    [Authorize(Policy = "Admin")]
+
     public class VeterinairesController : ControllerBase
     {
         public readonly IVetRepo _vetRepo;
@@ -121,6 +124,9 @@ namespace backend.Controllers.AdminControllers
         [Route("delete-veterinaire")]
         public async Task<IActionResult> DeleteVet(Guid id)
         {
+            var vet = _context.veterinaires.FirstOrDefault(vet => vet.AppUserId == id);
+            if (vet == null)
+                return BadRequest("Veterinaire with this id not found");
             var appUser = await _userManager.FindByIdAsync(id.ToString());
             if(appUser !=null)
             {

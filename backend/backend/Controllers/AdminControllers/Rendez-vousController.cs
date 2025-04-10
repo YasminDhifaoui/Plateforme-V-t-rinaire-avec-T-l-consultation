@@ -5,12 +5,15 @@ using backend.Repo.AdminRepo.AnimalRepo;
 using backend.Repo.AdminRepo.ClientsRepo;
 using backend.Repo.AdminRepo.VetRepo;
 using backend.Repo.Rendez_vousRepo;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace backend.Controllers.AdminControllers
 {
-    [Route("api/[controller]")]
+    [Route("api/admin/[controller]")]
     [Controller]
+    [Authorize(Policy = "Admin")]
+
     public class Rendez_vousController : ControllerBase
     {
         public readonly AppDbContext _context;

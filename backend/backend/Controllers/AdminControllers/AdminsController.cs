@@ -13,6 +13,8 @@ namespace backend.Controllers.AdminControllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize(Policy = "Admin")]
+
     public class AdminsController : ControllerBase
     {
         public readonly IAdminRepo _adminRepo;
@@ -43,7 +45,6 @@ namespace backend.Controllers.AdminControllers
         //AdminList
         [HttpGet]
         [Route("get-all-admins")]
-        [Authorize(Roles = "Admin")]
         public IActionResult GetAllAdmins()
         {
             Console.WriteLine("GET /api/admins/get-all-admins was hit.");
@@ -51,6 +52,7 @@ namespace backend.Controllers.AdminControllers
             var admins = _adminRepo.GetAdmins();
             return Ok(admins);
         }
+        
 
         //SearchAdmin
         [HttpGet]

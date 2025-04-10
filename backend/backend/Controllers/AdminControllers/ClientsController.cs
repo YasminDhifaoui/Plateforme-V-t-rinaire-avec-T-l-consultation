@@ -14,6 +14,8 @@ namespace backend.Controllers.AdminControllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize(Policy = "Admin")]
+
     public class ClientsController: ControllerBase
     {
         public readonly IClientRepo _clientRepo;

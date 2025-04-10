@@ -7,8 +7,10 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace backend.Controllers.AdminControllers
 {
-    [Route("api/[controller]")]
+    [Route("api/admin/[controller]")]
     [Controller]
+    [Authorize(Policy = "Admin")]
+
     public class AnimalsController : ControllerBase
     {
         public readonly AppDbContext _context;

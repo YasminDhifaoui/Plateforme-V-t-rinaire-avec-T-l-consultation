@@ -169,7 +169,7 @@ namespace backend.Repo.AdminRepo.AnimalRepo
             animalToUpdate.Age = updatedAnimal.Age;
             animalToUpdate.Sexe = updatedAnimal.Sexe;
             animalToUpdate.OwnerId = updatedAnimal.OwnerId;
-            animalToUpdate.UpdatedAt = DateTime.Now;
+            animalToUpdate.UpdatedAt = DateTime.UtcNow.ToUniversalTime();
             animalToUpdate.Allergies = updatedAnimal.Allergies;
             animalToUpdate.AnttecedentsMedicaux = animalToUpdate.AnttecedentsMedicaux;
 
