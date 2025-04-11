@@ -410,6 +410,9 @@ namespace backend.Controllers.AdminControllers
             var token = await _userManager.GeneratePasswordResetTokenAsync(user);
             byte[] encodedToken = Encoding.UTF8.GetBytes(token);
             var resetToken = WebEncoders.Base64UrlEncode(encodedToken);
+            user.TokenCreationTime  = DateTime.UtcNow;
+            await _userManager.UpdateAsync(user);
+
 
             string Url = $"{_configuration["AdminBaseUrl"]}/reset-password?email={model.Email}&token={resetToken}";
 
