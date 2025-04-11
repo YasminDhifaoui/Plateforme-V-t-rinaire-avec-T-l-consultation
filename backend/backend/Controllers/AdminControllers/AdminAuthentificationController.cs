@@ -195,10 +195,11 @@ namespace backend.Controllers.AdminControllers
         }
 
          [HttpPost]
-         [Route("confirm-admin-email")]
-         public async Task<IActionResult> confirmAdminEmail([FromBody] AdminConfirmEmailDto EmailCodeModel )
-         {
-             var user = await _userManager.FindByEmailAsync(EmailCodeModel.Email);
+        [Route("confirm-admin-email")]
+        public async Task<IActionResult> confirmAdminEmail([FromQuery] string email, [FromQuery] string code)
+        {
+            var EmailCodeModel = new AdminConfirmEmailDto { Email = email, Code = code };
+            var user = await _userManager.FindByEmailAsync(EmailCodeModel.Email);
              if (user == null)
                  return StatusCode(StatusCodes.Status500InternalServerError, new ApiResponse
                  {
@@ -444,12 +445,13 @@ namespace backend.Controllers.AdminControllers
             return Ok(new ApiResponse { Status = "Success", Message = "Reset password URL has been sent to the email successfully!" });
 
         }
-
         [HttpPost]
         [Route("reset-password")]
-        public async Task<IActionResult> ResetPasswordAsync([FromBody] AdminResetPasswordDto model)
+        public async Task<IActionResult> ResetPasswordAsync([FromQuery] string email,[FromQuery] string token, [FromBody] AdminResetPasswordDto model)
         {
-            var user = await _userManager.FindByEmailAsync(model.Email);
+
+
+        var user = await _userManager.FindByEmailAsync(email);
             if (user == null)
                 return StatusCode(StatusCodes.Status404NotFound, new ApiResponse
                 {
@@ -469,14 +471,18 @@ namespace backend.Controllers.AdminControllers
                     Status = "Error",
                     Message = "Password doesn't match its confirmation"
                 });
-            var isTokenNotExpired = IsTokenValidAsync(user.TokenCreationTime.AddMinutes(5));
+
+            var isTokenNotExpired = IsTokenValidAsync(user.TokenCreationTime);
             if (!isTokenNotExpired)
+            {
                 return StatusCode(StatusCodes.Status403Forbidden, new ApiResponse
                 {
                     Status = "Error",
                     Message = "Expired reset token."
                 });
-            var isTokenValid = await _userManager.VerifyUserTokenAsync(user, TokenOptions.DefaultProvider, UserManager<AppUser>.ResetPasswordTokenPurpose, model.Token);
+            }
+
+            var isTokenValid = await _userManager.VerifyUserTokenAsync(user, TokenOptions.DefaultProvider, UserManager<AppUser>.ResetPasswordTokenPurpose, token);
             if (isTokenValid)
                 return StatusCode(StatusCodes.Status403Forbidden, new ApiResponse
                 {
@@ -484,7 +490,7 @@ namespace backend.Controllers.AdminControllers
                     Message = "Token is incorrect."
                 });
 
-            var decodedToken = WebEncoders.Base64UrlDecode(model.Token);
+            var decodedToken = WebEncoders.Base64UrlDecode(token);
             string normalToken = Encoding.UTF8.GetString(decodedToken);
 
             var result = await _userManager.ResetPasswordAsync(user, normalToken, model.NewPassword);
@@ -501,12 +507,14 @@ namespace backend.Controllers.AdminControllers
         private bool IsTokenValidAsync(DateTime? tokenCreationTime)
         {
             if (!tokenCreationTime.HasValue)
-            {
                 return false;
-            }
-            var expirationTime = _tokenOptions.Value.TokenLifespan;
-            return (DateTime.UtcNow - tokenCreationTime) < expirationTime;
+
+            var lifespanMinutes = int.Parse(_configuration["2FA:TokenLifeSpan"]);
+            var expirationTime = tokenCreationTime.Value.AddMinutes(lifespanMinutes);
+
+            return DateTime.UtcNow <= expirationTime;
         }
+
 
         private JwtSecurityToken GetToken(List<Claim> authClaims)
         {
