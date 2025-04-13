@@ -96,7 +96,7 @@ namespace backend.Controllers.AdminControllers
         }
         [HttpPost]
         [Route("add-animal")]
-        public IActionResult AddAnimal([FromBody] AddAnimalDto model)
+        public IActionResult AddAnimal([FromBody] AddAnimalAdminDto model)
         {
             var owner = _context.Users.FirstOrDefault(u => u.Id == model.OwnerId);
             if (owner == null)
@@ -124,7 +124,7 @@ namespace backend.Controllers.AdminControllers
         }
         [HttpPut]
         [Route("update-animal/{id}")]
-        public IActionResult UpdateAnimal(Guid id, [FromBody] UpdateAnimalDto updatedAnimal)
+        public IActionResult UpdateAnimal(Guid id, [FromBody] UpdateAnimalAdminDto updatedAnimal)
         {
             var animalExist = _context.Animals.Find(id);
             if (animalExist == null)

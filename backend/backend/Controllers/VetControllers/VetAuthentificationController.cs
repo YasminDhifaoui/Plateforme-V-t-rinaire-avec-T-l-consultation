@@ -140,10 +140,10 @@ namespace backend.Controllers.VetControllers
                 var applicationUserRole = new IdentityUserRole<Guid>
                 {
                     UserId = user.Id,
-                    RoleId = role.Id
+                    RoleId = role!.Id
                 };
 
-                _context.UserRoles.AddAsync(applicationUserRole);
+                await _context.UserRoles.AddAsync(applicationUserRole);
                 await _context.SaveChangesAsync();
             }
             var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
@@ -193,8 +193,9 @@ namespace backend.Controllers.VetControllers
 
         [HttpPost]
         [Route("confirm-veterinaire-email")]
-        public async Task<IActionResult> confirmVetEmail([FromBody] VetConfirmEmailDto EmailCodeModel)
+        public async Task<IActionResult> confirmVetEmail([FromQuery] string email, [FromQuery] string code)
         {
+            var EmailCodeModel = new VetConfirmEmailDto { Email =  email ,Code = code};
             var user = await _userManager.FindByEmailAsync(EmailCodeModel.Email);
             if (user == null)
                 return StatusCode(StatusCodes.Status500InternalServerError, new ApiResponse
@@ -210,6 +211,22 @@ namespace backend.Controllers.VetControllers
                     Status = "Error finding veterinaire",
                     Message = "veterinaire not found"
                 });
+            if (user.UserName == null)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, new ApiResponse
+                {
+                    Status = "Error",
+                    Message = "User name is null."
+                });
+            }
+            if (user.Email == null)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, new ApiResponse
+                {
+                    Status = "Error",
+                    Message = "User email is null."
+                });
+            }
             var result = await _userManager.ConfirmEmailAsync(user, EmailCodeModel.Code);
             if (!result.Succeeded)
                 return StatusCode(StatusCodes.Status500InternalServerError, new ApiResponse
@@ -257,6 +274,22 @@ namespace backend.Controllers.VetControllers
         public async Task<IActionResult> Login([FromBody] VetLoginDto model)
         {
             var user = await _userManager.FindByEmailAsync(model.Email);
+            if (user.UserName == null)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, new ApiResponse
+                {
+                    Status = "Error",
+                    Message = "User name is null."
+                });
+            }
+            if (user.Email == null)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, new ApiResponse
+                {
+                    Status = "Error",
+                    Message = "User email is null."
+                });
+            }
 
             if (user != null && await _userManager.CheckPasswordAsync(user, model.Password) && user.EmailConfirmed)
             {
@@ -266,7 +299,7 @@ namespace backend.Controllers.VetControllers
                 Variables["UserName"] = user.UserName;
                 Variables["AuthentificationCode"] = TwoFactorTokenAsyncToken;
                 Variables["TokenLifeSpan"] = _configuration.GetSection("2FA:TokenLifeSpan").Get<int>().ToString();
-                Variables["ConfirmLoginCode"] = _configuration["ApiUrls:VetConfirmLoginCode"];
+                Variables["ConfirmLoginCode"] = _configuration["ApiUrls:VetConfirmLoginCode"]!;
 
                 var veterinaire = _context.veterinaires.FirstOrDefault(x => x.AppUserId == user.Id);
 
@@ -309,8 +342,6 @@ namespace backend.Controllers.VetControllers
             else
             {
                 return Ok(new ApiResponse { Status = "Login failed", Message = " Login failed !" });
-                _logger.LogWarning("User " + model.Email + " login fail ,check your password!");
-                return Unauthorized();
             }
 
         }
@@ -329,6 +360,22 @@ namespace backend.Controllers.VetControllers
                     _logger.LogError("Veterinaire not found.");
                     return StatusCode(StatusCodes.Status404NotFound, new ApiResponse { Status = "Error", Message = "Veterinaire not found." });
                 }
+                if (user.UserName == null)
+                {
+                    return StatusCode(StatusCodes.Status500InternalServerError, new ApiResponse
+                    {
+                        Status = "Error",
+                        Message = "User name is null."
+                    });
+                }
+                if (user.Email == null)
+                {
+                    return StatusCode(StatusCodes.Status500InternalServerError, new ApiResponse
+                    {
+                        Status = "Error",
+                        Message = "User email is null."
+                    });
+                }
                 var token = user.CodeConfirmationLogin;
                 var isTokenValid = await _userManager.VerifyTwoFactorTokenAsync(user, "Email", model.Code);
                 var isTokenNotExpired = IsTokenValidAsync(user.TokenCreationTime);
@@ -345,8 +392,8 @@ namespace backend.Controllers.VetControllers
                          new Claim(ClaimTypes.Role, "Veterinaire"),
                          new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
                          new Claim(JwtRegisteredClaimNames.Sub, user.UserName),
-                         new Claim(JwtRegisteredClaimNames.Aud, _configuration["JWT:ValidAudience"]),
-                         new Claim(JwtRegisteredClaimNames.Iss, _configuration["JWT:ValidIssuer"]),
+                         new Claim(JwtRegisteredClaimNames.Aud, _configuration["JWT:ValidAudience"]!),
+                         new Claim(JwtRegisteredClaimNames.Iss, _configuration["JWT:ValidIssuer"]!),
                          new Claim("Id", user.Id.ToString())
                      };
 
@@ -393,6 +440,22 @@ namespace backend.Controllers.VetControllers
                     Status = "Error",
                     Message = "No user associated with this email"
                 });
+            if (user.UserName == null)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, new ApiResponse
+                {
+                    Status = "Error",
+                    Message = "User name is null."
+                });
+            }
+            if (user.Email == null)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, new ApiResponse
+                {
+                    Status = "Error",
+                    Message = "User email is null."
+                });
+            }
             var veterinaire = _context.veterinaires.FirstOrDefault(x => x.AppUserId == user.Id);
 
             if (veterinaire == null)
@@ -403,6 +466,9 @@ namespace backend.Controllers.VetControllers
             var token = await _userManager.GeneratePasswordResetTokenAsync(user);
             byte[] encodedToken = Encoding.UTF8.GetBytes(token);
             var resetToken = WebEncoders.Base64UrlEncode(encodedToken);
+            user.TokenCreationTime = DateTime.UtcNow;
+            await _userManager.UpdateAsync(user);
+
 
             string Url = $"{_configuration["VetBaseUrl"]}/reset-password?email={model.Email}&token={resetToken}";
 
@@ -440,9 +506,9 @@ namespace backend.Controllers.VetControllers
         }
         [HttpPost]
         [Route("reset-password")]
-        public async Task<IActionResult> ResetPasswordAsync([FromBody] VetResetPasswordDto model)
+        public async Task<IActionResult> ResetPasswordAsync([FromQuery] string email, [FromQuery] string token, [FromBody] VetResetPasswordDto model)
         {
-            var user = await _userManager.FindByEmailAsync(model.Email);
+            var user = await _userManager.FindByEmailAsync(email);
             if (user == null)
                 return StatusCode(StatusCodes.Status404NotFound, new ApiResponse
                 {
@@ -469,7 +535,7 @@ namespace backend.Controllers.VetControllers
                     Status = "Error",
                     Message = "Expired reset token."
                 });
-            var isTokenValid = await _userManager.VerifyUserTokenAsync(user, TokenOptions.DefaultProvider, UserManager<AppUser>.ResetPasswordTokenPurpose, model.Token);
+            var isTokenValid = await _userManager.VerifyUserTokenAsync(user, TokenOptions.DefaultProvider, UserManager<AppUser>.ResetPasswordTokenPurpose, token);
             if (isTokenValid)
                 return StatusCode(StatusCodes.Status403Forbidden, new ApiResponse
                 {
@@ -477,7 +543,7 @@ namespace backend.Controllers.VetControllers
                     Message = "Token is incorrect."
                 });
 
-            var decodedToken = WebEncoders.Base64UrlDecode(model.Token);
+            var decodedToken = WebEncoders.Base64UrlDecode(token);
             string normalToken = Encoding.UTF8.GetString(decodedToken);
 
             var result = await _userManager.ResetPasswordAsync(user, normalToken, model.NewPassword);
@@ -494,21 +560,23 @@ namespace backend.Controllers.VetControllers
         private bool IsTokenValidAsync(DateTime? tokenCreationTime)
         {
             if (!tokenCreationTime.HasValue)
-            {
                 return false;
-            }
-            var expirationTime = _tokenOptions.Value.TokenLifespan;
-            return (DateTime.UtcNow - tokenCreationTime) < expirationTime;
+
+            var lifespanMinutes = int.Parse(_configuration["2FA:TokenLifeSpan"]!);
+            var expirationTime = tokenCreationTime.Value.AddMinutes(lifespanMinutes);
+
+            return DateTime.UtcNow <= expirationTime;
         }
+
 
         private JwtSecurityToken GetToken(List<Claim> authClaims)
         {
-            var authSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["JWT:SecretKey"]));
+            var authSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["JWT:SecretKey"]!));
             var credentials = new SigningCredentials(authSigningKey, SecurityAlgorithms.HmacSha256);
             var token = new JwtSecurityToken(
                 issuer: _configuration["JWT:ValidIssuer"],
                 audience: _configuration["JWT:ValidAudience"],
-                expires: DateTime.Now.AddHours(Double.Parse(_configuration["JWT:ExpiresHours"])),
+                expires: DateTime.Now.AddHours(Double.Parse(_configuration["JWT:ExpiresHours"]!)),
                 claims: authClaims,
                 signingCredentials: credentials
                 );
@@ -517,12 +585,16 @@ namespace backend.Controllers.VetControllers
         }
         private string GenerateJwtToken(AppUser user)
         {
+            if (string.IsNullOrEmpty(user.UserName))
+            {
+                throw new Exception("UserName must not be null.");
+            }
             var claims = new[]
             {
                   new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
                   new Claim(JwtRegisteredClaimNames.UniqueName, user.UserName)
               };
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]));
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]!));
             var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
             var token = new JwtSecurityToken(

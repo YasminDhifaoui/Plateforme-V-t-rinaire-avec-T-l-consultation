@@ -13,7 +13,7 @@ namespace backend.Repo.Rendez_vousRepo
         public IEnumerable<RendezVous> getRendezVousByStatus(RendezVousStatus status);
 
         public string AddRendezVous(RendezVous rendezVous);
-        public string UpdateRendezVous(Guid id,UpdateRendezVousDto updatedRendezVous);
+        public string UpdateRendezVous(Guid id,UpdateRendezVousAdminDto updatedRendezVous);
         public string DeleteRendezVous(Guid id);
         public void SaveChanges();
 

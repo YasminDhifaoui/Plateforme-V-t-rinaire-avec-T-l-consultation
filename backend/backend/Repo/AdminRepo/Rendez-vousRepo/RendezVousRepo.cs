@@ -124,7 +124,7 @@ namespace backend.Repo.Rendez_vousRepo
             return "failed to add rendez-vous";
         }
 
-        public string UpdateRendezVous(Guid id, UpdateRendezVousDto updatedRendezVous)
+        public string UpdateRendezVous(Guid id, UpdateRendezVousAdminDto updatedRendezVous)
         {
             var vet = _context.veterinaires.FirstOrDefault(u => u.AppUserId == updatedRendezVous.VetId);
             if (vet == null)

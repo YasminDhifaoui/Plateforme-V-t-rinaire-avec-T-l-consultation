@@ -22,16 +22,16 @@ namespace backend.Repo.AdminRepo.ClientsRepo
                 .Select(user => new ClientDto
                 {
                     Id = user.Id,
-                    Username = user.UserName,
-                    Email = user.Email,
+                    Username = user.UserName!,
+                    Email = user.Email!,
                     Role = user.Role,
-                    PhoneNumber = user.PhoneNumber,
+                    PhoneNumber = user.PhoneNumber!,
 
                     CreatedAt = user.CreatedAt,
                     UpdatedAt = user.UpdatedAt,
                     TwoFactorEnabled = user.TwoFactorEnabled,
                     LockoutEnabled = user.LockoutEnabled,
-                    LockoutEnd = (DateTimeOffset)user.LockoutEnd,
+                    LockoutEnd = (DateTimeOffset)user.LockoutEnd!,
 
 
                     EmailConfirmed = user.EmailConfirmed,
@@ -89,7 +89,7 @@ namespace backend.Repo.AdminRepo.ClientsRepo
                     UpdatedAt = user.UpdatedAt,
                     TwoFactorEnabled = user.TwoFactorEnabled,
                     LockoutEnabled = user.LockoutEnabled,
-                    LockoutEnd = (DateTimeOffset)user.LockoutEnd,
+                    LockoutEnd = user.LockoutEnd.HasValue ? user.LockoutEnd.Value : DateTimeOffset.MaxValue,
 
 
                     EmailConfirmed = user.EmailConfirmed,

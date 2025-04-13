@@ -144,10 +144,10 @@ namespace backend.Controllers.ClientControllers
                 var applicationUserRole = new IdentityUserRole<Guid>
                 {
                     UserId = user.Id,
-                    RoleId = role.Id
+                    RoleId = role!.Id
                 };
 
-                _context.UserRoles.AddAsync(applicationUserRole);
+                await _context.UserRoles.AddAsync(applicationUserRole);
                 await _context.SaveChangesAsync();
             }
 
@@ -198,8 +198,10 @@ namespace backend.Controllers.ClientControllers
 
         [HttpPost]
         [Route("confirm-client-email")]
-        public async Task<IActionResult> confirmClientEmail([FromBody] ClientConfirmEmailDto EmailCodeModel)
+        public async Task<IActionResult> confirmClientEmail([FromQuery] string email, [FromQuery] string code)
         {
+            var EmailCodeModel = new ClientConfirmEmailDto { Email = email, Code = code };
+
             var user = await _userManager.FindByEmailAsync(EmailCodeModel.Email);
             if (user == null)
                 return StatusCode(StatusCodes.Status500InternalServerError, new ApiResponse
@@ -215,6 +217,22 @@ namespace backend.Controllers.ClientControllers
                     Status = "Error finding client",
                     Message = "client not found"
                 });
+            if (user.UserName == null)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, new ApiResponse
+                {
+                    Status = "Error",
+                    Message = "User name is null."
+                });
+            }
+            if (user.Email == null)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, new ApiResponse
+                {
+                    Status = "Error",
+                    Message = "User email is null."
+                });
+            }
             var result = await _userManager.ConfirmEmailAsync(user, EmailCodeModel.Code);
             if (!result.Succeeded)
                 return StatusCode(StatusCodes.Status500InternalServerError, new ApiResponse
@@ -267,13 +285,29 @@ namespace backend.Controllers.ClientControllers
 
             if (user != null && await _userManager.CheckPasswordAsync(user, model.Password) && user.EmailConfirmed)
             {
+                if (user.UserName == null)
+                {
+                    return StatusCode(StatusCodes.Status500InternalServerError, new ApiResponse
+                    {
+                        Status = "Error",
+                        Message = "User name is null."
+                    });
+                }
+                if (user.Email == null)
+                {
+                    return StatusCode(StatusCodes.Status500InternalServerError, new ApiResponse
+                    {
+                        Status = "Error",
+                        Message = "User email is null."
+                    });
+                }
                 var UserRoles = await _userManager.GetRolesAsync(user);
                 var TwoFactorTokenAsyncToken = await _userManager.GenerateTwoFactorTokenAsync(user, "Email");
                 var Variables = new Dictionary<string, string>();
                 Variables["UserName"] = user.UserName;
                 Variables["AuthentificationCode"] = TwoFactorTokenAsyncToken;
                 Variables["TokenLifeSpan"] = _configuration.GetSection("2FA:TokenLifeSpan").Get<int>().ToString();
-                Variables["ConfirmLoginCode"] = _configuration["ApiUrls:ClientConfirmLoginCode"];
+                Variables["ConfirmLoginCode"] = _configuration["ApiUrls:ClientConfirmLoginCode"]!;
 
                 var client = _context.clients.FirstOrDefault(x => x.AppUserId == user.Id);
 
@@ -315,8 +349,6 @@ namespace backend.Controllers.ClientControllers
             else
             {
                 return Ok(new ApiResponse { Status = "Login failed", Message = " Login failed !" });
-                _logger.LogWarning("User " + model.Email + " login fail ,check your password!");
-                return Unauthorized();
             }
 
         }
@@ -335,6 +367,22 @@ namespace backend.Controllers.ClientControllers
                     _logger.LogError("Client not found.");
                     return StatusCode(StatusCodes.Status404NotFound, new ApiResponse { Status = "Error", Message = "Client not found." });
                 }
+                if (user.UserName == null)
+                {
+                    return StatusCode(StatusCodes.Status500InternalServerError, new ApiResponse
+                    {
+                        Status = "Error",
+                        Message = "User name is null."
+                    });
+                }
+                if (user.Email == null)
+                {
+                    return StatusCode(StatusCodes.Status500InternalServerError, new ApiResponse
+                    {
+                        Status = "Error",
+                        Message = "User email is null."
+                    });
+                }
                 var token = user.CodeConfirmationLogin;
                 var isTokenValid = await _userManager.VerifyTwoFactorTokenAsync(user, "Email", model.Code);
                 var isTokenNotExpired = IsTokenValidAsync(user.TokenCreationTime);
@@ -351,8 +399,8 @@ namespace backend.Controllers.ClientControllers
                          new Claim(ClaimTypes.Role, "Client"),
                          new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
                          new Claim(JwtRegisteredClaimNames.Sub, user.UserName),
-                         new Claim(JwtRegisteredClaimNames.Aud, _configuration["JWT:ValidAudience"]),
-                         new Claim(JwtRegisteredClaimNames.Iss, _configuration["JWT:ValidIssuer"]),
+                         new Claim(JwtRegisteredClaimNames.Aud, _configuration["JWT:ValidAudience"]!),
+                         new Claim(JwtRegisteredClaimNames.Iss, _configuration["JWT:ValidIssuer"]!),
                          new Claim("Id", user.Id.ToString())
                      };
 
@@ -407,9 +455,27 @@ namespace backend.Controllers.ClientControllers
                 _logger.LogError("Client not found.");
                 return StatusCode(StatusCodes.Status404NotFound, new ApiResponse { Status = "Error", Message = "Client not found." });
             }
+            if (user.UserName == null)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, new ApiResponse
+                {
+                    Status = "Error",
+                    Message = "User name is null."
+                });
+            }
+            if (user.Email == null)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, new ApiResponse
+                {
+                    Status = "Error",
+                    Message = "User email is null."
+                });
+            }
             var token = await _userManager.GeneratePasswordResetTokenAsync(user);
             byte[] encodedToken = Encoding.UTF8.GetBytes(token);
             var resetToken = WebEncoders.Base64UrlEncode(encodedToken);
+            user.TokenCreationTime = DateTime.UtcNow;
+            await _userManager.UpdateAsync(user);
 
             string Url = $"{_configuration["ClientBaseUrl"]}/reset-password?email={model.Email}&token={resetToken}";
 
@@ -448,9 +514,9 @@ namespace backend.Controllers.ClientControllers
 
         [HttpPost]
         [Route("reset-password")]
-        public async Task<IActionResult> ResetPasswordAsync([FromBody] ClientResetPasswordDto model)
+        public async Task<IActionResult> ResetPasswordAsync([FromQuery] string email, [FromQuery] string token, [FromBody] ClientResetPasswordDto model)
         {
-            var user = await _userManager.FindByEmailAsync(model.Email);
+            var user = await _userManager.FindByEmailAsync(email);
             if (user == null)
                 return StatusCode(StatusCodes.Status404NotFound, new ApiResponse
                 {
@@ -477,7 +543,7 @@ namespace backend.Controllers.ClientControllers
                     Status = "Error",
                     Message = "Expired reset token."
                 });
-            var isTokenValid = await _userManager.VerifyUserTokenAsync(user, TokenOptions.DefaultProvider, UserManager<AppUser>.ResetPasswordTokenPurpose, model.Token);
+            var isTokenValid = await _userManager.VerifyUserTokenAsync(user, TokenOptions.DefaultProvider, UserManager<AppUser>.ResetPasswordTokenPurpose, token);
             if (isTokenValid)
                 return StatusCode(StatusCodes.Status403Forbidden, new ApiResponse
                 {
@@ -485,7 +551,7 @@ namespace backend.Controllers.ClientControllers
                     Message = "Token is incorrect."
                 });
 
-            var decodedToken = WebEncoders.Base64UrlDecode(model.Token);
+            var decodedToken = WebEncoders.Base64UrlDecode(token);
             string normalToken = Encoding.UTF8.GetString(decodedToken);
 
             var result = await _userManager.ResetPasswordAsync(user, normalToken, model.NewPassword);
@@ -502,21 +568,22 @@ namespace backend.Controllers.ClientControllers
         private bool IsTokenValidAsync(DateTime? tokenCreationTime)
         {
             if (!tokenCreationTime.HasValue)
-            {
                 return false;
-            }
-            var expirationTime = _tokenOptions.Value.TokenLifespan;
-            return (DateTime.UtcNow - tokenCreationTime) < expirationTime;
+
+            var lifespanMinutes = int.Parse(_configuration["2FA:TokenLifeSpan"]!);
+            var expirationTime = tokenCreationTime.Value.AddMinutes(lifespanMinutes);
+
+            return DateTime.UtcNow <= expirationTime;
         }
 
         private JwtSecurityToken GetToken(List<Claim> authClaims)
         {
-            var authSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["JWT:SecretKey"]));
+            var authSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["JWT:SecretKey"]!));
             var credentials = new SigningCredentials(authSigningKey, SecurityAlgorithms.HmacSha256);
             var token = new JwtSecurityToken(
                 issuer: _configuration["JWT:ValidIssuer"],
                 audience: _configuration["JWT:ValidAudience"],
-                expires: DateTime.Now.AddHours(Double.Parse(_configuration["JWT:ExpiresHours"])),
+                expires: DateTime.Now.AddHours(Double.Parse(_configuration["JWT:ExpiresHours"]!)),
                 claims: authClaims,
                 signingCredentials: credentials
                 );
@@ -525,12 +592,16 @@ namespace backend.Controllers.ClientControllers
         }
         private string GenerateJwtToken(AppUser user)
         {
+            if (string.IsNullOrEmpty(user.UserName))
+            {
+                throw new Exception("UserName must not be null.");
+            }
             var claims = new[]
             {
                   new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
                   new Claim(JwtRegisteredClaimNames.UniqueName, user.UserName)
             };
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]));
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]!));
             var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
             var token = new JwtSecurityToken(

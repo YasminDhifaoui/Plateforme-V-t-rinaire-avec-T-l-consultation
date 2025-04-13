@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace backend.Dtos.AdminDtos.RendezVousDtos
 {
-    public class AddRendezVousDto
+    public class AddRendezVousAdminDto
     {
         public Guid VetId { get; set; }
         public Guid ClientId { get; set; }

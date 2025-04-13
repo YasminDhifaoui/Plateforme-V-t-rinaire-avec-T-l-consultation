@@ -2,7 +2,7 @@
 {
     public class VetForgetPasswordDto
     {
-        public string Email { get; set; }
+        public string Email { get; set; } = string.Empty;
 
     }
 }

@@ -2,12 +2,15 @@
 using backend.Dtos.ClientDtos.AnimalDtos;
 using backend.Models;
 using backend.Repo.ClientRepo.AnimalRepo;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace backend.Controllers.ClientControllers
 {
     [Route("api/client/[controller]")]
     [ApiController]
+    [Authorize(Policy = "Client")]
+
     public class AnimalsController : ControllerBase
     {
 
@@ -20,17 +23,35 @@ namespace backend.Controllers.ClientControllers
             _repo = repo;
         }
         [HttpGet]
-        [Route("animals-list{id}")]
-        public IActionResult AnimalsList(Guid id)
+        [Route("animals-list")]
+        public IActionResult AnimalsList()
         {
-            var animals = _repo.getAnimalsByOwnerId(id);
-            return Ok(animals);
+            var userIdClaim = User.FindFirst("Id")?.Value;
 
+            if (!Guid.TryParse(userIdClaim, out var clientId))
+            {
+                throw new UnauthorizedAccessException("Invalid or missing user ID claim.");
+            }
+
+            if (string.IsNullOrEmpty(userIdClaim))
+                return Unauthorized("User ID not found in token");
+
+            Guid userId = Guid.Parse(userIdClaim);
+            var animals = _repo.getAnimalsByOwnerId(userId);
+
+            return Ok(animals);
         }
         [HttpPost]
-        [Route("add-animal{ownerId}")]
-        public IActionResult AddAnimal(Guid ownerId, [FromBody] AddAnimal model)
+        [Route("add-animal")]
+        public IActionResult AddAnimal([FromBody] AddAnimalClientDto model)
         {
+            var idClaimValue = User.FindFirst("Id")?.Value;
+
+            if (!Guid.TryParse(idClaimValue, out var ownerId))
+            {
+                throw new UnauthorizedAccessException("Invalid or missing user ID claim.");
+            }
+
             var owner = _context.Users.FirstOrDefault(u => u.Id == ownerId);
             if (owner == null)
                 return NotFound(new { message = "Owner not found." });
@@ -45,8 +66,6 @@ namespace backend.Controllers.ClientControllers
                 Allergies = model.Allergies,
                 AnttecedentsMedicaux = model.AntecedentsMedicaux,
                 OwnerId = ownerId,
-
-
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow
             };
@@ -56,48 +75,53 @@ namespace backend.Controllers.ClientControllers
             return Ok(new { message = "Animal added successfully", animal });
         }
 
+
         [HttpPut]
-        [Route("update-animal/{ownerId}/{id}")]
-        public IActionResult UpdateAnimal(Guid ownerId, Guid id, [FromBody] UpdateAnimal updatedAnimal)
+        [Route("update-animal/{id}")]
+        public IActionResult UpdateAnimal(Guid id, [FromBody] UpdateAnimalClientDto updatedAnimal)
         {
+            var idClaimValue = User.FindFirst("Id")?.Value;
+
+            if (!Guid.TryParse(idClaimValue, out var ownerId))
+            {
+                throw new UnauthorizedAccessException("Invalid or missing user ID claim.");
+            }
 
             var owner = _context.Users.FirstOrDefault(u => u.Id == ownerId);
             if (owner == null)
-                return BadRequest("Owner with this Id not found.");
+                return BadRequest("Owner not found.");
 
             var animalExist = _context.Animals.FirstOrDefault(a => a.Id == id && a.OwnerId == ownerId);
-            ;
             if (animalExist == null)
-            {
-                return BadRequest("Animal not found");
-            }
+                return BadRequest("Animal not found.");
 
-            var animalToUpdate = _context.Animals.Find(id);
+            animalExist.Nom = updatedAnimal.Name;
+            animalExist.Age = updatedAnimal.Age;
+            animalExist.Allergies = updatedAnimal.Allergies;
+            animalExist.AnttecedentsMedicaux = updatedAnimal.AntecedentsMedicaux; // ← fixed from using old value
 
-            if (animalToUpdate == null)
-                return BadRequest("Animal not found !");
+            animalExist.UpdatedAt = DateTime.UtcNow;
 
-            animalToUpdate.Nom = updatedAnimal.Name;
-            animalToUpdate.Age = updatedAnimal.Age;
-            animalToUpdate.Allergies = updatedAnimal.Allergies;
-            animalToUpdate.AnttecedentsMedicaux = animalToUpdate.AnttecedentsMedicaux;
-
-            animalToUpdate.UpdatedAt = DateTime.UtcNow.ToUniversalTime();
-
-            _context.Animals.Update(animalToUpdate);
+            _context.Animals.Update(animalExist);
             _context.SaveChanges();
+
             return Ok("Animal updated successfully");
         }
 
         [HttpDelete]
-        [Route("delete-animal/{ownerId}/{id}")]
-        public IActionResult DeleteAnimal(Guid ownerId , Guid id)
+        [Route("delete-animal/{id}")]
+        public IActionResult DeleteAnimal(Guid id)
         {
+            var idClaimValue = User.FindFirst("Id")?.Value;
+
+            if (!Guid.TryParse(idClaimValue, out var ownerId))
+            {
+                throw new UnauthorizedAccessException("Invalid or missing user ID claim.");
+            }
+
             var animalExist = _context.Animals.FirstOrDefault(a => a.Id == id && a.OwnerId == ownerId);
             if (animalExist == null)
-            {
-                return BadRequest("Animal not found");
-            }
+                return BadRequest("Animal not found.");
 
             var result = _repo.deleteAnimal(id);
 

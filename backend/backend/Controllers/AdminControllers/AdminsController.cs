@@ -21,7 +21,7 @@ namespace backend.Controllers.AdminControllers
         private readonly UserManager<AppUser> _userManager;
         private readonly RoleManager<ApplicationRole> _roleManager;
         private readonly AppDbContext _context;
-        private readonly ILogger _logger;
+        private readonly ILogger<AdminsController> _logger;
         private readonly IConfiguration _configuration;
         private readonly IMailService _emailService;
 
@@ -31,7 +31,9 @@ namespace backend.Controllers.AdminControllers
             RoleManager<ApplicationRole> roleManager,
             AppDbContext context,
             IConfiguration configuration,
-            IMailService mailService
+            IMailService mailService,
+            ILogger<AdminsController> logger
+
         )
         {
             _adminRepo = adminRepo;
@@ -40,6 +42,7 @@ namespace backend.Controllers.AdminControllers
             _context = context;
             _configuration = configuration;
             _emailService = mailService;
+            _logger = logger;
         }
    
         //AdminList
@@ -86,6 +89,8 @@ namespace backend.Controllers.AdminControllers
             var appUser = await _userManager.FindByIdAsync(id.ToString());
             if (appUser == null)
                 return NotFound(new { message = "User not found" });
+            string? oldRole = appUser.Role;
+            _adminRepo.UpdateAdmin(id, updatedAdmin);
 
             var adminEmailExists = await _userManager.FindByEmailAsync(updatedAdmin.Username);
 
@@ -94,8 +99,76 @@ namespace backend.Controllers.AdminControllers
                 var roleUpdated = await ReplaceRoleAsync(appUser, updatedAdmin.Role);
                 if (!roleUpdated)
                     return BadRequest(new { message = "Failed to update role" });
+
+                appUser.Role = updatedAdmin.Role;
+
+                // Remove from old role table
+                switch (oldRole?.ToLower())
+                {
+                    case "Client":
+                        var oldClient = await _context.clients.FirstOrDefaultAsync(c => c.AppUserId == appUser.Id);
+                        if (oldClient != null)
+                            _context.clients.Remove(oldClient);
+                        break;
+
+                    case "Veterinaire":
+                        var oldVet = await _context.veterinaires.FirstOrDefaultAsync(v => v.AppUserId == appUser.Id);
+                        if (oldVet != null)
+                            _context.veterinaires.Remove(oldVet);
+                        break;
+                    case "Admin":
+                        var oldAdmin = await _context.admins.FirstOrDefaultAsync(v => v.AppUserId == appUser.Id);
+                        if (oldAdmin != null)
+                            _context.admins.Remove(oldAdmin);
+                        break;
+
+                }
+
+                // Add to new role table
+                switch (updatedAdmin.Role.ToLower())
+                {
+                    case "Veterinaire":
+                        var existingVet = await _context.veterinaires.FirstOrDefaultAsync(v => v.AppUserId == appUser.Id);
+                        if (existingVet == null)
+                        {
+                            var vet = new Veterinaire
+                            {
+                                AppUserId = appUser.Id,
+                            };
+                            await _context.veterinaires.AddAsync(vet);
+                        }
+                        break;
+
+                    case "Client":
+                        var existingClient = await _context.clients.FirstOrDefaultAsync(c => c.AppUserId == appUser.Id);
+                        if (existingClient == null)
+                        {
+                            var client = new Client
+                            {
+                                AppUserId = appUser.Id,
+                            };
+                            await _context.clients.AddAsync(client);
+                        }
+                        break;
+
+                    case "Admin":
+                        var existingAdmin = await _context.admins.FirstOrDefaultAsync(c => c.AppUserId == appUser.Id);
+                        if (existingAdmin == null)
+                        {
+                            var admin = new Admin
+                            {
+                                AppUserId = appUser.Id,
+                            };
+                            await _context.admins.AddAsync(admin);
+                        }
+                        break;
+                    default:
+                        break;
+                }
+                await _context.SaveChangesAsync();
+
             }
-            appUser.Role = updatedAdmin.Role;
+
 
             if (!string.IsNullOrEmpty(updatedAdmin.Password))
             {

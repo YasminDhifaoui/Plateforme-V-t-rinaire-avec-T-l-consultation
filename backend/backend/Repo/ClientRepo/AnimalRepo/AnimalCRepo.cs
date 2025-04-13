@@ -13,11 +13,11 @@ namespace backend.Repo.ClientRepo.AnimalRepo
         {
             _context = context;
         }
-        public IEnumerable<AnimalDto> getAnimalsByOwnerId(Guid userId)
+        public IEnumerable<AnimalClientDto> getAnimalsByOwnerId(Guid userId)
         {
             var animals = _context.Animals
                 .Where(animal => animal.OwnerId == userId)
-                .Select(Animal => new AnimalDto
+                .Select(Animal => new AnimalClientDto
                 {
                     Id = Animal.Id,
                     Name = Animal.Nom,

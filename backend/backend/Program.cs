@@ -8,6 +8,8 @@ using backend.Repo.AdminRepo.VetRepo;
 using backend.Repo.ClientRepo.AnimalRepo;
 using backend.Repo.ClientRepo.RendezVousRepo;
 using backend.Repo.Rendez_vousRepo;
+using backend.Repo.VetRepo.AnimalRepo;
+using backend.Repo.VetRepo.RendezVousRepo;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -72,6 +74,8 @@ builder.Services.AddSwaggerGen(c =>
             new List<string>()
         }
     });
+    c.SupportNonNullableReferenceTypes(); 
+
 });
 
 
@@ -88,6 +92,10 @@ builder.Services.AddScoped<IRendezVousRepo, RendezVousRepo>();
 // add Client Repositories
 builder.Services.AddScoped<IAnimalCRepo, AnimalCRepo>();
 builder.Services.AddScoped<IRendezVousCRepo, RendezVousCRepo>();
+
+//add Veterinaire Repositories
+builder.Services.AddScoped<IAnimalVRepo, AnimalVRepo>();
+builder.Services.AddScoped<IRendezVousVRepo, RendezVousVRepo>();
 
 // Add PostgreSQL DB connection
 builder.Services.AddDbContext<AppDbContext>(options =>

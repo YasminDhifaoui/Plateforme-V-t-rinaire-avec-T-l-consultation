@@ -6,15 +6,15 @@ namespace backend.Repo.AdminRepo.AnimalRepo
 {
     public interface IAnimalRepo
     {
-        public IEnumerable<AnimalDto> getAllAnimals();
-        public AnimalDto getAnimalById(Guid id);
+        public IEnumerable<AnimalAdminDto> getAllAnimals();
+        public AnimalAdminDto getAnimalById(Guid id);
 
-        public IEnumerable<AnimalDto> getAnimalsByOwnerId(Guid userId);
-        public IEnumerable<AnimalDto> getAnimalsByName(string name);
-        public IEnumerable<AnimalDto> getAnimalsByEspece(string espece);
-        public IEnumerable<AnimalDto> getAnimalsByRace(string race);
+        public IEnumerable<AnimalAdminDto> getAnimalsByOwnerId(Guid userId);
+        public IEnumerable<AnimalAdminDto> getAnimalsByName(string name);
+        public IEnumerable<AnimalAdminDto> getAnimalsByEspece(string espece);
+        public IEnumerable<AnimalAdminDto> getAnimalsByRace(string race);
 
-        public string UpdateAnimal(Guid animalId, UpdateAnimalDto updatedAnimal);
+        public string UpdateAnimal(Guid animalId, UpdateAnimalAdminDto updatedAnimal);
 
         public string deleteAnimal(Guid id);
         public string AddAnimal(Animal animal);

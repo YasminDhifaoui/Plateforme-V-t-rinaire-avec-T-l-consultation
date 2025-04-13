@@ -99,7 +99,7 @@ namespace backend.Controllers.AdminControllers
 
         [HttpPost]
         [Route("add-rendez-vous")]
-        public IActionResult AddRendezVous([FromBody] AddRendezVousDto model)
+        public IActionResult AddRendezVous([FromBody] AddRendezVousAdminDto model)
         {
             var vet = _VetRepo.GetVeterinaireById(model.VetId);
             if (vet == null)
@@ -132,7 +132,7 @@ namespace backend.Controllers.AdminControllers
 
         [HttpPut]
         [Route("update-rendez-vous/{id}")]
-        public IActionResult UpdateRendezVous(Guid id, [FromBody] UpdateRendezVousDto model)
+        public IActionResult UpdateRendezVous(Guid id, [FromBody] UpdateRendezVousAdminDto model)
         {
             var rendezVousExist = _context.RendezVous.Find(id);
             if (rendezVousExist == null)

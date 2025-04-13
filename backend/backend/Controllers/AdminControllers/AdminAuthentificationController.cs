@@ -28,7 +28,7 @@ namespace backend.Controllers.AdminControllers
         private readonly RoleManager<ApplicationRole> _roleManager;
 
 
-        private readonly ILogger _logger;
+        private readonly ILogger<AdminAuthentificationController> _logger;
         private readonly IMailService _emailService;
         private readonly IOptions<DataProtectionTokenProviderOptions> _tokenOptions;
         private readonly AppDbContext _context;
@@ -142,10 +142,10 @@ namespace backend.Controllers.AdminControllers
                 var applicationUserRole = new IdentityUserRole<Guid>
                 {
                     UserId = user.Id,
-                    RoleId = role.Id
+                    RoleId = role!.Id
                 };
 
-                _context.UserRoles.AddAsync(applicationUserRole);
+                await _context.UserRoles.AddAsync(applicationUserRole);
                 await _context.SaveChangesAsync();
             }
             
@@ -226,6 +226,22 @@ namespace backend.Controllers.AdminControllers
 
             string LoginUrl = $"{_configuration["ApiUrls:AdminLoginUrl"]}";
 
+            if (user.UserName == null)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, new ApiResponse
+                {
+                    Status = "Error",
+                    Message = "User name is null."
+                });
+            }
+            if (user.Email == null)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, new ApiResponse
+                {
+                    Status = "Error",
+                    Message = "User email is null."
+                });
+            }
             var Variables = new Dictionary<string, string>
              {
                  { "UserName", user.UserName },
@@ -268,11 +284,27 @@ namespace backend.Controllers.AdminControllers
              {
                 var UserRoles = await _userManager.GetRolesAsync(user);
                 var TwoFactorTokenAsyncToken = await _userManager.GenerateTwoFactorTokenAsync(user, "Email");
+                if (user.UserName == null)
+                {
+                    return StatusCode(StatusCodes.Status500InternalServerError, new ApiResponse
+                    {
+                        Status = "Error",
+                        Message = "User name is null."
+                    });
+                }
+                if (user.Email == null)
+                {
+                    return StatusCode(StatusCodes.Status500InternalServerError, new ApiResponse
+                    {
+                        Status = "Error",
+                        Message = "User email is null."
+                    });
+                }
                 var Variables = new Dictionary<string, string>();
                 Variables["UserName"] = user.UserName;
                 Variables["AuthentificationCode"] = TwoFactorTokenAsyncToken;
                 Variables["TokenLifeSpan"] = _configuration.GetSection("2FA:TokenLifeSpan").Get<int>().ToString();
-                Variables["ConfirmLoginCode"] = _configuration["ApiUrls:AdminConfirmLoginCode"];
+                Variables["ConfirmLoginCode"] = _configuration["ApiUrls:AdminConfirmLoginCode"]!;
                
                 var admin = _context.admins.FirstOrDefault(x => x.AppUserId == user.Id);
 
@@ -315,8 +347,6 @@ namespace backend.Controllers.AdminControllers
              else
              {
                 return Ok(new ApiResponse { Status = "Login failed", Message = " Login failed !" });
-                _logger.LogWarning("User " + model.Email + " login fail ,check your password!");
-                 return Unauthorized();
              }
 
          }
@@ -335,7 +365,23 @@ namespace backend.Controllers.AdminControllers
                      _logger.LogError("Admin not found.");
                      return StatusCode(StatusCodes.Status404NotFound, new ApiResponse { Status = "Error", Message = "Admin not found." });
                  }
-                 var token = user.CodeConfirmationLogin;
+                if (user.UserName == null)
+                {
+                    return StatusCode(StatusCodes.Status500InternalServerError, new ApiResponse
+                    {
+                        Status = "Error",
+                        Message = "User name is null."
+                    });
+                }
+                if (user.Email == null)
+                {
+                    return StatusCode(StatusCodes.Status500InternalServerError, new ApiResponse
+                    {
+                        Status = "Error",
+                        Message = "User email is null."
+                    });
+                }
+                var token = user.CodeConfirmationLogin;
                  var isTokenValid = await _userManager.VerifyTwoFactorTokenAsync(user, "Email", model.Code);
                  var isTokenNotExpired = IsTokenValidAsync(user.TokenCreationTime);
 
@@ -351,8 +397,8 @@ namespace backend.Controllers.AdminControllers
                          new Claim(ClaimTypes.Role, "Admin"),
                          new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
                          new Claim(JwtRegisteredClaimNames.Sub, user.UserName),
-                         new Claim(JwtRegisteredClaimNames.Aud, _configuration["JWT:ValidAudience"]),
-                         new Claim(JwtRegisteredClaimNames.Iss, _configuration["JWT:ValidIssuer"]),
+                         new Claim(JwtRegisteredClaimNames.Aud, _configuration["JWT:ValidAudience"]!),
+                         new Claim(JwtRegisteredClaimNames.Iss, _configuration["JWT:ValidIssuer"]!),
                          new Claim("Id", user.Id.ToString())  
                      };
 
@@ -406,6 +452,22 @@ namespace backend.Controllers.AdminControllers
             {
                 _logger.LogError("Admin not found.");
                 return StatusCode(StatusCodes.Status404NotFound, new ApiResponse { Status = "Error", Message = "Admin not found." });
+            }
+            if (user.UserName == null)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, new ApiResponse
+                {
+                    Status = "Error",
+                    Message = "User name is null."
+                });
+            }
+            if (user.Email == null)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, new ApiResponse
+                {
+                    Status = "Error",
+                    Message = "User email is null."
+                });
             }
             var token = await _userManager.GeneratePasswordResetTokenAsync(user);
             byte[] encodedToken = Encoding.UTF8.GetBytes(token);
@@ -512,7 +574,7 @@ namespace backend.Controllers.AdminControllers
             if (!tokenCreationTime.HasValue)
                 return false;
 
-            var lifespanMinutes = int.Parse(_configuration["2FA:TokenLifeSpan"]);
+            var lifespanMinutes = int.Parse(_configuration["2FA:TokenLifeSpan"]!);
             var expirationTime = tokenCreationTime.Value.AddMinutes(lifespanMinutes);
 
             return DateTime.UtcNow <= expirationTime;
@@ -521,12 +583,12 @@ namespace backend.Controllers.AdminControllers
 
         private JwtSecurityToken GetToken(List<Claim> authClaims)
         {
-            var authSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["JWT:SecretKey"]));
+            var authSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["JWT:SecretKey"]!));
             var credentials = new SigningCredentials(authSigningKey, SecurityAlgorithms.HmacSha256);
             var token = new JwtSecurityToken(
                 issuer: _configuration["JWT:ValidIssuer"],
                 audience: _configuration["JWT:ValidAudience"],
-                expires: DateTime.Now.AddHours(Double.Parse(_configuration["JWT:ExpiresHours"])),
+                expires: DateTime.Now.AddHours(Double.Parse(_configuration["JWT:ExpiresHours"]!)),
                 claims: authClaims,
                 signingCredentials: credentials
                 );
@@ -535,13 +597,22 @@ namespace backend.Controllers.AdminControllers
         }
         private string GenerateJwtToken(AppUser user)
           {
-              var claims = new[]
+            if (string.IsNullOrEmpty(user.UserName))
+            {
+                throw new Exception("UserName must not be null.");
+            }
+            var claims = new[]
               {
                   new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
                   new Claim(JwtRegisteredClaimNames.UniqueName, user.UserName)
               };
-              var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]));
-              var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+            var jwtKey = _configuration["Jwt:Key"];
+            if (string.IsNullOrEmpty(jwtKey))
+            {
+                throw new Exception("JWT key is missing from configuration.");
+            }
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey));
+            var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
               var token = new JwtSecurityToken(
                   _configuration["Jwt:Issuer"],

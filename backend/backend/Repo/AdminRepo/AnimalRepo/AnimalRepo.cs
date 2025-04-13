@@ -14,9 +14,9 @@ namespace backend.Repo.AdminRepo.AnimalRepo
         {
             _context = context;
         }
-        public IEnumerable<AnimalDto> getAllAnimals()
+        public IEnumerable<AnimalAdminDto> getAllAnimals()
         {
-            var animals = _context.Animals.Select(Animal => new AnimalDto
+            var animals = _context.Animals.Select(Animal => new AnimalAdminDto
             {
                 Id = Animal.Id,
                 Name = Animal.Nom,
@@ -32,11 +32,11 @@ namespace backend.Repo.AdminRepo.AnimalRepo
             }).ToList();
             return animals;
         }
-        public AnimalDto getAnimalById(Guid id)
+        public AnimalAdminDto getAnimalById(Guid id)
         {
-            var animals = _context.Animals
+            var animal = _context.Animals
                 .Where(animal => animal.Id == id)
-                .Select(Animal => new AnimalDto
+                .Select(Animal => new AnimalAdminDto
                 {
                     Id = Animal.Id,
                     Name = Animal.Nom,
@@ -50,13 +50,17 @@ namespace backend.Repo.AdminRepo.AnimalRepo
                     CreatedAt = Animal.CreatedAt,
                     UpdatedAt = Animal.UpdatedAt,
                 }).FirstOrDefault();
-            return animals;
+            if (animal == null)
+            {
+                throw new Exception("Animal not found."); 
+            }
+            return animal;
         }
-        public IEnumerable<AnimalDto> getAnimalsByOwnerId(Guid userId)
+        public IEnumerable<AnimalAdminDto> getAnimalsByOwnerId(Guid userId)
         {
             var animals = _context.Animals
                 .Where(animal => animal.OwnerId == userId)
-                .Select(Animal => new AnimalDto
+                .Select(Animal => new AnimalAdminDto
                 {
                     Id = Animal.Id,
                     Name = Animal.Nom,
@@ -74,12 +78,12 @@ namespace backend.Repo.AdminRepo.AnimalRepo
         }
 
 
-        public IEnumerable<AnimalDto> getAnimalsByName(string name)
+        public IEnumerable<AnimalAdminDto> getAnimalsByName(string name)
         {
 
             var animals = _context.Animals
                 .Where(animal => animal.Nom == name)
-                .Select(Animal => new AnimalDto
+                .Select(Animal => new AnimalAdminDto
                 {
                     Id = Animal.Id,
                     Name = Animal.Nom,
@@ -96,11 +100,11 @@ namespace backend.Repo.AdminRepo.AnimalRepo
             return animals;
         }
 
-        public IEnumerable<AnimalDto> getAnimalsByEspece(string espece)
+        public IEnumerable<AnimalAdminDto> getAnimalsByEspece(string espece)
         {
             var animals = _context.Animals
                 .Where(animal => animal.Espece == espece)
-                .Select(Animal => new AnimalDto
+                .Select(Animal => new AnimalAdminDto
                 {
                     Id = Animal.Id,
                     Name = Animal.Nom,
@@ -117,12 +121,12 @@ namespace backend.Repo.AdminRepo.AnimalRepo
             return animals;
         }
 
-        public IEnumerable<AnimalDto> getAnimalsByRace(string race)
+        public IEnumerable<AnimalAdminDto> getAnimalsByRace(string race)
         {
 
             var animals = _context.Animals
                 .Where(animal => animal.Race == race)
-                .Select(Animal => new AnimalDto
+                .Select(Animal => new AnimalAdminDto
                 {
                     Id = Animal.Id,
                     Name = Animal.Nom,
@@ -151,7 +155,7 @@ namespace backend.Repo.AdminRepo.AnimalRepo
             return "failed to add animal";
         }
 
-        public string UpdateAnimal(Guid animalId, UpdateAnimalDto updatedAnimal)
+        public string UpdateAnimal(Guid animalId, UpdateAnimalAdminDto updatedAnimal)
         {
 
             var owner = _context.Users.FirstOrDefault(u => u.Id == updatedAnimal.OwnerId);
@@ -181,6 +185,10 @@ namespace backend.Repo.AdminRepo.AnimalRepo
         public string deleteAnimal(Guid id)
         {
             var animal = _context.Animals.FirstOrDefault(a => a.Id == id);
+            if (animal == null)
+            {
+                throw new Exception("Animal not found.");
+            }
             _context.Animals.Remove(animal);
             SaveChanges();
             return "Animal removed successfully";
