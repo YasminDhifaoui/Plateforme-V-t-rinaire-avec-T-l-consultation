@@ -24,6 +24,9 @@ namespace backend.Models
         [MaxLength(1000)]
         public string Notes { get; set; }
 
+        [MaxLength(1000)]
+        public string DocumentPath { get; set; }
+
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
 

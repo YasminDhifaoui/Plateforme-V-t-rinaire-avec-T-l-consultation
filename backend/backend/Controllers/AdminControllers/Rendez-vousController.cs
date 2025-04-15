@@ -12,7 +12,7 @@ namespace backend.Controllers.AdminControllers
 {
     [Route("api/admin/[controller]")]
     [Controller]
-    [Authorize(Policy = "Admin")]
+    //[Authorize(Policy = "Admin")]
 
     public class Rendez_vousController : ControllerBase
     {

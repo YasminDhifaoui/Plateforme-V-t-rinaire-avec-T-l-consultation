@@ -4,8 +4,10 @@ using backend.Models;
 using backend.Repo.AdminRepo;
 using backend.Repo.AdminRepo.AnimalRepo;
 using backend.Repo.AdminRepo.ClientsRepo;
+using backend.Repo.AdminRepo.ConsultationRepo;
 using backend.Repo.AdminRepo.VetRepo;
 using backend.Repo.ClientRepo.AnimalRepo;
+using backend.Repo.ClientRepo.ConsultationRepo;
 using backend.Repo.ClientRepo.RendezVousRepo;
 using backend.Repo.Rendez_vousRepo;
 using backend.Repo.VetRepo.AnimalRepo;
@@ -88,10 +90,12 @@ builder.Services.AddScoped<IClientRepo, ClientRepo>();
 builder.Services.AddScoped<IVetRepo, VetRepo>();
 builder.Services.AddScoped<IAnimalRepo, AnimalRepo>();
 builder.Services.AddScoped<IRendezVousRepo, RendezVousRepo>();
+builder.Services.AddScoped<IConsultationRepo, consultationRepo>();
 
 // add Client Repositories
 builder.Services.AddScoped<IAnimalCRepo, AnimalCRepo>();
 builder.Services.AddScoped<IRendezVousCRepo, RendezVousCRepo>();
+builder.Services.AddScoped<IConsultationCRepo, ConsultationCRepo>();
 
 //add Veterinaire Repositories
 builder.Services.AddScoped<IAnimalVRepo, AnimalVRepo>();
