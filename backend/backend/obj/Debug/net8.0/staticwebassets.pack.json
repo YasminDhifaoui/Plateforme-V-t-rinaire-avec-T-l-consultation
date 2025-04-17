@@ -1,0 +1,29 @@
+{
+  "Files": [
+    {
+      "Id": "D:\\Internships\\Pfe\\Plateforme-V-t-rinaire-avec-T-l-consultation\\backend\\backend\\wwwroot\\docs\\9999eb77-d3b9-4803-9f10-ffa811311098\\20250417_181356\\80533c86-adf8-41fe-8d76-d9db0d07df73_pfe Dclass .mdj",
+      "PackagePath": "staticwebassets\\docs\\9999eb77-d3b9-4803-9f10-ffa811311098\\20250417_181356\\80533c86-adf8-41fe-8d76-d9db0d07df73_pfe Dclass .mdj"
+    },
+    {
+      "Id": "D:\\Internships\\Pfe\\Plateforme-V-t-rinaire-avec-T-l-consultation\\backend\\backend\\wwwroot\\docs\\9999eb77-d3b9-4803-9f10-ffa811311098\\20250417_181458\\42c69b54-934e-4eff-9e12-de036ed07941_ToDo.txt",
+      "PackagePath": "staticwebassets\\docs\\9999eb77-d3b9-4803-9f10-ffa811311098\\20250417_181458\\42c69b54-934e-4eff-9e12-de036ed07941_ToDo.txt"
+    },
+    {
+      "Id": "obj\\Debug\\net8.0\\staticwebassets\\msbuild.backend.Microsoft.AspNetCore.StaticWebAssets.props",
+      "PackagePath": "build\\Microsoft.AspNetCore.StaticWebAssets.props"
+    },
+    {
+      "Id": "obj\\Debug\\net8.0\\staticwebassets\\msbuild.build.backend.props",
+      "PackagePath": "build\\backend.props"
+    },
+    {
+      "Id": "obj\\Debug\\net8.0\\staticwebassets\\msbuild.buildMultiTargeting.backend.props",
+      "PackagePath": "buildMultiTargeting\\backend.props"
+    },
+    {
+      "Id": "obj\\Debug\\net8.0\\staticwebassets\\msbuild.buildTransitive.backend.props",
+      "PackagePath": "buildTransitive\\backend.props"
+    }
+  ],
+  "ElementsToRemove": []
+}

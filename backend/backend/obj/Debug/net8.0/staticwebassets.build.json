@@ -1,11 +1,58 @@
 {
   "Version": 1,
-  "Hash": "7/yvsnDRTixX0vVer35KSjS1HzfM4rGxA/gc1emwSdw=",
+  "Hash": "b5MlHYng7nInRM3elbLMz+PXboqvaF579pgA9RJOzLI=",
   "Source": "backend",
   "BasePath": "_content/backend",
   "Mode": "Default",
   "ManifestType": "Build",
   "ReferencedProjectsConfiguration": [],
-  "DiscoveryPatterns": [],
-  "Assets": []
+  "DiscoveryPatterns": [
+    {
+      "Name": "backend\\wwwroot",
+      "Source": "backend",
+      "ContentRoot": "D:\\Internships\\Pfe\\Plateforme-V-t-rinaire-avec-T-l-consultation\\backend\\backend\\wwwroot\\",
+      "BasePath": "_content/backend",
+      "Pattern": "**"
+    }
+  ],
+  "Assets": [
+    {
+      "Identity": "D:\\Internships\\Pfe\\Plateforme-V-t-rinaire-avec-T-l-consultation\\backend\\backend\\wwwroot\\docs\\9999eb77-d3b9-4803-9f10-ffa811311098\\20250417_181356\\80533c86-adf8-41fe-8d76-d9db0d07df73_pfe Dclass .mdj",
+      "SourceId": "backend",
+      "SourceType": "Discovered",
+      "ContentRoot": "D:\\Internships\\Pfe\\Plateforme-V-t-rinaire-avec-T-l-consultation\\backend\\backend\\wwwroot\\",
+      "BasePath": "_content/backend",
+      "RelativePath": "docs/9999eb77-d3b9-4803-9f10-ffa811311098/20250417_181356/80533c86-adf8-41fe-8d76-d9db0d07df73_pfe Dclass .mdj",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Primary",
+      "AssetMergeBehavior": "PreferTarget",
+      "AssetMergeSource": "",
+      "RelatedAsset": "",
+      "AssetTraitName": "",
+      "AssetTraitValue": "",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "wwwroot\\docs\\9999eb77-d3b9-4803-9f10-ffa811311098\\20250417_181356\\80533c86-adf8-41fe-8d76-d9db0d07df73_pfe Dclass .mdj"
+    },
+    {
+      "Identity": "D:\\Internships\\Pfe\\Plateforme-V-t-rinaire-avec-T-l-consultation\\backend\\backend\\wwwroot\\docs\\9999eb77-d3b9-4803-9f10-ffa811311098\\20250417_181458\\42c69b54-934e-4eff-9e12-de036ed07941_ToDo.txt",
+      "SourceId": "backend",
+      "SourceType": "Discovered",
+      "ContentRoot": "D:\\Internships\\Pfe\\Plateforme-V-t-rinaire-avec-T-l-consultation\\backend\\backend\\wwwroot\\",
+      "BasePath": "_content/backend",
+      "RelativePath": "docs/9999eb77-d3b9-4803-9f10-ffa811311098/20250417_181458/42c69b54-934e-4eff-9e12-de036ed07941_ToDo.txt",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Primary",
+      "AssetMergeBehavior": "PreferTarget",
+      "AssetMergeSource": "",
+      "RelatedAsset": "",
+      "AssetTraitName": "",
+      "AssetTraitValue": "",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "wwwroot\\docs\\9999eb77-d3b9-4803-9f10-ffa811311098\\20250417_181458\\42c69b54-934e-4eff-9e12-de036ed07941_ToDo.txt"
+    }
+  ]
 }

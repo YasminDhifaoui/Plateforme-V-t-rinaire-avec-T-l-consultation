@@ -1,6 +1,7 @@
 ﻿using backend.Data;
 using backend.Dtos.AdminDtos.ConsultationDtos;
 using backend.Models;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
 
 namespace backend.Repo.AdminRepo.ConsultationRepo
@@ -29,61 +30,128 @@ namespace backend.Repo.AdminRepo.ConsultationRepo
                     .FirstOrDefaultAsync(c => c.Id == id);
             }
 
-            public async Task<Consultation> AddConsultation(AddConsultationDto dto)
+        public async Task<Consultation> AddConsultation(AddConsultationDto dto)
+        {
+            string documentPath = null;
+            var rdv = _context.RendezVous.Find(dto.RendezVousID);
+            if (rdv == null)
             {
-                var rendezVous = await _context.RendezVous.FindAsync(dto.RendezVousID);
-                if (rendezVous == null) return null;
+                return null;
+            }
 
-                var consultation = new Consultation
+            var consultationDate = DateTime.UtcNow;
+            var formattedDate = consultationDate.ToString("yyyyMMdd_HHmmss"); 
+
+            if (dto.Document != null && dto.Document.Length > 0)
+            {
+                var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "docs", rdv.AnimalId.ToString(), formattedDate);
+                Directory.CreateDirectory(uploadsFolder);
+
+                var fileName = $"{Guid.NewGuid()}_{dto.Document.FileName}";
+                var filePath = Path.Combine(uploadsFolder, fileName);
+
+                using (var stream = new FileStream(filePath, FileMode.Create))
                 {
-                    Id = Guid.NewGuid(),
-                    Date = dto.Date,
-                    Diagnostic = dto.Diagnostic,
-                    Treatment = dto.Treatment,
-                    Prescriptions = dto.Prescription,
-                    Notes = dto.Notes,
-                    DocumentPath = dto.DocumentPath,
-                    RendezVousId = dto.RendezVousID,
-                    AnimalId = rendezVous.AnimalId,
-                    VeterinaireId = rendezVous.VeterinaireId,
-                    CreatedAt = DateTime.UtcNow,
-                    UpdatedAt = DateTime.UtcNow
-                };
+                    await dto.Document.CopyToAsync(stream);
+                }
 
-                _context.Consultations.Add(consultation);
-                await _context.SaveChangesAsync();
-                return consultation;
+                documentPath = Path.Combine("docs", rdv.AnimalId.ToString(), formattedDate, fileName);
             }
 
-            public string UpdateAsync(Guid id, UpdateConsultationDto dto)
+            var consultation = new Consultation
             {
-                var consultation = _context.Consultations.Find(id);
-                if (consultation == null) return "Consultation not found";
+                Id = Guid.NewGuid(),
+                Date = consultationDate,
+                RendezVousId = dto.RendezVousID,
+                Diagnostic = dto.Diagnostic,
+                Treatment = dto.Treatment,
+                Prescriptions = dto.Prescription,
+                Notes = dto.Notes,
+                DocumentPath = documentPath,
+                VeterinaireId = rdv.VeterinaireId,
+                AnimalId = rdv.AnimalId,
+                CreatedAt = consultationDate,
+                UpdatedAt = consultationDate
+            };
 
-                consultation.Date = dto.Date;
-                consultation.Diagnostic = dto.Diagnostic;
-                consultation.Treatment = dto.Treatment;
-                consultation.Prescriptions = dto.Prescription;
-                consultation.Notes = dto.Notes;
-                consultation.DocumentPath = dto.DocumentPath;
-                consultation.UpdatedAt = DateTime.UtcNow;
+            await _context.Consultations.AddAsync(consultation);
+            this.saveChanges();
+            return consultation;
+        }
 
-                _context.Consultations.Update(consultation);
-                _context.SaveChanges();
-                return "Consultation updated";
-            }
+        public async Task<string> UpdateAsync(Guid id, UpdateConsultationDto dto)
+        {
+            var consultation = await _context.Consultations.FindAsync(id);
+            if (consultation == null)
+                return "Consultation not found";
 
-            public string DeleteAsync(Guid id)
+            var rdv = _context.RendezVous.Find(dto.RendezVousID);
+
+            consultation.Date = dto.Date.ToUniversalTime();
+            consultation.Diagnostic = dto.Diagnostic;
+            consultation.Treatment = dto.Treatment;
+            consultation.Prescriptions = dto.Prescription;
+            consultation.Notes = dto.Notes;
+            consultation.RendezVousId = dto.RendezVousID;
+            consultation.AnimalId = rdv.AnimalId;
+            consultation.VeterinaireId = rdv.VeterinaireId;
+            consultation.UpdatedAt = DateTime.UtcNow;
+
+            if (dto.Document != null && dto.Document.Length > 0)
             {
-                var consultation = _context.Consultations.FirstOrDefault(c => c.Id.ToString().Equals(id.ToString()));
-                if (consultation == null) return "Consultation not found";
+                if (!string.IsNullOrEmpty(consultation.DocumentPath))
+                {
+                    var oldFolderPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", Path.GetDirectoryName(consultation.DocumentPath));
+                    if (Directory.Exists(oldFolderPath))
+                    {
+                        Directory.Delete(oldFolderPath, true);
+                    }
+                }
 
-                _context.Consultations.Remove(consultation);
-                _context.SaveChanges();
-                return "Consultation deleted";
+                var newDateFolder = dto.Date.ToString("yyyyMMdd_HHmmss");
+                var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "docs", consultation.AnimalId.ToString(), newDateFolder);
+                Directory.CreateDirectory(uploadsFolder);
+
+                var fileName = $"{Guid.NewGuid()}_{dto.Document.FileName}";
+                var filePath = Path.Combine(uploadsFolder, fileName);
+
+                using (var stream = new FileStream(filePath, FileMode.Create))
+                {
+                    await dto.Document.CopyToAsync(stream);
+                }
+
+                consultation.DocumentPath = Path.Combine("docs", consultation.AnimalId.ToString(), newDateFolder, fileName);
             }
 
-            public void saveChanges()
+            _context.Consultations.Update(consultation);
+            this.saveChanges();
+            return "Consultation updated";
+        }
+
+
+
+
+        public string DeleteAsync(Guid id)
+        {
+            var consultation = _context.Consultations.FirstOrDefault(c => c.Id == id);
+            if (consultation == null)
+                return "Consultation not found";
+
+            if (!string.IsNullOrEmpty(consultation.DocumentPath))
+            {
+                var folderPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", Path.GetDirectoryName(consultation.DocumentPath));
+                if (Directory.Exists(folderPath))
+                {
+                    Directory.Delete(folderPath, true); 
+                }
+            }
+
+            _context.Consultations.Remove(consultation);
+            this.saveChanges();
+            return "Consultation deleted";
+        }
+
+        public void saveChanges()
             {
                 _context.SaveChanges();
             }

@@ -356,3 +356,4 @@ D:\Internships\Pfe\Plateforme-V-t-rinaire-avec-T-l-consultation\backend\backend\
 D:\Internships\Pfe\Plateforme-V-t-rinaire-avec-T-l-consultation\backend\backend\obj\Debug\net8.0\backend.pdb
 D:\Internships\Pfe\Plateforme-V-t-rinaire-avec-T-l-consultation\backend\backend\obj\Debug\net8.0\backend.genruntimeconfig.cache
 D:\Internships\Pfe\Plateforme-V-t-rinaire-avec-T-l-consultation\backend\backend\obj\Debug\net8.0\ref\backend.dll
+D:\Internships\Pfe\Plateforme-V-t-rinaire-avec-T-l-consultation\backend\backend\bin\Debug\net8.0\backend.staticwebassets.runtime.json

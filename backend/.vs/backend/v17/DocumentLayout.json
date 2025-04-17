@@ -3,28 +3,16 @@
   "WorkspaceRootPath": "D:\\Internships\\Pfe\\Plateforme-V-t-rinaire-avec-T-l-consultation\\backend\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{26F21D31-1B72-4CCD-BEDC-8662D6E3799E}|backend\\backend.csproj|D:\\Internships\\Pfe\\Plateforme-V-t-rinaire-avec-T-l-consultation\\backend\\backend\\controllers\\admincontrollers\\consultationscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "AbsoluteMoniker": "D:0:0:{26F21D31-1B72-4CCD-BEDC-8662D6E3799E}|backend\\backend.csproj|d:\\internships\\pfe\\plateforme-v-t-rinaire-avec-t-l-consultation\\backend\\backend\\controllers\\admincontrollers\\consultationscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{26F21D31-1B72-4CCD-BEDC-8662D6E3799E}|backend\\backend.csproj|solutionrelative:backend\\controllers\\admincontrollers\\consultationscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{26F21D31-1B72-4CCD-BEDC-8662D6E3799E}|backend\\backend.csproj|D:\\Internships\\Pfe\\Plateforme-V-t-rinaire-avec-T-l-consultation\\backend\\backend\\controllers\\admincontrollers\\veterinairescontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{26F21D31-1B72-4CCD-BEDC-8662D6E3799E}|backend\\backend.csproj|solutionrelative:backend\\controllers\\admincontrollers\\veterinairescontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{26F21D31-1B72-4CCD-BEDC-8662D6E3799E}|backend\\backend.csproj|d:\\internships\\pfe\\plateforme-v-t-rinaire-avec-t-l-consultation\\backend\\backend\\controllers\\clientcontrollers\\consultationsccontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{26F21D31-1B72-4CCD-BEDC-8662D6E3799E}|backend\\backend.csproj|solutionrelative:backend\\controllers\\clientcontrollers\\consultationsccontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{26F21D31-1B72-4CCD-BEDC-8662D6E3799E}|backend\\backend.csproj|d:\\internships\\pfe\\plateforme-v-t-rinaire-avec-t-l-consultation\\backend\\backend\\repo\\adminrepo\\consultationrepo\\iconsultationrepo.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{26F21D31-1B72-4CCD-BEDC-8662D6E3799E}|backend\\backend.csproj|solutionrelative:backend\\repo\\adminrepo\\consultationrepo\\iconsultationrepo.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{26F21D31-1B72-4CCD-BEDC-8662D6E3799E}|backend\\backend.csproj|d:\\internships\\pfe\\plateforme-v-t-rinaire-avec-t-l-consultation\\backend\\backend\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{26F21D31-1B72-4CCD-BEDC-8662D6E3799E}|backend\\backend.csproj|solutionrelative:backend\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{26F21D31-1B72-4CCD-BEDC-8662D6E3799E}|backend\\backend.csproj|d:\\internships\\pfe\\plateforme-v-t-rinaire-avec-t-l-consultation\\backend\\backend\\controllers\\admincontrollers\\clientscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{26F21D31-1B72-4CCD-BEDC-8662D6E3799E}|backend\\backend.csproj|solutionrelative:backend\\controllers\\admincontrollers\\clientscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{26F21D31-1B72-4CCD-BEDC-8662D6E3799E}|backend\\backend.csproj|d:\\internships\\pfe\\plateforme-v-t-rinaire-avec-t-l-consultation\\backend\\backend\\repo\\adminrepo\\clientsrepo\\clientrepo.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{26F21D31-1B72-4CCD-BEDC-8662D6E3799E}|backend\\backend.csproj|solutionrelative:backend\\repo\\adminrepo\\clientsrepo\\clientrepo.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{26F21D31-1B72-4CCD-BEDC-8662D6E3799E}|backend\\backend.csproj|d:\\internships\\pfe\\plateforme-v-t-rinaire-avec-t-l-consultation\\backend\\backend\\controllers\\vetcontrollers\\consultationsvetcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{26F21D31-1B72-4CCD-BEDC-8662D6E3799E}|backend\\backend.csproj|solutionrelative:backend\\controllers\\vetcontrollers\\consultationsvetcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     }
   ],
   "DocumentGroupContainers": [
@@ -34,7 +22,7 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 4,
+          "SelectedChildIndex": 3,
           "Children": [
             {
               "$type": "Bookmark",
@@ -42,41 +30,28 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 3,
-              "Title": "Program.cs",
-              "DocumentMoniker": "D:\\Internships\\Pfe\\Plateforme-V-t-rinaire-avec-T-l-consultation\\backend\\backend\\Program.cs",
-              "RelativeDocumentMoniker": "backend\\Program.cs",
-              "ToolTip": "D:\\Internships\\Pfe\\Plateforme-V-t-rinaire-avec-T-l-consultation\\backend\\backend\\Program.cs",
-              "RelativeToolTip": "backend\\Program.cs",
-              "ViewState": "AQIAAE8AAAAAAAAAAAAAAFwAAAAAAAAA",
+              "DocumentIndex": 2,
+              "Title": "ConsultationsVetController.cs",
+              "DocumentMoniker": "D:\\Internships\\Pfe\\Plateforme-V-t-rinaire-avec-T-l-consultation\\backend\\backend\\Controllers\\VetControllers\\ConsultationsVetController.cs",
+              "RelativeDocumentMoniker": "backend\\Controllers\\VetControllers\\ConsultationsVetController.cs",
+              "ToolTip": "D:\\Internships\\Pfe\\Plateforme-V-t-rinaire-avec-T-l-consultation\\backend\\backend\\Controllers\\VetControllers\\ConsultationsVetController.cs",
+              "RelativeToolTip": "backend\\Controllers\\VetControllers\\ConsultationsVetController.cs",
+              "ViewState": "AQIAAAsAAAAAAAAAAADgvxUAAAA9AAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-04-14T17:54:02.784Z",
+              "WhenOpened": "2025-04-17T18:22:18.768Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 5,
-              "Title": "ClientRepo.cs",
-              "DocumentMoniker": "D:\\Internships\\Pfe\\Plateforme-V-t-rinaire-avec-T-l-consultation\\backend\\backend\\Repo\\AdminRepo\\ClientsRepo\\ClientRepo.cs",
-              "RelativeDocumentMoniker": "backend\\Repo\\AdminRepo\\ClientsRepo\\ClientRepo.cs",
-              "ToolTip": "D:\\Internships\\Pfe\\Plateforme-V-t-rinaire-avec-T-l-consultation\\backend\\backend\\Repo\\AdminRepo\\ClientsRepo\\ClientRepo.cs",
-              "RelativeToolTip": "backend\\Repo\\AdminRepo\\ClientsRepo\\ClientRepo.cs",
-              "ViewState": "AQIAABwAAAAAAAAAAAAQwDQAAAARAAAA",
+              "DocumentIndex": 1,
+              "Title": "ConsultationsCController.cs",
+              "DocumentMoniker": "D:\\Internships\\Pfe\\Plateforme-V-t-rinaire-avec-T-l-consultation\\backend\\backend\\Controllers\\ClientControllers\\ConsultationsCController.cs",
+              "RelativeDocumentMoniker": "backend\\Controllers\\ClientControllers\\ConsultationsCController.cs",
+              "ToolTip": "D:\\Internships\\Pfe\\Plateforme-V-t-rinaire-avec-T-l-consultation\\backend\\backend\\Controllers\\ClientControllers\\ConsultationsCController.cs",
+              "RelativeToolTip": "backend\\Controllers\\ClientControllers\\ConsultationsCController.cs",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-04-14T17:43:45.635Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 4,
-              "Title": "ClientsController.cs",
-              "DocumentMoniker": "D:\\Internships\\Pfe\\Plateforme-V-t-rinaire-avec-T-l-consultation\\backend\\backend\\Controllers\\AdminControllers\\ClientsController.cs",
-              "RelativeDocumentMoniker": "backend\\Controllers\\AdminControllers\\ClientsController.cs",
-              "ToolTip": "D:\\Internships\\Pfe\\Plateforme-V-t-rinaire-avec-T-l-consultation\\backend\\backend\\Controllers\\AdminControllers\\ClientsController.cs",
-              "RelativeToolTip": "backend\\Controllers\\AdminControllers\\ClientsController.cs",
-              "ViewState": "AQIAABIAAAAAAAAAAAAAACQAAAAAAAAA",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-04-14T17:38:35.838Z",
+              "WhenOpened": "2025-04-17T18:22:16.855Z",
               "EditorCaption": ""
             },
             {
@@ -87,35 +62,9 @@
               "RelativeDocumentMoniker": "backend\\Controllers\\AdminControllers\\ConsultationsController.cs",
               "ToolTip": "D:\\Internships\\Pfe\\Plateforme-V-t-rinaire-avec-T-l-consultation\\backend\\backend\\Controllers\\AdminControllers\\ConsultationsController.cs",
               "RelativeToolTip": "backend\\Controllers\\AdminControllers\\ConsultationsController.cs",
-              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAoAAAAhAAAA",
+              "ViewState": "AQIAABIAAAAAAAAAAAAEwCgAAAAJAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-04-14T12:54:43.17Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 1,
-              "Title": "VeterinairesController.cs",
-              "DocumentMoniker": "D:\\Internships\\Pfe\\Plateforme-V-t-rinaire-avec-T-l-consultation\\backend\\backend\\Controllers\\AdminControllers\\VeterinairesController.cs",
-              "RelativeDocumentMoniker": "backend\\Controllers\\AdminControllers\\VeterinairesController.cs",
-              "ToolTip": "D:\\Internships\\Pfe\\Plateforme-V-t-rinaire-avec-T-l-consultation\\backend\\backend\\Controllers\\AdminControllers\\VeterinairesController.cs",
-              "RelativeToolTip": "backend\\Controllers\\AdminControllers\\VeterinairesController.cs",
-              "ViewState": "AQIAAAMAAAAAAAAAAAAAAA0AAAADAAAA",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-04-14T12:32:55.702Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 2,
-              "Title": "IConsultationRepo.cs",
-              "DocumentMoniker": "D:\\Internships\\Pfe\\Plateforme-V-t-rinaire-avec-T-l-consultation\\backend\\backend\\Repo\\AdminRepo\\ConsultationRepo\\IConsultationRepo.cs",
-              "RelativeDocumentMoniker": "backend\\Repo\\AdminRepo\\ConsultationRepo\\IConsultationRepo.cs",
-              "ToolTip": "D:\\Internships\\Pfe\\Plateforme-V-t-rinaire-avec-T-l-consultation\\backend\\backend\\Repo\\AdminRepo\\ConsultationRepo\\IConsultationRepo.cs",
-              "RelativeToolTip": "backend\\Repo\\AdminRepo\\ConsultationRepo\\IConsultationRepo.cs",
-              "ViewState": "AQIAAAAAAAAAAAAAAAAuwAYAAAAFAAAA",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-04-14T11:01:01.135Z",
+              "WhenOpened": "2025-04-17T18:22:15.258Z",
               "EditorCaption": ""
             }
           ]

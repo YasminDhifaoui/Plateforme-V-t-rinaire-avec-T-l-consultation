@@ -12,7 +12,7 @@ using backend.Repo.AdminRepo.ClientsRepo;
 
 namespace backend.Controllers.AdminControllers
 {
-    [Route("api/[controller]")]
+    [Route("api/admin/[controller]")]
     [ApiController]
     [Authorize(Policy = "Admin")]
 

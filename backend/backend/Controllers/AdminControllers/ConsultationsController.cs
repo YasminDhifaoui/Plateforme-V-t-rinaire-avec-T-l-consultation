@@ -1,13 +1,12 @@
 ﻿using backend.Dtos.AdminDtos.ConsultationDtos;
-using backend.Models;
 using backend.Repo.AdminRepo.ConsultationRepo;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace backend.Controllers.AdminControllers
 {
-    [Route("api/admin/[Controller]")]
-    [Controller]
+    [Route("api/admin/[controller]")]
+    [ApiController]
     //[Authorize(Policy = "Admin")]
     public class ConsultationController : ControllerBase
     {
@@ -19,7 +18,7 @@ namespace backend.Controllers.AdminControllers
         }
 
         [HttpGet]
-        [Route("/get-all-consultations")]
+        [Route("get-all-consultations")]
         public async Task<IActionResult> GetAllConsultations()
         {
             var consultations = await _consultationRepo.GetAllConsultations();
@@ -27,7 +26,7 @@ namespace backend.Controllers.AdminControllers
         }
 
         [HttpGet]
-        [Route("/get-consultation-by-id/{id}")]
+        [Route("get-consultation-by-id/{id}")]
         public async Task<IActionResult> GetConsultationById(Guid id)
         {
             var consultation = await _consultationRepo.GetConsultationById(id);
@@ -37,8 +36,8 @@ namespace backend.Controllers.AdminControllers
         }
 
         [HttpPost]
-        [Route("/add-consultation")]
-        public async Task<IActionResult> AddConsultation([FromBody] AddConsultationDto dto)
+        [Route("add-consultation")]
+        public async Task<IActionResult> AddConsultation([FromForm] AddConsultationDto dto)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
@@ -51,21 +50,23 @@ namespace backend.Controllers.AdminControllers
         }
 
         [HttpPut]
-        [Route("/update-consultation/{id}")]
-        public IActionResult UpdateConsultation(Guid id, [FromBody] UpdateConsultationDto dto)
+        [Route("update-consultation/{id}")]
+        public async Task<IActionResult> UpdateConsultation(Guid id, [FromForm] UpdateConsultationDto dto)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            var result = _consultationRepo.UpdateAsync(id, dto);
-            if (result == "Consultation not found")
+            var result = await _consultationRepo.UpdateAsync(id, dto);
+
+            if (result == null || result == "Consultation not found")
                 return NotFound(result);
 
-            return Ok(result);
+            return Ok(result); 
         }
 
+
         [HttpDelete]
-        [Route("/delete-consultation/{id}")]
+        [Route("delete-consultation/{id}")]
         public IActionResult DeleteConsultation(Guid id)
         {
             var result = _consultationRepo.DeleteAsync(id);

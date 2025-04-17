@@ -11,6 +11,7 @@ using backend.Repo.ClientRepo.ConsultationRepo;
 using backend.Repo.ClientRepo.RendezVousRepo;
 using backend.Repo.Rendez_vousRepo;
 using backend.Repo.VetRepo.AnimalRepo;
+using backend.Repo.VetRepo.ConsultationRepo;
 using backend.Repo.VetRepo.RendezVousRepo;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
@@ -100,6 +101,7 @@ builder.Services.AddScoped<IConsultationCRepo, ConsultationCRepo>();
 //add Veterinaire Repositories
 builder.Services.AddScoped<IAnimalVRepo, AnimalVRepo>();
 builder.Services.AddScoped<IRendezVousVRepo, RendezVousVRepo>();
+builder.Services.AddScoped<IConsultationVetRepo, ConsultationVetRepo>();
 
 // Add PostgreSQL DB connection
 builder.Services.AddDbContext<AppDbContext>(options =>
