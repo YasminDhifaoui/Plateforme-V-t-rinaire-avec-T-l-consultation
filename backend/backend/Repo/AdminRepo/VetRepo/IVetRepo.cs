@@ -6,14 +6,14 @@ namespace backend.Repo.AdminRepo.VetRepo
 {
     public interface IVetRepo
     {
-        IEnumerable<VetDto> GetVeterinaires();
-        VetDto GetVeterinaireById(Guid id);
-        VetDto GetVeterinaireByUsername(string username);
+        Task<IEnumerable<VetDto>> GetVeterinaires();
+        Task<VetDto> GetVeterinaireById(Guid id);
+        Task<VetDto> GetVeterinaireByUsername(string username);
 
-        string UpdateVeterinaire(Guid UserId, UpdateVetDto updatedVet);
-        string DeleteVeterinaire(Guid id);
-        string AddVeterinaire(Veterinaire veterinaire);
+        Task<string> UpdateVeterinaire(Guid UserId, UpdateVetDto updatedVet);
+        Task<string> DeleteVeterinaire(Guid id);
+        Task<string> AddVeterinaire(Veterinaire veterinaire);
 
-        void SaveChanges();
+        Task SaveChanges();
     }
 }

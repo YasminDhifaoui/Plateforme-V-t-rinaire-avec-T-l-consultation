@@ -5,10 +5,10 @@ namespace backend.Repo.ClientRepo.AnimalRepo
 {
     public interface IAnimalCRepo
     {
-        public IEnumerable<AnimalClientDto> getAnimalsByOwnerId(Guid userId);
-        public string deleteAnimal(Guid id);
-        public string AddAnimal(Animal animal);
-        void SaveChanges();
-
+        public Task<IEnumerable<AnimalClientDto>> getAnimalsByOwnerId(Guid userId);
+        public Task<string> deleteAnimal(Guid id);
+        public Task<string> AddAnimal(Animal animal);
+        public Task SaveChanges();
+         
     }
 }

@@ -1,5 +1,6 @@
 ﻿using backend.Data;
 using backend.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace backend.Repo.ClientRepo.RendezVousRepo
 {
@@ -10,9 +11,9 @@ namespace backend.Repo.ClientRepo.RendezVousRepo
         {
             _context = context;
         }
-        public IEnumerable<RendezVous> getRendezVousByClientId(Guid clientId)
+        public async Task<IEnumerable<RendezVous>> getRendezVousByClientId(Guid clientId)
         {
-            var Rvous = _context.RendezVous
+            var Rvous =await _context.RendezVous
                             .Where(r => r.ClientId == clientId)
                             .Select(r => new RendezVous
                             {
@@ -24,30 +25,30 @@ namespace backend.Repo.ClientRepo.RendezVousRepo
                                 Status = r.Status,
                                 CreatedAt = r.CreatedAt,
                                 UpdatedAt = r.UpdatedAt,
-                            }).ToList();
+                            }).ToListAsync();
             return Rvous;
         }
-        public string AddRendezVous(RendezVous rendezVous)
+        public async Task<string> AddRendezVous(RendezVous rendezVous)
         {
             if (rendezVous != null)
             {
-                _context.RendezVous.Add(rendezVous);
-                this.SaveChanges();
+                await _context.RendezVous.AddAsync(rendezVous);
+                await SaveChanges();
                 return "Rendez-vous added successfully";
             }
             return "failed to add rendez-vous";
         }
-        public string DeleteRendezVous(Guid id)
+        public async Task<string> DeleteRendezVous(Guid id)
         {
-            var Rvous = _context.RendezVous.FirstOrDefault(r => r.Id == id);
+            var Rvous =await _context.RendezVous.FirstOrDefaultAsync(r => r.Id == id);
             _context.RendezVous.Remove(Rvous);
-            this.SaveChanges();
+            await SaveChanges();
             return ("Rendez-vous removed successfully");
         }
 
-        public void SaveChanges()
+        public async Task SaveChanges()
         {
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
         }
 
     }

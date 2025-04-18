@@ -4,9 +4,9 @@ namespace backend.Repo.ClientRepo.RendezVousRepo
 {
     public interface IRendezVousCRepo
     {
-        public IEnumerable<RendezVous> getRendezVousByClientId(Guid clientId);
-        public string AddRendezVous(RendezVous rendezVous);
-        public string DeleteRendezVous(Guid id);
-        public void SaveChanges();
+        public Task<IEnumerable<RendezVous>> getRendezVousByClientId(Guid clientId);
+        public Task<string> AddRendezVous(RendezVous rendezVous);
+        public Task<string> DeleteRendezVous(Guid id);
+        public Task SaveChanges();
     }
 }

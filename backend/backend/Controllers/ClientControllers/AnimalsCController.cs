@@ -4,6 +4,7 @@ using backend.Models;
 using backend.Repo.ClientRepo.AnimalRepo;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace backend.Controllers.ClientControllers
 {
@@ -24,7 +25,7 @@ namespace backend.Controllers.ClientControllers
         }
         [HttpGet]
         [Route("animals-list")]
-        public IActionResult AnimalsList()
+        public async Task<IActionResult> AnimalsList()
         {
             var userIdClaim = User.FindFirst("Id")?.Value;
 
@@ -37,13 +38,13 @@ namespace backend.Controllers.ClientControllers
                 return Unauthorized("User ID not found in token");
 
             Guid userId = Guid.Parse(userIdClaim);
-            var animals = _repo.getAnimalsByOwnerId(userId);
+            var animals =await _repo.getAnimalsByOwnerId(userId);
 
             return Ok(animals);
         }
         [HttpPost]
         [Route("add-animal")]
-        public IActionResult AddAnimal([FromBody] AddAnimalClientDto model)
+        public async Task<IActionResult> AddAnimal([FromBody] AddAnimalClientDto model)
         {
             var idClaimValue = User.FindFirst("Id")?.Value;
 
@@ -52,7 +53,7 @@ namespace backend.Controllers.ClientControllers
                 throw new UnauthorizedAccessException("Invalid or missing user ID claim.");
             }
 
-            var owner = _context.Users.FirstOrDefault(u => u.Id == ownerId);
+            var owner =await _context.Users.FirstOrDefaultAsync(u => u.Id == ownerId);
             if (owner == null)
                 return NotFound(new { message = "Owner not found." });
 
@@ -70,7 +71,7 @@ namespace backend.Controllers.ClientControllers
                 UpdatedAt = DateTime.UtcNow
             };
 
-            _repo.AddAnimal(animal);
+            await _repo.AddAnimal(animal);
 
             return Ok(new { message = "Animal added successfully", animal });
         }
@@ -78,7 +79,7 @@ namespace backend.Controllers.ClientControllers
 
         [HttpPut]
         [Route("update-animal/{id}")]
-        public IActionResult UpdateAnimal(Guid id, [FromBody] UpdateAnimalClientDto updatedAnimal)
+        public async Task<IActionResult> UpdateAnimal(Guid id, [FromBody] UpdateAnimalClientDto updatedAnimal)
         {
             var idClaimValue = User.FindFirst("Id")?.Value;
 
@@ -87,11 +88,11 @@ namespace backend.Controllers.ClientControllers
                 throw new UnauthorizedAccessException("Invalid or missing user ID claim.");
             }
 
-            var owner = _context.Users.FirstOrDefault(u => u.Id == ownerId);
+            var owner =await _context.Users.FirstOrDefaultAsync(u => u.Id == ownerId);
             if (owner == null)
                 return BadRequest("Owner not found.");
 
-            var animalExist = _context.Animals.FirstOrDefault(a => a.Id == id && a.OwnerId == ownerId);
+            var animalExist =await _context.Animals.FirstOrDefaultAsync(a => a.Id == id && a.OwnerId == ownerId);
             if (animalExist == null)
                 return BadRequest("Animal not found.");
 
@@ -103,14 +104,14 @@ namespace backend.Controllers.ClientControllers
             animalExist.UpdatedAt = DateTime.UtcNow;
 
             _context.Animals.Update(animalExist);
-            _context.SaveChanges();
+            await _repo.SaveChanges();
 
             return Ok("Animal updated successfully");
         }
 
         [HttpDelete]
         [Route("delete-animal/{id}")]
-        public IActionResult DeleteAnimal(Guid id)
+        public async Task<IActionResult> DeleteAnimal(Guid id)
         {
             var idClaimValue = User.FindFirst("Id")?.Value;
 
@@ -119,11 +120,11 @@ namespace backend.Controllers.ClientControllers
                 throw new UnauthorizedAccessException("Invalid or missing user ID claim.");
             }
 
-            var animalExist = _context.Animals.FirstOrDefault(a => a.Id == id && a.OwnerId == ownerId);
+            var animalExist =await _context.Animals.FirstOrDefaultAsync(a => a.Id == id && a.OwnerId == ownerId);
             if (animalExist == null)
                 return BadRequest("Animal not found.");
 
-            var result = _repo.deleteAnimal(id);
+            var result =await _repo.deleteAnimal(id);
 
             return Ok(new { message = result });
         }

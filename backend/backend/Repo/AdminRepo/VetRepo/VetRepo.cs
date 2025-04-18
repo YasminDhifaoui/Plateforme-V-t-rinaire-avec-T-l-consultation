@@ -14,9 +14,9 @@ namespace backend.Repo.AdminRepo.VetRepo
         }
 
         //get veterinaires
-        public IEnumerable<VetDto> GetVeterinaires()
+        public async Task<IEnumerable<VetDto>> GetVeterinaires()
         {
-            var veterinaires = _context.Users
+            var veterinaires = await _context.Users
                 .Where(user => user.Role == "Veterinaire")
                 .Select(user => new VetDto
                 {
@@ -37,13 +37,13 @@ namespace backend.Repo.AdminRepo.VetRepo
                     PhoneConfirmed = user.PhoneNumberConfirmed,
 
                     AccessFailedCount = user.AccessFailedCount
-                }).ToList();
+                }).ToListAsync();
             return veterinaires;
         }
         //get vet by id
-        public VetDto GetVeterinaireById(Guid id)
+        public async Task<VetDto> GetVeterinaireById(Guid id)
         {
-            var vet = _context.Users
+            var vet = await _context.Users
                 .Where(user => user.Id == id)
                 .Select(user => new VetDto
                 {
@@ -64,13 +64,13 @@ namespace backend.Repo.AdminRepo.VetRepo
                     PhoneConfirmed = user.PhoneNumberConfirmed,
 
                     AccessFailedCount = user.AccessFailedCount
-                }).FirstOrDefault();
+                }).FirstOrDefaultAsync();
             return vet;
         }
         //get vet by username
-        public VetDto GetVeterinaireByUsername(string username)
+        public async Task<VetDto> GetVeterinaireByUsername(string username)
         {
-            var vet = _context.Users
+            var vet = await _context.Users
                 .Where(user => user.UserName == username)
                 .Select(user => new VetDto
                 {
@@ -91,18 +91,18 @@ namespace backend.Repo.AdminRepo.VetRepo
                     PhoneConfirmed = user.PhoneNumberConfirmed,
 
                     AccessFailedCount = user.AccessFailedCount
-                }).FirstOrDefault();
+                }).FirstOrDefaultAsync();
             return vet;
         }
         //update vet
-        public string UpdateVeterinaire(Guid UserId, UpdateVetDto updatedVet)
+        public async Task<string> UpdateVeterinaire(Guid UserId, UpdateVetDto updatedVet)
         {
-            var vet = GetVeterinaireById(UserId);
+            var vet =await GetVeterinaireById(UserId);
             if (vet == null)
             {
                 return "Veterinaire not found!";
             }
-            var userToUpdate = _context.Users.Find(UserId);
+            var userToUpdate = await _context.Users.FindAsync(UserId);
 
             if (userToUpdate == null)
                 return "User not found !";
@@ -120,29 +120,29 @@ namespace backend.Repo.AdminRepo.VetRepo
             userToUpdate.UpdatedAt = DateTime.UtcNow;
 
             _context.Users.Update(userToUpdate);
-            SaveChanges();
+            await SaveChanges();
             return "User updated successfully";
         }
         //delete vet
-        public string DeleteVeterinaire(Guid id)
+        public async Task<string> DeleteVeterinaire(Guid id)
         {
-            var vet = _context.veterinaires.Find(id);
+            var vet = await _context.veterinaires.FirstOrDefaultAsync(v => v.AppUserId == id);
             if (vet == null)
                 return "veterinaire not found !";
             _context.veterinaires.Remove(vet);
-            SaveChanges();
+            await SaveChanges();
             return "veterinaire deleted successfully";
         }
         //add vet
-        public string AddVeterinaire(Veterinaire veterinaire)
+        public async Task<string> AddVeterinaire(Veterinaire veterinaire)
         {
-            _context.veterinaires.Add(veterinaire);
-            SaveChanges();
+            await _context.veterinaires.AddAsync(veterinaire);
+            await SaveChanges();
             return "Veterinaire added successfully";
         }
-        public void SaveChanges()
+        public async Task SaveChanges()
         {
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
         }
 
 

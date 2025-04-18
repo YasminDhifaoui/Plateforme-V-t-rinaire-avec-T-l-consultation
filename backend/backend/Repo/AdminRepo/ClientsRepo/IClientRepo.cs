@@ -5,15 +5,13 @@ namespace backend.Repo.AdminRepo.ClientsRepo
 {
     public interface IClientRepo
     {
-        IEnumerable<ClientDto> GetClients();
-        ClientDto GetClientById(Guid id);
-        ClientDto GetClientByUsername(string username);
-
-
-        string UpdateClient(Guid UserId, UpdateClientDto updatedUser);
-        string DeleteClient(Guid id);
-        string AddClient(Client client);
-        void SaveChanges();
+        Task<IEnumerable<ClientDto>> GetClientsAsync();
+        Task<ClientDto> GetClientByIdAsync(Guid id);
+        Task<ClientDto> GetClientByUsernameAsync(string username);
+        Task<string> UpdateClientAsync(Guid userId, UpdateClientDto updatedUser);
+        Task<string> DeleteClientAsync(Guid id);
+        Task<string> AddClientAsync(Client client);
+        Task SaveChangesAsync();
 
     }
 }

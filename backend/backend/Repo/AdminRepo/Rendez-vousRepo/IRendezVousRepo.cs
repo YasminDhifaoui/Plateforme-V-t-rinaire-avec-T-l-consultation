@@ -5,17 +5,17 @@ namespace backend.Repo.Rendez_vousRepo
 {
     public interface IRendezVousRepo
     {
-        public IEnumerable<RendezVous> getAllRendezVous();
-        public IEnumerable<RendezVous> getRendezVousById(Guid id);
-        public IEnumerable<RendezVous> getRendezVousByVetId(Guid vetId);
-        public IEnumerable<RendezVous> getRendezVousByClientId(Guid clientId);
-        public IEnumerable<RendezVous> getRendezVousByAnimalId(Guid animalId);
-        public IEnumerable<RendezVous> getRendezVousByStatus(RendezVousStatus status);
+        public Task<IEnumerable<RendezVous>> getAllRendezVous();
+        public Task<RendezVous> getRendezVousById(Guid id);
+        public Task<IEnumerable<RendezVous>> getRendezVousByVetId(Guid vetId);
+        public Task<IEnumerable<RendezVous>> getRendezVousByClientId(Guid clientId);
+        public Task<IEnumerable<RendezVous>> getRendezVousByAnimalId(Guid animalId);
+        public Task<IEnumerable<RendezVous>> getRendezVousByStatus(RendezVousStatus status);
 
-        public string AddRendezVous(RendezVous rendezVous);
-        public string UpdateRendezVous(Guid id,UpdateRendezVousAdminDto updatedRendezVous);
-        public string DeleteRendezVous(Guid id);
-        public void SaveChanges();
+        public Task<string> AddRendezVous(RendezVous rendezVous);
+        public Task<string> UpdateRendezVous(Guid id,UpdateRendezVousAdminDto updatedRendezVous);
+        public Task<string> DeleteRendezVous(Guid id);
+        public Task SaveChanges();
 
     }
 }

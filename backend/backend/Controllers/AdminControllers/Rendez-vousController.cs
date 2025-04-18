@@ -7,12 +7,13 @@ using backend.Repo.AdminRepo.VetRepo;
 using backend.Repo.Rendez_vousRepo;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace backend.Controllers.AdminControllers
 {
     [Route("api/admin/[controller]")]
     [Controller]
-    [Authorize(Policy = "Admin")]
+    //[Authorize(Policy = "Admin")]
 
     public class Rendez_vousController : ControllerBase
     {
@@ -31,16 +32,16 @@ namespace backend.Controllers.AdminControllers
         }
         [HttpGet]
         [Route("get-all-rendez-vous")]
-        public IActionResult GetAllRendezVous()
+        public async Task<IActionResult> GetAllRendezVous()
         {
-            var Rvous = _repo.getAllRendezVous();
+            var Rvous = await _repo.getAllRendezVous();
             return Ok(Rvous);
         }
         [HttpGet]
         [Route("get-rendez-vous-by-id")]
-        public IActionResult GetRendezVousById(Guid id)
+        public async Task<IActionResult> GetRendezVousById(Guid id)
         {
-            var Rvous = _repo.getRendezVousById(id);
+            var Rvous = await _repo.getRendezVousById(id);
             if (Rvous == null)
             {
                 return BadRequest("No rendez-vous with this Id !");
@@ -50,46 +51,46 @@ namespace backend.Controllers.AdminControllers
 
         [HttpGet]
         [Route("get-rendez-vous-by-vet-id/{vetId}")]
-        public IActionResult GetRendezVousByVetId(Guid vetId)
+        public async Task<IActionResult> GetRendezVousByVetId(Guid vetId)
         {
-            var vet = _context.veterinaires.Where(v => v.AppUserId == vetId);//it should look for the appuser id where the role is vet
+            var vet = await _VetRepo.GetVeterinaireById(vetId); //it should look for the appuser id where the role is vet
             if (vet == null)
                 return BadRequest("No veterinaire with this Id !");
 
-            var Rvous = _repo.getRendezVousByVetId(vetId);
+            var Rvous = await _repo.getRendezVousByVetId(vetId);
             return Ok(Rvous);
 
         }
         [HttpGet]
         [Route("get-rendez-vous-by-client-id/{clientId}")]
-        public IActionResult GetRendezVousByClientId(Guid clientId)
+        public async Task<IActionResult> GetRendezVousByClientId(Guid clientId)
         {
-            var client = _context.clients.Where(c => c.AppUserId == clientId);
+            var client = await _ClientRepo.GetClientByIdAsync(clientId);
             if (client == null)
                 return BadRequest("No client with this Id !");
 
-            var Rvous = _repo.getRendezVousByClientId(clientId);
+            var Rvous = await _repo.getRendezVousByClientId(clientId);
             return Ok(Rvous);
 
         }
         [HttpGet]
         [Route("get-rendez-vous-by-animal-id/{animalId}")]
-        public IActionResult GetRendezVousByanimalId(Guid animalId)
+        public async Task<IActionResult> GetRendezVousByanimalId(Guid animalId)
         {
-            var animal = _context.Animals.Find(animalId);
+            var animal = await _AnimalRepo.GetAnimalByIdAsync(animalId);
             if (animal == null)
                 return BadRequest("No animal with this Id !");
 
-            var Rvous = _repo.getRendezVousByAnimalId(animalId);
+            var Rvous = await _repo.getRendezVousByAnimalId(animalId);
             return Ok(Rvous);
 
         }
 
         [HttpGet]
         [Route("get-rendez-vous-by-status")]
-        public IActionResult GetRendezVousByStatus(RendezVousStatus status)
+        public async Task<IActionResult> GetRendezVousByStatus(RendezVousStatus status)
         {
-            var Rvous = _repo.getRendezVousByStatus(status);
+            var Rvous = await _repo.getRendezVousByStatus(status);
             if (Rvous == null)
             {
                 return BadRequest("No rendez-vous with this status !");
@@ -99,17 +100,17 @@ namespace backend.Controllers.AdminControllers
 
         [HttpPost]
         [Route("add-rendez-vous")]
-        public IActionResult AddRendezVous([FromBody] AddRendezVousAdminDto model)
+        public async Task<IActionResult> AddRendezVous([FromBody] AddRendezVousAdminDto model)
         {
-            var vet = _VetRepo.GetVeterinaireById(model.VetId);
+            var vet = await _VetRepo.GetVeterinaireById(model.VetId);
             if (vet == null)
                 return NotFound(new { message = "Veterinaire not found." });
 
-            var client = _ClientRepo.GetClientById(model.ClientId);
+            var client = await _ClientRepo.GetClientByIdAsync(model.ClientId);
             if (client == null)
                 return NotFound(new { message = "Client not found." });
 
-            var animal = _AnimalRepo.getAnimalById(model.AnimalId);
+            var animal = await _AnimalRepo.GetAnimalByIdAsync(model.AnimalId);
             if (animal == null)
                 return NotFound(new { message = "Animal not found." });
 
@@ -124,7 +125,7 @@ namespace backend.Controllers.AdminControllers
                 UpdatedAt = DateTime.UtcNow
             };
 
-            _repo.AddRendezVous(rendezVous);
+            await _repo.AddRendezVous(rendezVous);
 
             return Ok(new { message = "Rendez-vous added successfully", rendezVous });
         }
@@ -132,27 +133,27 @@ namespace backend.Controllers.AdminControllers
 
         [HttpPut]
         [Route("update-rendez-vous/{id}")]
-        public IActionResult UpdateRendezVous(Guid id, [FromBody] UpdateRendezVousAdminDto model)
+        public async Task<IActionResult> UpdateRendezVous(Guid id, [FromBody] UpdateRendezVousAdminDto model)
         {
-            var rendezVousExist = _context.RendezVous.Find(id);
+            var rendezVousExist = await _repo.getRendezVousById(id);
             if (rendezVousExist == null)
                 return BadRequest("Rendez-vous with this id doesnt exist !");
 
-            var res= _repo.UpdateRendezVous(id, model);
+            var res= await _repo.UpdateRendezVous(id, model);
             return Ok(new { message = res });
         }
 
         [HttpDelete]
         [Route("delete-rendez-vous/{id}")]
-        public IActionResult DeleteAnimal(Guid id)
+        public async Task<IActionResult> DeleteAnimal(Guid id)
         {
-            var RvousExist = _context.RendezVous.Find(id);
+            var RvousExist = await _repo.getRendezVousById(id);
             if (RvousExist == null)
             {
                 return BadRequest("Rendez-vous with this Id not found");
             }
 
-            var result = _repo.DeleteRendezVous(id);
+            var result = await _repo.DeleteRendezVous(id);
             
 
             return Ok(new { message = result });

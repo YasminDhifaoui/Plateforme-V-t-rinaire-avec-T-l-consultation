@@ -1,20 +1,24 @@
-﻿using backend.Dtos.AdminDtos.ConsultationDtos;
+﻿using backend.Data;
+using backend.Dtos.AdminDtos.ConsultationDtos;
 using backend.Repo.AdminRepo.ConsultationRepo;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace backend.Controllers.AdminControllers
 {
     [Route("api/admin/[controller]")]
     [ApiController]
-    //[Authorize(Policy = "Admin")]
+    [Authorize(Policy = "Admin")]
     public class ConsultationController : ControllerBase
     {
         private readonly IConsultationRepo _consultationRepo;
+        private readonly AppDbContext _context;
 
-        public ConsultationController(IConsultationRepo consultationRepo)
+        public ConsultationController(IConsultationRepo consultationRepo, AppDbContext context)
         {
             _consultationRepo = consultationRepo;
+            _context = context;
         }
 
         [HttpGet]
@@ -39,6 +43,11 @@ namespace backend.Controllers.AdminControllers
         [Route("add-consultation")]
         public async Task<IActionResult> AddConsultation([FromForm] AddConsultationDto dto)
         {
+            var rdv = await _context.RendezVous.FindAsync(dto.RendezVousID);
+            if (rdv == null)
+            {
+                return NotFound("Rendezvous not found !");
+            }
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
@@ -67,9 +76,9 @@ namespace backend.Controllers.AdminControllers
 
         [HttpDelete]
         [Route("delete-consultation/{id}")]
-        public IActionResult DeleteConsultation(Guid id)
+        public async Task<IActionResult> DeleteConsultation(Guid id)
         {
-            var result = _consultationRepo.DeleteAsync(id);
+            var result =await _consultationRepo.DeleteAsync(id);
             if (result == "Consultation not found")
                 return NotFound(result);
 

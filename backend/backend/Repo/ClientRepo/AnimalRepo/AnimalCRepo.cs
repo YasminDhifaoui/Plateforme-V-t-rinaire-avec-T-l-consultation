@@ -1,6 +1,7 @@
 ﻿using backend.Data;
 using backend.Dtos.ClientDtos.AnimalDtos;
 using backend.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace backend.Repo.ClientRepo.AnimalRepo
 {
@@ -13,9 +14,9 @@ namespace backend.Repo.ClientRepo.AnimalRepo
         {
             _context = context;
         }
-        public IEnumerable<AnimalClientDto> getAnimalsByOwnerId(Guid userId)
+        public async Task<IEnumerable<AnimalClientDto>> getAnimalsByOwnerId(Guid userId)
         {
-            var animals = _context.Animals
+            var animals =await _context.Animals
                 .Where(animal => animal.OwnerId == userId)
                 .Select(Animal => new AnimalClientDto
                 {
@@ -29,31 +30,31 @@ namespace backend.Repo.ClientRepo.AnimalRepo
                     Anttecedentsmedicaux = Animal.AnttecedentsMedicaux,
                     CreatedAt = Animal.CreatedAt,
                     UpdatedAt = Animal.UpdatedAt,
-                }).ToList();
+                }).ToListAsync();
             return animals;
         }
-        public string AddAnimal(Animal animal)
+        public async Task<string> AddAnimal(Animal animal)
         {
             if (animal != null)
             {
-                _context.Animals.Add(animal);
-                SaveChanges();
+                await _context.Animals.AddAsync(animal);
+                await SaveChanges();
                 return "animal added successfully";
             }
             return "failed to add animal";
         }
-        public string deleteAnimal(Guid id)
+        public async Task<string> deleteAnimal(Guid id)
         {
-            var animal = _context.Animals.FirstOrDefault(a => a.Id == id);
+            var animal =await _context.Animals.FirstOrDefaultAsync(a => a.Id == id);
             _context.Animals.Remove(animal);
-            SaveChanges();
+            await SaveChanges();
             return "Animal removed successfully";
         }
 
 
-        public void SaveChanges()
+        public async Task SaveChanges()
         {
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
         }
 
 

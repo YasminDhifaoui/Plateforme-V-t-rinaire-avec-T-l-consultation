@@ -8,14 +8,18 @@ namespace backend.Repo.AdminRepo
 {
     public interface IAdminRepo
     {
-        IEnumerable<AdminDto> GetAdmins(); 
-        AdminDto GetAdminById(Guid id);
-        AdminDto GetAdminByUsername(string username);
+        Task<IEnumerable<AdminDto>> GetAdmins();
 
-        string UpdateAdmin(Guid UserId, UpdateAdminDto updatedAdmin);
-        string DeleteAdmin(Guid id);
-        string AddAdmin(Admin admin);
+        Task<AdminDto> GetAdminById(Guid id);
 
-        void SaveChanges();
+        Task<AdminDto> GetAdminByUsername(string username);
+
+        Task<string> UpdateAdmin(Guid userId, UpdateAdminDto updatedAdmin);
+
+        Task<string> DeleteAdmin(Guid id);
+
+        Task<string> AddAdmin(Admin admin);
+
+        Task SaveChangesAsync();
     }
 }

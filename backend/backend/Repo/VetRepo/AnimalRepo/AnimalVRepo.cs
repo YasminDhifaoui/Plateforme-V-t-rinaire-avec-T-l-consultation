@@ -1,6 +1,8 @@
 ﻿using backend.Data;
+using backend.Dtos.AdminDtos.AnimalDtos;
 using backend.Dtos.VetDtos.AnimalDtos;
-using backend.Models; 
+using backend.Models;
+using Microsoft.EntityFrameworkCore;
 using System.Linq;
 
 namespace backend.Repo.VetRepo.AnimalRepo
@@ -14,31 +16,62 @@ namespace backend.Repo.VetRepo.AnimalRepo
             _context = context;
         }
 
-        public IEnumerable<AnimalVetDto> GetAnimalsByVetId(Guid vetId)
+        public async  Task<IEnumerable<AnimalVetDto>> GetAnimalsByVetId(Guid vetId)
         {
-            var animalIds = _context.RendezVous
+
+            var animalIds = await _context.RendezVous
                                     .Where(r => r.VeterinaireId == vetId)
                                     .Select(r => r.AnimalId)
                                     .Distinct()
-                                    .ToList();
+                                    .ToListAsync();
 
-            var animals = _context.Animals
-                                  .Where(a => animalIds.Contains(a.Id))
-                                  .ToList();
 
-            var animalDtos = animals.Select(a => new AnimalVetDto
-            {
-                Id = a.Id,
-                Name = a.Nom,
-                Espece = a.Espece,
-                Race = a.Race,
-                Age = a.Age,
-                Sexe = a.Sexe,
-                Allergies = a.Allergies,
-                Anttecedentsmedicaux = a.AnttecedentsMedicaux,
-            }).ToList();
+            var animalDtos = await _context.Animals
+              .Where(a => animalIds.Contains(a.Id))
+              .Select(a => new AnimalVetDto
+              {
+                  Id = a.Id,
+                  Name = a.Nom,
+                  Espece = a.Espece,
+                  Race = a.Race,
+                  Age = a.Age,
+                  Sexe = a.Sexe,
+                  Allergies = a.Allergies,
+                  Anttecedentsmedicaux = a.AnttecedentsMedicaux,
+              }).ToListAsync();
+
 
             return animalDtos;
         }
+
+       
+
+        public async Task<string> UpdateAnimalAsync(Guid vetId, Guid animalId, UpdateAnimalVetDto updatedAnimal)
+        {
+            var vet = await _context.veterinaires.FirstOrDefaultAsync(u => u.AppUserId == vetId);
+            if (vet == null)
+                return "Vet Id not found.";
+
+            var animalToUpdate = await _context.Animals.FirstOrDefaultAsync(a => a.Id == animalId);
+            if (animalToUpdate == null)
+                return "Animal not found.";
+
+
+            animalToUpdate.Age = updatedAnimal.Age;
+            animalToUpdate.Allergies = updatedAnimal.Allergies ;
+            animalToUpdate.AnttecedentsMedicaux = updatedAnimal.AntecedentsMedicaux ;
+            animalToUpdate.UpdatedAt = DateTime.UtcNow;
+
+
+            _context.Animals.Update(animalToUpdate);
+            await SaveChanges();
+            return "Animal updated successfully";
+        }
+        public async Task SaveChanges()
+        {
+            await _context.SaveChangesAsync();
+        }
+
+
     }
 }

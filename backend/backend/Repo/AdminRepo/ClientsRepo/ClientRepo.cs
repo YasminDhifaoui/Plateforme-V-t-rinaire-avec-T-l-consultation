@@ -15,9 +15,9 @@ namespace backend.Repo.AdminRepo.ClientsRepo
         }
 
         //Get Users By Role
-        public IEnumerable<ClientDto> GetClients()
+        public async Task<IEnumerable<ClientDto>> GetClientsAsync()
         {
-            var clients = _context.Users
+            var clients =await _context.Users
                 .Where(user => user.Role == "Client")
                 .Select(user => new ClientDto
                 {
@@ -38,14 +38,14 @@ namespace backend.Repo.AdminRepo.ClientsRepo
                     PhoneConfirmed = user.PhoneNumberConfirmed,
 
                     AccessFailedCount = user.AccessFailedCount
-                }).ToList();
+                }).ToListAsync();
             return clients;
 
         }
         //GetClientById
-        public ClientDto GetClientById(Guid id)
+        public async Task<ClientDto> GetClientByIdAsync(Guid id)
         {
-            var client = _context.Users
+            var client = await _context.Users
                 .Where(user => user.Id == id)
                 .Select(user => new ClientDto
                 {
@@ -67,15 +67,15 @@ namespace backend.Repo.AdminRepo.ClientsRepo
 
                     AccessFailedCount = user.AccessFailedCount
                 })
-                .FirstOrDefault();
+                .FirstOrDefaultAsync();
 
             return client;
         }
 
         //getClientByUsername
-        public ClientDto GetClientByUsername(string username)
+        public async Task<ClientDto> GetClientByUsernameAsync(string username)
         {
-            var client = _context.Users
+            var client = await _context.Users
                 .Where(user => user.UserName == username)
                 .Select(user => new ClientDto
                 {
@@ -97,21 +97,21 @@ namespace backend.Repo.AdminRepo.ClientsRepo
 
                     AccessFailedCount = user.AccessFailedCount
                 })
-                .FirstOrDefault();
+                .FirstOrDefaultAsync();
 
             return client;
         }
 
         // Update client 
-        public string UpdateClient(Guid UserId, UpdateClientDto updatedUser)
+        public async Task<string> UpdateClientAsync(Guid userId, UpdateClientDto updatedUser)
         {
 
-            var clientExist = GetClientById(UserId);
+            var clientExist = await GetClientByIdAsync(userId);
             if (clientExist == null)
             {
                 return "Client not found";
             }
-            var userToUpdate = _context.Users.Find(UserId);
+            var userToUpdate = _context.Users.Find(userId);
 
             if (userToUpdate == null)
                 return "User not found !";
@@ -129,38 +129,39 @@ namespace backend.Repo.AdminRepo.ClientsRepo
             userToUpdate.UpdatedAt = DateTime.UtcNow;
 
             _context.Users.Update(userToUpdate);
-            SaveChanges();
+            SaveChangesAsync();
             return "User updated successfully";
         }
 
         // Delete client by Id
-        public string DeleteClient(Guid id)
+        public async Task<string> DeleteClientAsync(Guid id)
         {
-            var client = _context.clients.Find(id);
+            var client = await _context.clients.FirstOrDefaultAsync(v => v.AppUserId == id);
+
             if (client == null)
             {
                 return "Client not found";
             }
             _context.clients.Remove(client);
-            SaveChanges();
+            SaveChangesAsync();
             return "Client deleted successfully";
         }
 
 
         //Add client 
-        public string AddClient(Client client)
+        public async Task<string> AddClientAsync(Client client)
         {
             _context.clients.Add(client);
-            SaveChanges();
+            SaveChangesAsync();
 
             return "Client added successfully";
 
         }
 
 
-        public void SaveChanges()
+        public async Task SaveChangesAsync()
         {
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
         }
     }
 }

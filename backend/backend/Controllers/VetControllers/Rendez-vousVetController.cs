@@ -3,6 +3,7 @@ using backend.Models;
 using backend.Repo.VetRepo.RendezVousRepo;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 
 namespace backend.Controllers.VetControllers
@@ -23,15 +24,15 @@ namespace backend.Controllers.VetControllers
 
         [HttpGet]
         [Route("rendez-vous-list")]
-        public IActionResult GetRendezVousList()
+        public async Task<IActionResult> GetRendezVousList()
         {
             var vetId = Guid.Parse(User.FindFirst("Id")?.Value);
 
             if (vetId == Guid.Empty)
                 return Unauthorized("Veterinarian ID not found in token");
 
-            var rendezVous = _repo.GetRendezVousByVetId(vetId);
-            if (rendezVous == null || !rendezVous.Any())
+            var rendezVous =await _repo.GetRendezVousByVetId(vetId);
+            if (rendezVous == null )
                 return NotFound("No rendez-vous found for this vet.");
 
             return Ok(rendezVous);
@@ -39,23 +40,18 @@ namespace backend.Controllers.VetControllers
 
         [HttpPut]
         [Route("update-status/{rendezVousId}")]
-        public IActionResult UpdateRendezVousStatus(Guid rendezVousId, [FromBody] RendezVousStatus newStatus)
+        public async Task<IActionResult> UpdateRendezVousStatus(Guid rendezVousId, [FromBody] RendezVousStatus newStatus)
         {
             var vetId = Guid.Parse(User.FindFirst("Id")?.Value);
             if (vetId == Guid.Empty)
                 return Unauthorized("Veterinarian ID not found in token");
 
-            var rendezVous = _context.RendezVous.FirstOrDefault(r => r.Id == rendezVousId && r.VeterinaireId == vetId);
-            if (rendezVous == null)
-                return NotFound("Rendez-vous not found for this veterinarian.");
+            var success = await _repo.UpdateRendezVousStatus(vetId, rendezVousId, newStatus);
 
-            rendezVous.Status = newStatus;
-            rendezVous.UpdatedAt = DateTime.UtcNow;
+            if (!success)
+                return NotFound(new { message = "Rendez-vous not found for this veterinarian" });
 
-            _context.RendezVous.Update(rendezVous);
-            _context.SaveChanges();
-
-            return Ok(new { message = "Rendez-vous status updated successfully.", rendezVous });
+            return Ok(new { message = "Rendez-vous status updated successfully." });
         }
 
       

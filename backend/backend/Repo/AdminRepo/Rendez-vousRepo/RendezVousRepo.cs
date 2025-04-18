@@ -1,6 +1,7 @@
 ﻿using backend.Data;
 using backend.Dtos.AdminDtos.RendezVousDtos;
 using backend.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace backend.Repo.Rendez_vousRepo
 {
@@ -10,9 +11,9 @@ namespace backend.Repo.Rendez_vousRepo
         public RendezVousRepo(AppDbContext context) { 
             _context = context;
         }
-        public IEnumerable<RendezVous> getAllRendezVous()
+        public async Task<IEnumerable<RendezVous>> getAllRendezVous()
         {
-            var Rvous = _context.RendezVous.Select(r => new RendezVous
+            var Rvous = await _context.RendezVous.Select(r => new RendezVous
             {
                 Id = r.Id,
                 Date = r.Date,
@@ -22,12 +23,12 @@ namespace backend.Repo.Rendez_vousRepo
                 Status = r.Status,
                 CreatedAt = r.CreatedAt,
                 UpdatedAt = r.UpdatedAt,
-            }).ToList();
+            }).ToListAsync();
             return Rvous;
         }
-        public IEnumerable<RendezVous> getRendezVousById(Guid id)
+        public async Task<RendezVous> getRendezVousById(Guid id)
         {
-            var Rvous = _context.RendezVous
+            var Rvous = await _context.RendezVous
                 .Where(r => r.Id == id)
                 .Select(r => new RendezVous
             {
@@ -39,12 +40,12 @@ namespace backend.Repo.Rendez_vousRepo
                 Status = r.Status,
                 CreatedAt = r.CreatedAt,
                 UpdatedAt = r.UpdatedAt,
-            }).ToList();
+            }).FirstOrDefaultAsync();
             return Rvous;
         }
-        public IEnumerable<RendezVous> getRendezVousByVetId(Guid vetId)
+        public async Task<IEnumerable<RendezVous>> getRendezVousByVetId(Guid vetId)
         {
-            var Rvous = _context.RendezVous
+            var Rvous = await _context.RendezVous
                 .Where(r => r.VeterinaireId == vetId)
                 .Select(r => new RendezVous
                 {
@@ -56,12 +57,12 @@ namespace backend.Repo.Rendez_vousRepo
                     Status = r.Status,
                     CreatedAt = r.CreatedAt,
                     UpdatedAt = r.UpdatedAt,
-                }).ToList();
+                }).ToListAsync();
             return Rvous;
         }
-        public IEnumerable<RendezVous> getRendezVousByClientId(Guid clientId)
+        public async Task<IEnumerable<RendezVous>> getRendezVousByClientId(Guid clientId)
         {
-            var Rvous = _context.RendezVous
+            var Rvous = await _context.RendezVous
                             .Where(r => r.ClientId == clientId)
                             .Select(r => new RendezVous
                             {
@@ -73,12 +74,12 @@ namespace backend.Repo.Rendez_vousRepo
                                 Status = r.Status,
                                 CreatedAt = r.CreatedAt,
                                 UpdatedAt = r.UpdatedAt,
-                            }).ToList();
+                            }).ToListAsync();
             return Rvous;
         }
-        public IEnumerable<RendezVous> getRendezVousByAnimalId(Guid animalId)
+        public async Task<IEnumerable<RendezVous>> getRendezVousByAnimalId(Guid animalId)
         {
-            var Rvous = _context.RendezVous
+            var Rvous = await _context.RendezVous
                             .Where(r => r.AnimalId == animalId)
                             .Select(r => new RendezVous
                             {
@@ -90,14 +91,14 @@ namespace backend.Repo.Rendez_vousRepo
                                 Status = r.Status,
                                 CreatedAt = r.CreatedAt,
                                 UpdatedAt = r.UpdatedAt,
-                            }).ToList();
+                            }).ToListAsync();
             return Rvous;
         }
 
 
-        public IEnumerable<RendezVous> getRendezVousByStatus(RendezVousStatus status)
+        public async Task<IEnumerable<RendezVous>> getRendezVousByStatus(RendezVousStatus status)
         {
-            var Rvous = _context.RendezVous
+            var Rvous = await _context.RendezVous
                             .Where(r => r.Status == status)
                             .Select(r => new RendezVous
                             {
@@ -109,37 +110,37 @@ namespace backend.Repo.Rendez_vousRepo
                                 Status = r.Status,
                                 CreatedAt = r.CreatedAt,
                                 UpdatedAt = r.UpdatedAt,
-                            }).ToList();
+                            }).ToListAsync();
             return Rvous;
         }
 
-        public string AddRendezVous(RendezVous rendezVous)
+        public async Task<string> AddRendezVous(RendezVous rendezVous)
         {
             if (rendezVous != null)
             {
-                _context.RendezVous.Add(rendezVous);
-                this.SaveChanges();
+                await _context.RendezVous.AddAsync(rendezVous);
+                await SaveChanges();
                 return "Rendez-vous added successfully";
             }
             return "failed to add rendez-vous";
         }
 
-        public string UpdateRendezVous(Guid id, UpdateRendezVousAdminDto updatedRendezVous)
+        public async Task<string> UpdateRendezVous(Guid id, UpdateRendezVousAdminDto updatedRendezVous)
         {
-            var vet = _context.veterinaires.FirstOrDefault(u => u.AppUserId == updatedRendezVous.VetId);
+            var vet = await _context.veterinaires.FirstOrDefaultAsync(u => u.AppUserId == updatedRendezVous.VetId);
             if (vet == null)
                 return ("Veterinaire not found." );
 
-            var client = _context.clients.FirstOrDefault(u => u.AppUserId == updatedRendezVous.ClientId);
+            var client = await _context.clients.FirstOrDefaultAsync(u => u.AppUserId == updatedRendezVous.ClientId);
             if (client == null)
                 return ("Client not found.");
 
-            var animal = _context.Animals.FirstOrDefault(u => u.Id == updatedRendezVous.AnimalId);
+            var animal = await _context.Animals.FirstOrDefaultAsync(u => u.Id == updatedRendezVous.AnimalId);
             if (animal == null)
                 return ("Animal not found.");
 
 
-            var RvousToUpdate = _context.RendezVous.Find(id);
+            var RvousToUpdate = await _context.RendezVous.FindAsync(id);
 
             if (RvousToUpdate == null)
                 return "Rendez-vous not found !";
@@ -153,20 +154,20 @@ namespace backend.Repo.Rendez_vousRepo
             RvousToUpdate.UpdatedAt = DateTime.UtcNow.ToUniversalTime();
 
             _context.RendezVous.Update(RvousToUpdate);
-            this.SaveChanges();
+            await SaveChanges();
             return "Rendez-vous updated successfully";
         }
-        public string DeleteRendezVous(Guid id)
+        public async Task<string> DeleteRendezVous(Guid id)
         {
-            var Rvous = _context.RendezVous.FirstOrDefault(r => r.Id == id);
+            var Rvous = await _context.RendezVous.FirstOrDefaultAsync(r => r.Id == id);
             _context.RendezVous.Remove(Rvous);
-            this.SaveChanges();
+            await SaveChanges();
             return ("Rendez-vous removed successfully");
         }
 
-        public void SaveChanges()
+        public async Task SaveChanges()
         {
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
         }
     }
 }

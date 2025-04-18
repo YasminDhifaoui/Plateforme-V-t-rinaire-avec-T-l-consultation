@@ -131,7 +131,7 @@ namespace backend.Controllers.ClientControllers
                 AppUserId = user.Id
             };
 
-            _repository.AddClient(client);
+            _repository.AddClientAsync(client);
 
             if (!await _roleManager.RoleExistsAsync(ApplicationRole.Client))
             {

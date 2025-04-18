@@ -4,6 +4,8 @@ using backend.Models;
 using backend.Repo.AdminRepo.AnimalRepo;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using System.Threading.Tasks;
 
 namespace backend.Controllers.AdminControllers
 {
@@ -15,90 +17,88 @@ namespace backend.Controllers.AdminControllers
     {
         public readonly AppDbContext _context;
         public IAnimalRepo _repo;
-        public AnimalsController(AppDbContext context, IAnimalRepo repo) {
 
+        public AnimalsController(AppDbContext context, IAnimalRepo repo)
+        {
             _context = context;
             _repo = repo;
         }
 
         [HttpGet]
         [Route("get-all-animals")]
-        public IActionResult GetAllAnimals()
+        public async Task<IActionResult> GetAllAnimals()
         {
-            var animals = _repo.getAllAnimals();
+            var animals = await _repo.GetAllAnimalsAsync(); 
             return Ok(animals);
-
         }
 
         [HttpGet]
         [Route("get-animal-by-id/{id}")]
-        public IActionResult GetAnimalById(Guid id)
+        public async Task<IActionResult> GetAnimalById(Guid id)
         {
-            var animals = _repo.getAnimalById(id);
+            var animals = await _repo.GetAnimalByIdAsync(id);  
             if (animals == null)
             {
-                return BadRequest("No animal with this Id !");
+                return BadRequest("No animal with this Id!");
             }
             return Ok(animals);
-
         }
 
         [HttpGet]
         [Route("get-animals-by-owner-id/{ownerId}")]
-        public IActionResult GetAnimalsByOwnerId(Guid ownerId)
+        public async Task<IActionResult> GetAnimalsByOwnerId(Guid ownerId)
         {
-            var owner = _context.AppUsers.Find(ownerId);
+            var owner = await _context.AppUsers.FindAsync(ownerId);  
             if (owner == null)
-                return BadRequest("No Owner with this Id !");
+                return BadRequest("No Owner with this Id!");
 
-            var animals = _repo.getAnimalsByOwnerId(ownerId);
+            var animals = await _repo.GetAnimalsByOwnerIdAsync(ownerId);  
             if (animals == null)
-                return BadRequest("No animals for this owner !");
+                return BadRequest("No animals for this owner!");
             return Ok(animals);
-
         }
-       
+
         [HttpGet]
         [Route("get-animals-by-name/{name}")]
-        public IActionResult GetAnimalsByname(string name)
+        public async Task<IActionResult> GetAnimalsByname(string name)
         {
-            var animals = _repo.getAnimalsByName(name);
+            var animals = await _repo.GetAnimalsByNameAsync(name); 
             if (animals == null)
             {
-                return BadRequest("No animal with this name !");
+                return BadRequest("No animal with this name!");
             }
             return Ok(animals);
-
         }
+
         [HttpGet]
         [Route("get-animals-by-espece/{espece}")]
-        public IActionResult GetAnimalsByEspece(string espece)
+        public async Task<IActionResult> GetAnimalsByEspece(string espece)
         {
-            var animals = _repo.getAnimalsByEspece(espece);
+            var animals = await _repo.GetAnimalsByEspeceAsync(espece);
             if (animals == null)
             {
-                return BadRequest("No animal in this espece !");
+                return BadRequest("No animal in this espece!");
             }
             return Ok(animals);
-
         }
+
         [HttpGet]
         [Route("get-animals-by-race/{race}")]
-        public IActionResult GetAnimalsByRace(string race)
+        public async Task<IActionResult> GetAnimalsByRace(string race)
         {
-            var animals = _repo.getAnimalsByRace(race);
+            var animals = await _repo.GetAnimalsByRaceAsync(race);  
             if (animals == null)
             {
-                return BadRequest("No animal in this race !");
+                return BadRequest("No animal in this race!");
             }
             return Ok(animals);
-
         }
+
         [HttpPost]
         [Route("add-animal")]
-        public IActionResult AddAnimal([FromBody] AddAnimalAdminDto model)
+        public async Task<IActionResult> AddAnimal([FromBody] AddAnimalAdminDto model)
         {
-            var owner = _context.Users.FirstOrDefault(u => u.Id == model.OwnerId);
+            var owner = await _context.Users.FirstOrDefaultAsync(u => u.Id == model.OwnerId);  
             if (owner == null)
                 return NotFound(new { message = "Owner not found." });
 
@@ -112,45 +112,43 @@ namespace backend.Controllers.AdminControllers
                 Allergies = model.Allergies,
                 AnttecedentsMedicaux = model.AntecedentsMedicaux,
                 OwnerId = model.OwnerId,
-
-
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow
             };
 
-            _repo.AddAnimal(animal);
+            await _repo.AddAnimalAsync(animal);  
 
             return Ok(new { message = "Animal added successfully", animal });
         }
+
         [HttpPut]
         [Route("update-animal/{id}")]
-        public IActionResult UpdateAnimal(Guid id, [FromBody] UpdateAnimalAdminDto updatedAnimal)
+        public async Task<IActionResult> UpdateAnimal(Guid id, [FromBody] UpdateAnimalAdminDto updatedAnimal)
         {
-            var animalExist = _context.Animals.Find(id);
+            var animalExist = await _context.Animals.FindAsync(id);
             if (animalExist == null)
             {
                 return BadRequest("Animal not found");
             }
 
-            var result = _repo.UpdateAnimal(id, updatedAnimal);
+            var result = await _repo.UpdateAnimalAsync(id, updatedAnimal); 
 
-            return Ok(new { message = result});
+            return Ok(new { message = result });
         }
+
         [HttpDelete]
         [Route("delete-animal/{id}")]
-        public IActionResult DeleteAnimal(Guid id)
+        public async Task<IActionResult> DeleteAnimal(Guid id)
         {
-            var animalExist = _context.Animals.Find(id);
+            var animalExist = await _context.Animals.FindAsync(id);  
             if (animalExist == null)
             {
                 return BadRequest("Animal with this Id not found");
             }
 
-            var result = _repo.deleteAnimal(id);
+            var result = await _repo.DeleteAnimalAsync(id);  
 
             return Ok(new { message = result });
         }
-
-
     }
 }

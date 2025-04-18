@@ -18,9 +18,10 @@ namespace backend.Repo.AdminRepo
      
 
         //Get Users By Role
-        public IEnumerable<AdminDto> GetAdmins()
+        public async Task<IEnumerable<AdminDto>> GetAdmins()
+
         {
-            var admins = _context.Users
+            var admins =await _context.Users
                 .Where(user => user.Role == "Admin")
                 .Select(user => new AdminDto
                 {
@@ -41,14 +42,14 @@ namespace backend.Repo.AdminRepo
                     PhoneConfirmed = user.PhoneNumberConfirmed,
 
                     AccessFailedCount = user.AccessFailedCount
-                }).ToList();
+                }).ToListAsync();
             return admins;
 
         }
         //GetAdminById
-        public AdminDto GetAdminById(Guid id)
+        public async Task<AdminDto> GetAdminById(Guid id)
         {
-            var admin = _context.Users
+            var admin = await _context.Users
                 .Where(user => user.Id == id)
                 .Select(user => new AdminDto
                 {
@@ -70,15 +71,15 @@ namespace backend.Repo.AdminRepo
 
                     AccessFailedCount = user.AccessFailedCount
                 })
-                .FirstOrDefault();
+                .FirstOrDefaultAsync();
 
             return admin;
         }
 
         //getAdminByUsername
-        public AdminDto GetAdminByUsername(string username)
+        public async Task<AdminDto> GetAdminByUsername(string username)
         {
-            var admin = _context.Users
+            var admin = await _context.Users
                 .Where(user => user.UserName == username)
                 .Select(user => new AdminDto
                 {
@@ -100,21 +101,21 @@ namespace backend.Repo.AdminRepo
 
                     AccessFailedCount = user.AccessFailedCount
                 })
-                .FirstOrDefault();
+                .FirstOrDefaultAsync();
 
             return admin;
         }
 
         // Update admin
-        public string UpdateAdmin(Guid UserId, UpdateAdminDto updatedAdmin)
+        public async Task<string> UpdateAdmin(Guid userId, UpdateAdminDto updatedAdmin)
         {
 
-            var adminExist = this.GetAdminById(UserId);
+            var adminExist =await GetAdminById(userId);
             if (adminExist == null)
             {
                 return "Admin not found";
             }
-            var userToUpdate = _context.Users.Find(UserId);
+            var userToUpdate =await _context.Users.FindAsync(userId);
 
             if (userToUpdate == null)
                 return "User not found !";
@@ -130,37 +131,38 @@ namespace backend.Repo.AdminRepo
             userToUpdate.UpdatedAt = DateTime.UtcNow;
 
             _context.Users.Update(userToUpdate);
-            this.SaveChanges();
+            SaveChangesAsync();
             return "User updated successfully";
         }
 
         // Delete admin by Id
-        public string DeleteAdmin(Guid id)
+        public async Task<string> DeleteAdmin(Guid id)
         {
-            var admin = _context.admins.Find(id);
+            var admin = await _context.admins.FirstOrDefaultAsync(v => v.AppUserId == id);
+
             if (admin == null)
             {
                 return "Admin not found";
             }
             _context.admins.Remove(admin);
-            this.SaveChanges();
+            SaveChangesAsync();
             return "Admin deleted successfully";
         }
 
 
         //Add Admin
-        public string AddAdmin(Admin admin)
+        public async Task<string> AddAdmin(Admin admin)
         {
             _context.admins.Add(admin);
-            this.SaveChanges();
+            SaveChangesAsync();
             return "Admin added successfully";
 
         }
 
 
-        public void SaveChanges()
+        public async Task SaveChangesAsync()
         {
-            _context.SaveChanges();
+            _context.SaveChangesAsync();
         }
     }
 }

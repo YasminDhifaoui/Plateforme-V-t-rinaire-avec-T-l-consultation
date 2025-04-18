@@ -127,7 +127,6 @@ namespace backend.Controllers.VetControllers
                 AppUserId = user.Id
             };
 
-            _repository.AddVeterinaire(veterinaire);
 
             if (!await _roleManager.RoleExistsAsync(ApplicationRole.Veterinaire))
             {
@@ -146,6 +145,8 @@ namespace backend.Controllers.VetControllers
                 await _context.UserRoles.AddAsync(applicationUserRole);
                 await _context.SaveChangesAsync();
             }
+            await _repository.AddVeterinaire(veterinaire);
+
             var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
             if (string.IsNullOrEmpty(token))
             {
@@ -274,23 +275,7 @@ namespace backend.Controllers.VetControllers
         public async Task<IActionResult> Login([FromBody] VetLoginDto model)
         {
             var user = await _userManager.FindByEmailAsync(model.Email);
-            if (user.UserName == null)
-            {
-                return StatusCode(StatusCodes.Status500InternalServerError, new ApiResponse
-                {
-                    Status = "Error",
-                    Message = "User name is null."
-                });
-            }
-            if (user.Email == null)
-            {
-                return StatusCode(StatusCodes.Status500InternalServerError, new ApiResponse
-                {
-                    Status = "Error",
-                    Message = "User email is null."
-                });
-            }
-
+           
             if (user != null && await _userManager.CheckPasswordAsync(user, model.Password) && user.EmailConfirmed)
             {
                 var UserRoles = await _userManager.GetRolesAsync(user);

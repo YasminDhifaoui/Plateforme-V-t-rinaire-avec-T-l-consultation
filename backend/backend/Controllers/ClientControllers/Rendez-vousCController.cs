@@ -7,6 +7,7 @@ using backend.Repo.AdminRepo.VetRepo;
 using backend.Repo.ClientRepo.RendezVousRepo;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace backend.Controllers.ClientControllers
 {
@@ -32,7 +33,7 @@ namespace backend.Controllers.ClientControllers
 
         [HttpGet]
         [Route("rendez-vous-list")]
-        public IActionResult RendezVousList()
+        public async Task<IActionResult> RendezVousList()
         {
             var idClaim = User.FindFirst("Id");
 
@@ -42,13 +43,13 @@ namespace backend.Controllers.ClientControllers
             }
 
             var clientId = Guid.Parse(idClaim.Value);
-            var Rvous = _repo.getRendezVousByClientId(clientId);
+            var Rvous =await _repo.getRendezVousByClientId(clientId);
             return Ok(Rvous);
         }
 
         [HttpPost]
         [Route("add-rendez-vous")]
-        public IActionResult AddRendezVous([FromBody] AddRendezVousClientDto model)
+        public async Task<IActionResult> AddRendezVous([FromBody] AddRendezVousClientDto model)
         {
             var idClaimValue = User.FindFirst("Id")?.Value;
 
@@ -57,15 +58,15 @@ namespace backend.Controllers.ClientControllers
                 throw new UnauthorizedAccessException("Invalid or missing user ID claim.");
             }
 
-            var client = _clientRepo.GetClientById(clientId);
+            var client =await _clientRepo.GetClientByIdAsync(clientId);
             if (client == null)
                 return NotFound(new { message = "Client not found." });
 
-            var vet = _vetRepo.GetVeterinaireById(model.VetId);
+            var vet = await _vetRepo.GetVeterinaireById(model.VetId);
             if (vet == null)
                 return NotFound(new { message = "Veterinaire not found." });
 
-            var animal = _context.Animals.FirstOrDefault(a => a.Id == model.AnimalId && a.OwnerId == clientId);
+            var animal = await _context.Animals.FirstOrDefaultAsync(a => a.Id == model.AnimalId && a.OwnerId == clientId);
             if (animal == null)
                 return NotFound(new { message = "Animal not found." });
 
@@ -80,14 +81,15 @@ namespace backend.Controllers.ClientControllers
                 UpdatedAt = DateTime.UtcNow
             };
 
-            _repo.AddRendezVous(rendezVous);
+            await _repo.AddRendezVous(rendezVous);
+            await _repo.SaveChanges();
 
             return Ok(new { message = "Rendez-vous added successfully", rendezVous });
         }
 
         [HttpPut]
         [Route("update-rendez-vous/{id}")]
-        public IActionResult UpdateRendezVous(Guid id, [FromBody] UpdateRendezVousClientDto model)
+        public async Task<IActionResult> UpdateRendezVous(Guid id, [FromBody] UpdateRendezVousClientDto model)
         {
             var idClaimValue = User.FindFirst("Id")?.Value;
 
@@ -96,15 +98,15 @@ namespace backend.Controllers.ClientControllers
                 throw new UnauthorizedAccessException("Invalid or missing user ID claim.");
             }
 
-            var rendezVousExist = _context.RendezVous.FirstOrDefault(r => r.Id == id && r.ClientId == clientId);
+            var rendezVousExist =await _context.RendezVous.FirstOrDefaultAsync(r => r.Id == id && r.ClientId == clientId);
             if (rendezVousExist == null)
                 return BadRequest("Rendez-vous with this id for this client doesn't exist!");
 
-            var vet = _context.veterinaires.FirstOrDefault(u => u.AppUserId == model.VetId);
+            var vet =await _context.veterinaires.FirstOrDefaultAsync(u => u.AppUserId == model.VetId);
             if (vet == null)
                 return BadRequest("Veterinaire not found.");
 
-            var animal = _context.Animals.FirstOrDefault(u => u.Id == model.AnimalId && u.OwnerId == clientId);
+            var animal = await _context.Animals.FirstOrDefaultAsync(u => u.Id == model.AnimalId && u.OwnerId == clientId);
             if (animal == null)
                 return BadRequest("Animal not found.");
 
@@ -114,14 +116,14 @@ namespace backend.Controllers.ClientControllers
             rendezVousExist.UpdatedAt = DateTime.UtcNow;
 
             _context.RendezVous.Update(rendezVousExist);
-            _context.SaveChanges();
+            await _repo.SaveChanges();
 
             return Ok("Rendez-vous updated successfully");
         }
 
         [HttpDelete]
         [Route("delete-rendez-vous/{id}")]
-        public IActionResult DeleteRendezVous(Guid id)
+        public async Task<IActionResult> DeleteRendezVous(Guid id)
         {
             var idClaimValue = User.FindFirst("Id")?.Value;
 
@@ -130,11 +132,11 @@ namespace backend.Controllers.ClientControllers
                 throw new UnauthorizedAccessException("Invalid or missing user ID claim.");
             }
 
-            var rendezVousExist = _context.RendezVous.FirstOrDefault(r => r.Id == id && r.ClientId == clientId);
+            var rendezVousExist =await _context.RendezVous.FirstOrDefaultAsync(r => r.Id == id && r.ClientId == clientId);
             if (rendezVousExist == null)
                 return BadRequest("Rendez-vous with this id for this client doesn't exist!");
 
-            var result = _repo.DeleteRendezVous(id);
+            var result =await _repo.DeleteRendezVous(id);
             return Ok(result);
         }
     }

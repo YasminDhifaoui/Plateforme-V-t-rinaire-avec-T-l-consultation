@@ -49,18 +49,18 @@ namespace backend.Controllers.AdminControllers
         //ClientsList
         [HttpGet]
         [Route("get-all-clients")]
-        public IActionResult GetAllClients()
+        public async Task<IActionResult>  GetAllClients()
         {
-            var Clients = _clientRepo.GetClients();
+            var Clients =await _clientRepo.GetClientsAsync();
             return Ok(Clients);
         }
 
         //SearchClient
         [HttpGet]
         [Route("get-client-by-id/{id}")]
-        public IActionResult GetClientById(Guid id)
+        public async Task<IActionResult> GetClientById(Guid id)
         {
-            var client = _clientRepo.GetClientById(id);
+            var client = await _clientRepo.GetClientByIdAsync(id);
 
             if (client == null || client.Role != "Client") 
                 return BadRequest(new { message = "Client with this Id not found" });
@@ -69,9 +69,9 @@ namespace backend.Controllers.AdminControllers
 
         [HttpGet]
         [Route("get-client-by-username/{username}")]
-        public IActionResult GetClientByUsername(string username)
+        public async Task<IActionResult> GetClientByUsername(string username)
         {
-            var client = _clientRepo.GetClientByUsername(username);
+            var client = await _clientRepo.GetClientByUsernameAsync(username);
 
             if (client == null || client.Role != "Client")
                 return BadRequest(new { message = "Client with this username not found" });
@@ -90,7 +90,6 @@ namespace backend.Controllers.AdminControllers
 
             string? oldRole = appUser.Role;
 
-            _clientRepo.UpdateClient(id, updatedClient);
 
             if (!string.IsNullOrEmpty(updatedClient.Role))
             {
@@ -99,6 +98,7 @@ namespace backend.Controllers.AdminControllers
                     return BadRequest(new { message = "Failed to update role" });
 
                 appUser.Role = updatedClient.Role;
+                await _context.SaveChangesAsync();
 
                 // Remove from old role table
                 switch (oldRole?.ToLower())
@@ -163,7 +163,6 @@ namespace backend.Controllers.AdminControllers
                     default:
                         break;
                 }
-                await _context.SaveChangesAsync();
 
             }
 
@@ -177,6 +176,8 @@ namespace backend.Controllers.AdminControllers
                 if (!addPassResult.Succeeded)
                     return BadRequest(new { message = "Failed to set new password", errors = addPassResult.Errors });
             }
+            await _clientRepo.UpdateClientAsync(id, updatedClient);
+
 
             return Ok(new { message = "Client updated successfully" });
         }
@@ -196,7 +197,6 @@ namespace backend.Controllers.AdminControllers
             var newUserRole = new IdentityUserRole<Guid> { UserId = user.Id, RoleId = role.Id };
             await _context.Set<IdentityUserRole<Guid>>().AddAsync(newUserRole);
 
-            await _context.SaveChangesAsync();
             return true;
         }
 
@@ -206,14 +206,15 @@ namespace backend.Controllers.AdminControllers
         public async Task<IActionResult> DeleteClient(Guid id)
         {
             var appUser = await _userManager.FindByIdAsync(id.ToString());
-            if (appUser != null) 
-            {
-                var result = await _userManager.DeleteAsync(appUser);
-                if (!result.Succeeded)
-                    return BadRequest(new { message = "Failed to delete user from Identity" });
-            }
+            if(appUser == null)
+                return BadRequest(new { message = "User with this Id not found !" });
+          
+            var result = await _userManager.DeleteAsync(appUser);
+            if (!result.Succeeded)
+                return BadRequest(new { message = "Failed to delete user from Identity" });
+            
 
-            _clientRepo.DeleteClient(id);
+            await _clientRepo.GetClientByIdAsync(id);
 
             return Ok(new { message = "User deleted successfully" });
         }
@@ -294,7 +295,7 @@ namespace backend.Controllers.AdminControllers
             {
                 AppUserId=user.Id
             };
-            _clientRepo.AddClient(client);
+            await _clientRepo.AddClientAsync(client);
 
             if (!await _roleManager.RoleExistsAsync(ApplicationRole.Client))
             {
@@ -310,7 +311,7 @@ namespace backend.Controllers.AdminControllers
                     RoleId = role.Id
                 };
 
-                _context.UserRoles.AddAsync(applicationUserRole);
+                await _context.UserRoles.AddAsync(applicationUserRole);
                 await _context.SaveChangesAsync();
             }
             var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);

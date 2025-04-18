@@ -48,11 +48,10 @@ namespace backend.Controllers.AdminControllers
         //AdminList
         [HttpGet]
         [Route("get-all-admins")]
-        public IActionResult GetAllAdmins()
+        public async Task<IActionResult> GetAllAdmins()
         {
-            Console.WriteLine("GET /api/admins/get-all-admins was hit.");
 
-            var admins = _adminRepo.GetAdmins();
+            var admins = await _adminRepo.GetAdmins();
             return Ok(admins);
         }
         
@@ -60,9 +59,9 @@ namespace backend.Controllers.AdminControllers
         //SearchAdmin
         [HttpGet]
         [Route("get-admin-by-id/{id}")]
-        public IActionResult GetAdminById(Guid id)
+        public async Task<IActionResult> GetAdminById(Guid id)
         {
-            var admin = _adminRepo.GetAdminById(id);
+            var admin =await _adminRepo.GetAdminById(id);
 
             if (admin == null || admin.Role != "Admin")
                 return BadRequest(new { message = "Admin with this Id not found" });
@@ -71,9 +70,9 @@ namespace backend.Controllers.AdminControllers
 
         [HttpGet]
         [Route("get-admin-by-username/{username}")]
-        public IActionResult GetAdminByUsername(string username)
+        public async Task<IActionResult> GetAdminByUsername(string username)
         {
-            var admin = _adminRepo.GetAdminByUsername(username);
+            var admin =await _adminRepo.GetAdminByUsername(username);
 
             if (admin == null || admin.Role != "Admin")
                 return BadRequest(new { message = "Admin with this username not found" });
@@ -90,7 +89,6 @@ namespace backend.Controllers.AdminControllers
             if (appUser == null)
                 return NotFound(new { message = "User not found" });
             string? oldRole = appUser.Role;
-            _adminRepo.UpdateAdmin(id, updatedAdmin);
 
             var adminEmailExists = await _userManager.FindByEmailAsync(updatedAdmin.Username);
 
@@ -180,7 +178,7 @@ namespace backend.Controllers.AdminControllers
                 if (!addPassResult.Succeeded)
                     return BadRequest(new { message = "Failed to set new password", errors = addPassResult.Errors });
             }
-            _adminRepo.UpdateAdmin(id, updatedAdmin);
+            await _adminRepo.UpdateAdmin(id, updatedAdmin);
 
             return Ok(new { message = "Admin updated successfully" });
         }
@@ -210,17 +208,28 @@ namespace backend.Controllers.AdminControllers
         public async Task<IActionResult> DeleteAdmin(Guid id)
         {
             var appUser = await _userManager.FindByIdAsync(id.ToString());
-            if (appUser != null)
+            if (appUser == null)
             {
-                var result = await _userManager.DeleteAsync(appUser);
-                if (!result.Succeeded)
-                    return BadRequest(new { message = "Failed to delete user from Identity" });
+                return NotFound(new { message = "User not found in Identity system" });
             }
 
-            _adminRepo.DeleteAdmin(id);
+            var result = await _userManager.DeleteAsync(appUser);
+            if (!result.Succeeded)
+            {
+                return BadRequest(new { message = "Failed to delete user from Identity" });
+            }
+
+            var admin = await _adminRepo.GetAdminById(id);
+            if (admin == null)
+            {
+                return NotFound(new { message = "Admin not found in the system" });
+            }
+
+            await _adminRepo.DeleteAdmin(id);
 
             return Ok(new { message = "User deleted successfully" });
         }
+
 
         //AddAdmin
         [HttpPost]

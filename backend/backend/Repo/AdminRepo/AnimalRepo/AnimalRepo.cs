@@ -1,7 +1,8 @@
 ﻿using backend.Data;
 using backend.Dtos.AdminDtos.AnimalDtos;
 using backend.Models;
-using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.EntityFrameworkCore;
+using System.Threading.Tasks;
 
 namespace backend.Repo.AdminRepo.AnimalRepo
 {
@@ -14,158 +15,149 @@ namespace backend.Repo.AdminRepo.AnimalRepo
         {
             _context = context;
         }
-        public IEnumerable<AnimalAdminDto> getAllAnimals()
+        public async Task<IEnumerable<AnimalAdminDto>> GetAllAnimalsAsync()
         {
-            var animals = _context.Animals.Select(Animal => new AnimalAdminDto
-            {
-                Id = Animal.Id,
-                Name = Animal.Nom,
-                Espece = Animal.Espece,
-                Race = Animal.Race,
-                Age = Animal.Age,
-                Sexe = Animal.Sexe,
-                Allergies = Animal.Allergies,
-                Anttecedentsmedicaux = Animal.AnttecedentsMedicaux,
-                OwnerId = Animal.OwnerId,
-                CreatedAt = Animal.CreatedAt,
-                UpdatedAt = Animal.UpdatedAt,
-            }).ToList();
-            return animals;
-        }
-        public AnimalAdminDto getAnimalById(Guid id)
-        {
-            var animal = _context.Animals
-                .Where(animal => animal.Id == id)
-                .Select(Animal => new AnimalAdminDto
+            var animals = await _context.Animals
+                .Select(a => new AnimalAdminDto
                 {
-                    Id = Animal.Id,
-                    Name = Animal.Nom,
-                    Espece = Animal.Espece,
-                    Race = Animal.Race,
-                    Age = Animal.Age,
-                    Sexe = Animal.Sexe,
-                    Allergies = Animal.Allergies,
-                    Anttecedentsmedicaux = Animal.AnttecedentsMedicaux,
-                    OwnerId = Animal.OwnerId,
-                    CreatedAt = Animal.CreatedAt,
-                    UpdatedAt = Animal.UpdatedAt,
-                }).FirstOrDefault();
-            if (animal == null)
-            {
-                throw new Exception("Animal not found."); 
-            }
-            return animal;
-        }
-        public IEnumerable<AnimalAdminDto> getAnimalsByOwnerId(Guid userId)
-        {
-            var animals = _context.Animals
-                .Where(animal => animal.OwnerId == userId)
-                .Select(Animal => new AnimalAdminDto
-                {
-                    Id = Animal.Id,
-                    Name = Animal.Nom,
-                    Espece = Animal.Espece,
-                    Race = Animal.Race,
-                    Age = Animal.Age,
-                    Sexe = Animal.Sexe,
-                    Allergies = Animal.Allergies,
-                    Anttecedentsmedicaux = Animal.AnttecedentsMedicaux,
-                    OwnerId = Animal.OwnerId,
-                    CreatedAt = Animal.CreatedAt,
-                    UpdatedAt = Animal.UpdatedAt,
-                }).ToList();
+                    Id = a.Id,
+                    Name = a.Nom,
+                    Espece = a.Espece,
+                    Race = a.Race,
+                    Age = a.Age,
+                    Sexe = a.Sexe,
+                    Allergies = a.Allergies,
+                    Anttecedentsmedicaux = a.AnttecedentsMedicaux,
+                    OwnerId = a.OwnerId,
+                    CreatedAt = a.CreatedAt,
+                    UpdatedAt = a.UpdatedAt,
+                }).ToListAsync();
+
             return animals;
         }
 
-
-        public IEnumerable<AnimalAdminDto> getAnimalsByName(string name)
+        public async Task<AnimalAdminDto> GetAnimalByIdAsync(Guid id)
         {
-
-            var animals = _context.Animals
-                .Where(animal => animal.Nom == name)
-                .Select(Animal => new AnimalAdminDto
+            return await _context.Animals
+                .Where(a => a.Id == id)
+                .Select(a => new AnimalAdminDto
                 {
-                    Id = Animal.Id,
-                    Name = Animal.Nom,
-                    Espece = Animal.Espece,
-                    Race = Animal.Race,
-                    Age = Animal.Age,
-                    Sexe = Animal.Sexe,
-                    Allergies = Animal.Allergies,
-                    Anttecedentsmedicaux = Animal.AnttecedentsMedicaux,
-                    OwnerId = Animal.OwnerId,
-                    CreatedAt = Animal.CreatedAt,
-                    UpdatedAt = Animal.UpdatedAt,
-                }).ToList();
-            return animals;
+                    Id = a.Id,
+                    Name = a.Nom,
+                    Espece = a.Espece,
+                    Race = a.Race,
+                    Age = a.Age,
+                    Sexe = a.Sexe,
+                    Allergies = a.Allergies,
+                    Anttecedentsmedicaux = a.AnttecedentsMedicaux,
+                    OwnerId = a.OwnerId,
+                    CreatedAt = a.CreatedAt,
+                    UpdatedAt = a.UpdatedAt,
+                }).FirstOrDefaultAsync();
+
+
         }
 
-        public IEnumerable<AnimalAdminDto> getAnimalsByEspece(string espece)
+        public async Task<IEnumerable<AnimalAdminDto>> GetAnimalsByOwnerIdAsync(Guid userId)
         {
-            var animals = _context.Animals
-                .Where(animal => animal.Espece == espece)
-                .Select(Animal => new AnimalAdminDto
+            return await _context.Animals
+                .Where(a => a.OwnerId == userId)
+                .Select(a => new AnimalAdminDto
                 {
-                    Id = Animal.Id,
-                    Name = Animal.Nom,
-                    Espece = Animal.Espece,
-                    Race = Animal.Race,
-                    Age = Animal.Age,
-                    Sexe = Animal.Sexe,
-                    Allergies = Animal.Allergies,
-                    Anttecedentsmedicaux = Animal.AnttecedentsMedicaux,
-                    OwnerId = Animal.OwnerId,
-                    CreatedAt = Animal.CreatedAt,
-                    UpdatedAt = Animal.UpdatedAt,
-                }).ToList();
-            return animals;
+                    Id = a.Id,
+                    Name = a.Nom,
+                    Espece = a.Espece,
+                    Race = a.Race,
+                    Age = a.Age,
+                    Sexe = a.Sexe,
+                    Allergies = a.Allergies,
+                    Anttecedentsmedicaux = a.AnttecedentsMedicaux,
+                    OwnerId = a.OwnerId,
+                    CreatedAt = a.CreatedAt,
+                    UpdatedAt = a.UpdatedAt,
+                }).ToListAsync();
         }
 
-        public IEnumerable<AnimalAdminDto> getAnimalsByRace(string race)
+        public async Task<IEnumerable<AnimalAdminDto>> GetAnimalsByNameAsync(string name)
         {
-
-            var animals = _context.Animals
-                .Where(animal => animal.Race == race)
-                .Select(Animal => new AnimalAdminDto
+            return await _context.Animals
+                .Where(a => a.Nom == name)
+                .Select(a => new AnimalAdminDto
                 {
-                    Id = Animal.Id,
-                    Name = Animal.Nom,
-                    Espece = Animal.Espece,
-                    Race = Animal.Race,
-                    Age = Animal.Age,
-                    Sexe = Animal.Sexe,
-                    Allergies = Animal.Allergies,
-                    Anttecedentsmedicaux = Animal.AnttecedentsMedicaux,
-                    OwnerId = Animal.OwnerId,
-                    CreatedAt = Animal.CreatedAt,
-                    UpdatedAt = Animal.UpdatedAt,
-                }).ToList();
-            return animals;
+                    Id = a.Id,
+                    Name = a.Nom,
+                    Espece = a.Espece,
+                    Race = a.Race,
+                    Age = a.Age,
+                    Sexe = a.Sexe,
+                    Allergies = a.Allergies,
+                    Anttecedentsmedicaux = a.AnttecedentsMedicaux,
+                    OwnerId = a.OwnerId,
+                    CreatedAt = a.CreatedAt,
+                    UpdatedAt = a.UpdatedAt,
+                }).ToListAsync();
         }
 
+        public async Task<IEnumerable<AnimalAdminDto>> GetAnimalsByEspeceAsync(string espece)
+        {
+            return await _context.Animals
+                .Where(a => a.Espece == espece)
+                .Select(a => new AnimalAdminDto
+                {
+                    Id = a.Id,
+                    Name = a.Nom,
+                    Espece = a.Espece,
+                    Race = a.Race,
+                    Age = a.Age,
+                    Sexe = a.Sexe,
+                    Allergies = a.Allergies,
+                    Anttecedentsmedicaux = a.AnttecedentsMedicaux,
+                    OwnerId = a.OwnerId,
+                    CreatedAt = a.CreatedAt,
+                    UpdatedAt = a.UpdatedAt,
+                }).ToListAsync();
+        }
 
-        public string AddAnimal(Animal animal)
+        public async Task<IEnumerable<AnimalAdminDto>> GetAnimalsByRaceAsync(string race)
+        {
+            return await _context.Animals
+                .Where(a => a.Race == race)
+                .Select(a => new AnimalAdminDto
+                {
+                    Id = a.Id,
+                    Name = a.Nom,
+                    Espece = a.Espece,
+                    Race = a.Race,
+                    Age = a.Age,
+                    Sexe = a.Sexe,
+                    Allergies = a.Allergies,
+                    Anttecedentsmedicaux = a.AnttecedentsMedicaux,
+                    OwnerId = a.OwnerId,
+                    CreatedAt = a.CreatedAt,
+                    UpdatedAt = a.UpdatedAt,
+                }).ToListAsync();
+        }
+
+        public async Task<string> AddAnimalAsync(Animal animal)
         {
             if (animal != null)
             {
-                _context.Animals.Add(animal);
-                SaveChanges();
-                return "animal added successfully";
+                await _context.Animals.AddAsync(animal);
+                await SaveChangesAsync();
+                return "Animal added successfully";
             }
-            return "failed to add animal";
+            return "Failed to add animal";
         }
 
-        public string UpdateAnimal(Guid animalId, UpdateAnimalAdminDto updatedAnimal)
+        public async Task<string> UpdateAnimalAsync(Guid animalId, UpdateAnimalAdminDto updatedAnimal)
         {
-
-            var owner = _context.Users.FirstOrDefault(u => u.Id == updatedAnimal.OwnerId);
+            var owner = await _context.Users.FirstOrDefaultAsync(u => u.Id == updatedAnimal.OwnerId);
             if (owner == null)
                 return "Owner with this Id not found.";
 
-            var animalToUpdate = _context.Animals.Find(animalId);
-
+            var animalToUpdate = await _context.Animals.FindAsync(animalId);
             if (animalToUpdate == null)
-                return "Animal not found !";
+                return "Animal not found!";
 
             animalToUpdate.Nom = updatedAnimal.Name;
             animalToUpdate.Espece = updatedAnimal.Espece;
@@ -173,31 +165,27 @@ namespace backend.Repo.AdminRepo.AnimalRepo
             animalToUpdate.Age = updatedAnimal.Age;
             animalToUpdate.Sexe = updatedAnimal.Sexe;
             animalToUpdate.OwnerId = updatedAnimal.OwnerId;
-            animalToUpdate.UpdatedAt = DateTime.UtcNow.ToUniversalTime();
+            animalToUpdate.UpdatedAt = DateTime.UtcNow;
             animalToUpdate.Allergies = updatedAnimal.Allergies;
-            animalToUpdate.AnttecedentsMedicaux = animalToUpdate.AnttecedentsMedicaux;
+            animalToUpdate.AnttecedentsMedicaux = updatedAnimal.AntecedentsMedicaux;
 
             _context.Animals.Update(animalToUpdate);
-            SaveChanges();
+            await SaveChangesAsync();
             return "Animal updated successfully";
         }
 
-        public string deleteAnimal(Guid id)
+        public async Task<string> DeleteAnimalAsync(Guid id)
         {
-            var animal = _context.Animals.FirstOrDefault(a => a.Id == id);
-            if (animal == null)
-            {
-                throw new Exception("Animal not found.");
-            }
+            var animal = await _context.Animals.FirstOrDefaultAsync(a => a.Id == id);
+           
             _context.Animals.Remove(animal);
-            SaveChanges();
+            await SaveChangesAsync();
             return "Animal removed successfully";
         }
 
-
-        public void SaveChanges()
+        public async Task SaveChangesAsync()
         {
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
         }
 
     }

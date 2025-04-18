@@ -45,26 +45,26 @@ namespace backend.Controllers.AdminControllers
         //vet list
         [HttpGet]
         [Route("get-all-veterinaires")]
-        public IActionResult GetAllVeterinaire()
+        public async Task<IActionResult> GetAllVeterinaire()
         {
-            var veterinaires= _vetRepo.GetVeterinaires();
+            var veterinaires= await _vetRepo.GetVeterinaires();
             return Ok(veterinaires);
         }
         //search vet
         [HttpGet]
         [Route("get-vet-by-id/{id}")]
-        public IActionResult GetVetById(Guid id)
+        public async Task<IActionResult> GetVetById(Guid id)
         {
-            var vet=_vetRepo.GetVeterinaireById(id);
+            var vet= await _vetRepo.GetVeterinaireById(id);
             if (vet == null)
                 return BadRequest(new { message = "Veterinaire with this Id not found!" });
             return Ok(vet);
         }
         [HttpGet]
         [Route("get-vet-by-username/{username}")]
-        public IActionResult GetVetByUsername(string username)
+        public async Task<IActionResult> GetVetByUsername(string username)
         {
-            var vet= _vetRepo.GetVeterinaireByUsername(username);
+            var vet=await _vetRepo.GetVeterinaireByUsername(username);
             if(vet == null)
                 return BadRequest(new {message ="Veterinaire with this username not found!"});
             return Ok(vet); 
@@ -81,7 +81,6 @@ namespace backend.Controllers.AdminControllers
 
             string? oldRole = appUser.Role;
 
-            _vetRepo.UpdateVeterinaire(id, updatedVet);
 
             if (!string.IsNullOrEmpty(updatedVet.Role))
             {
@@ -157,8 +156,6 @@ namespace backend.Controllers.AdminControllers
                 await _context.SaveChangesAsync();
 
             }
-
-
             if (!string.IsNullOrEmpty(updatedVet.Password))
             {
                 var removePassResult = await _userManager.RemovePasswordAsync(appUser);
@@ -169,6 +166,8 @@ namespace backend.Controllers.AdminControllers
                 if (!addPassResult.Succeeded)
                     return BadRequest(new { message = "Failed to set new password", errors = addPassResult.Errors });
             }
+            await _vetRepo.UpdateVeterinaire(id, updatedVet);
+
 
             return Ok(new { message = "Veterinaire updated successfully" });
         }
@@ -196,7 +195,7 @@ namespace backend.Controllers.AdminControllers
         [Route("delete-veterinaire")]
         public async Task<IActionResult> DeleteVet(Guid id)
         {
-            var vet = _context.veterinaires.FirstOrDefault(vet => vet.AppUserId == id);
+            var vet = await _context.veterinaires.FirstOrDefaultAsync(vet => vet.AppUserId == id);
             if (vet == null)
                 return BadRequest("Veterinaire with this id not found");
             var appUser = await _userManager.FindByIdAsync(id.ToString());
@@ -206,7 +205,7 @@ namespace backend.Controllers.AdminControllers
                 if (!result.Succeeded)
                     return BadRequest(new { message = "Failed to delete user from Identity" });
             }
-            _vetRepo.DeleteVeterinaire(id);
+            await _vetRepo.DeleteVeterinaire(id);
             return Ok(new { message = "Veterinaire deleted successfully" });
         }
         //add vet
@@ -283,7 +282,7 @@ namespace backend.Controllers.AdminControllers
             {
                 AppUserId = user.Id
             };
-            _vetRepo.AddVeterinaire(veterinaire);
+            await _vetRepo.AddVeterinaire(veterinaire);
 
             if (!await _roleManager.RoleExistsAsync(ApplicationRole.Veterinaire))
             {
@@ -299,7 +298,7 @@ namespace backend.Controllers.AdminControllers
                     RoleId = role.Id
                 };
 
-                _context.UserRoles.AddAsync(applicationUserRole);
+                await _context.UserRoles.AddAsync(applicationUserRole);
                 await _context.SaveChangesAsync();
             }
             var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);

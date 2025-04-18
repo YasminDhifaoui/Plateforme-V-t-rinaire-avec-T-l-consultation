@@ -33,12 +33,8 @@ namespace backend.Repo.AdminRepo.ConsultationRepo
         public async Task<Consultation> AddConsultation(AddConsultationDto dto)
         {
             string documentPath = null;
-            var rdv = _context.RendezVous.Find(dto.RendezVousID);
-            if (rdv == null)
-            {
-                return null;
-            }
-
+            var rdv = await _context.RendezVous.FindAsync(dto.RendezVousID);
+           
             var consultationDate = DateTime.UtcNow;
             var formattedDate = consultationDate.ToString("yyyyMMdd_HHmmss"); 
 
@@ -75,7 +71,7 @@ namespace backend.Repo.AdminRepo.ConsultationRepo
             };
 
             await _context.Consultations.AddAsync(consultation);
-            this.saveChanges();
+            await saveChanges();
             return consultation;
         }
 
@@ -85,7 +81,8 @@ namespace backend.Repo.AdminRepo.ConsultationRepo
             if (consultation == null)
                 return "Consultation not found";
 
-            var rdv = _context.RendezVous.Find(dto.RendezVousID);
+            var rdv =await _context.RendezVous.FindAsync(dto.RendezVousID);
+            if (rdv == null) return "rendez vous not found!";
 
             consultation.Date = dto.Date.ToUniversalTime();
             consultation.Diagnostic = dto.Diagnostic;
@@ -124,16 +121,16 @@ namespace backend.Repo.AdminRepo.ConsultationRepo
             }
 
             _context.Consultations.Update(consultation);
-            this.saveChanges();
+            await saveChanges();
             return "Consultation updated";
         }
 
 
 
 
-        public string DeleteAsync(Guid id)
+        public async Task<string> DeleteAsync(Guid id)
         {
-            var consultation = _context.Consultations.FirstOrDefault(c => c.Id == id);
+            var consultation = await _context.Consultations.FirstOrDefaultAsync(c => c.Id == id);
             if (consultation == null)
                 return "Consultation not found";
 
@@ -147,13 +144,14 @@ namespace backend.Repo.AdminRepo.ConsultationRepo
             }
 
             _context.Consultations.Remove(consultation);
-            this.saveChanges();
+            await saveChanges();
+
             return "Consultation deleted";
         }
 
-        public void saveChanges()
+        public async Task saveChanges()
             {
-                _context.SaveChanges();
+                await _context.SaveChangesAsync();
             }
         }
     }

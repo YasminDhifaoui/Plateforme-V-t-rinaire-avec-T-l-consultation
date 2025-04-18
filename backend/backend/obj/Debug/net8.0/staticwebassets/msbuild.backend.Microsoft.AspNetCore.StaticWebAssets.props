@@ -1,11 +1,11 @@
 ﻿<Project>
   <ItemGroup>
-    <StaticWebAsset Include="$([System.IO.Path]::GetFullPath($(MSBuildThisFileDirectory)..\staticwebassets\docs\9999eb77-d3b9-4803-9f10-ffa811311098\20250417_181356\80533c86-adf8-41fe-8d76-d9db0d07df73_pfe Dclass .mdj))">
+    <StaticWebAsset Include="$([System.IO.Path]::GetFullPath($(MSBuildThisFileDirectory)..\staticwebassets\docs\9999eb77-d3b9-4803-9f10-ffa811311098\20250418_170120\c4394dce-30d8-4a03-ac52-e4e7e5e553e5_[ENG] BTS (Jimin &amp; Jungkook (지민 &amp; 정국)) - We don t talk anymore pt.2 (Color Coded).mp3))">
       <SourceType>Package</SourceType>
       <SourceId>backend</SourceId>
       <ContentRoot>$(MSBuildThisFileDirectory)..\staticwebassets\</ContentRoot>
       <BasePath>_content/backend</BasePath>
-      <RelativePath>docs/9999eb77-d3b9-4803-9f10-ffa811311098/20250417_181356/80533c86-adf8-41fe-8d76-d9db0d07df73_pfe Dclass .mdj</RelativePath>
+      <RelativePath>docs/9999eb77-d3b9-4803-9f10-ffa811311098/20250418_170120/c4394dce-30d8-4a03-ac52-e4e7e5e553e5_[ENG] BTS (Jimin &amp; Jungkook (지민 &amp; 정국)) - We don t talk anymore pt.2 (Color Coded).mp3</RelativePath>
       <AssetKind>All</AssetKind>
       <AssetMode>All</AssetMode>
       <AssetRole>Primary</AssetRole>
@@ -14,23 +14,7 @@
       <AssetTraitValue></AssetTraitValue>
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-      <OriginalItemSpec>$([System.IO.Path]::GetFullPath($(MSBuildThisFileDirectory)..\staticwebassets\docs\9999eb77-d3b9-4803-9f10-ffa811311098\20250417_181356\80533c86-adf8-41fe-8d76-d9db0d07df73_pfe Dclass .mdj))</OriginalItemSpec>
-    </StaticWebAsset>
-    <StaticWebAsset Include="$([System.IO.Path]::GetFullPath($(MSBuildThisFileDirectory)..\staticwebassets\docs\9999eb77-d3b9-4803-9f10-ffa811311098\20250417_181458\42c69b54-934e-4eff-9e12-de036ed07941_ToDo.txt))">
-      <SourceType>Package</SourceType>
-      <SourceId>backend</SourceId>
-      <ContentRoot>$(MSBuildThisFileDirectory)..\staticwebassets\</ContentRoot>
-      <BasePath>_content/backend</BasePath>
-      <RelativePath>docs/9999eb77-d3b9-4803-9f10-ffa811311098/20250417_181458/42c69b54-934e-4eff-9e12-de036ed07941_ToDo.txt</RelativePath>
-      <AssetKind>All</AssetKind>
-      <AssetMode>All</AssetMode>
-      <AssetRole>Primary</AssetRole>
-      <RelatedAsset></RelatedAsset>
-      <AssetTraitName></AssetTraitName>
-      <AssetTraitValue></AssetTraitValue>
-      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
-      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-      <OriginalItemSpec>$([System.IO.Path]::GetFullPath($(MSBuildThisFileDirectory)..\staticwebassets\docs\9999eb77-d3b9-4803-9f10-ffa811311098\20250417_181458\42c69b54-934e-4eff-9e12-de036ed07941_ToDo.txt))</OriginalItemSpec>
+      <OriginalItemSpec>$([System.IO.Path]::GetFullPath($(MSBuildThisFileDirectory)..\staticwebassets\docs\9999eb77-d3b9-4803-9f10-ffa811311098\20250418_170120\c4394dce-30d8-4a03-ac52-e4e7e5e553e5_[ENG] BTS (Jimin &amp; Jungkook (지민 &amp; 정국)) - We don t talk anymore pt.2 (Color Coded).mp3))</OriginalItemSpec>
     </StaticWebAsset>
   </ItemGroup>
 </Project>

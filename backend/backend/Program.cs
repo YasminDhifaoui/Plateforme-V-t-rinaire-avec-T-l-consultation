@@ -16,6 +16,7 @@ using backend.Repo.VetRepo.RendezVousRepo;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using System.Threading.Tasks;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
@@ -90,6 +91,7 @@ builder.Services.AddScoped<IAdminRepo, AdminRepo>();
 builder.Services.AddScoped<IClientRepo, ClientRepo>();
 builder.Services.AddScoped<IVetRepo, VetRepo>();
 builder.Services.AddScoped<IAnimalRepo, AnimalRepo>();
+
 builder.Services.AddScoped<IRendezVousRepo, RendezVousRepo>();
 builder.Services.AddScoped<IConsultationRepo, consultationRepo>();
 
