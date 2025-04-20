@@ -24,6 +24,9 @@ using System.Text;
 using backend.Repo.AdminRepo.VaccinationRepo;
 using backend.Repo.ClientRepo.VaccinationRepo;
 using backend.Repo.VetRepo.VaccinationRepo;
+using backend.Repo.ClientRepo.ProfileRepo;
+using backend.Repo.VetRepo.ProfileRepo;
+using backend.Repo.AdminRepo.ProfileRepo;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -97,12 +100,15 @@ builder.Services.AddScoped<IAnimalRepo, AnimalRepo>();
 builder.Services.AddScoped<IRendezVousRepo, RendezVousRepo>();
 builder.Services.AddScoped<IConsultationRepo, consultationRepo>();
 builder.Services.AddScoped<IVaccinationRepo, VaccinationRepo>();
+builder.Services.AddScoped<IAdminProfileRepo, AdminProfileRepo>();
+
 
 // add Client Repositories
 builder.Services.AddScoped<IAnimalCRepo, AnimalCRepo>();
 builder.Services.AddScoped<IRendezVousCRepo, RendezVousCRepo>();
 builder.Services.AddScoped<IConsultationCRepo, ConsultationCRepo>();
 builder.Services.AddScoped<IVaccinationCRepo, VaccinationCRepo>();
+builder.Services.AddScoped<IClientProfileRepo, ClientProfileRepo>();
 
 
 //add Veterinaire Repositories
@@ -110,6 +116,8 @@ builder.Services.AddScoped<IAnimalVRepo, AnimalVRepo>();
 builder.Services.AddScoped<IRendezVousVRepo, RendezVousVRepo>();
 builder.Services.AddScoped<IConsultationVetRepo, ConsultationVetRepo>();
 builder.Services.AddScoped<IVaccinationVetRepo, VaccinationVetRepo>();
+builder.Services.AddScoped<IVeterinaireProfileRepo, VeterinaireProfileRepo>();
+
 
 
 // Add PostgreSQL DB connection
