@@ -815,17 +815,12 @@ namespace backend.Migrations
             modelBuilder.Entity("backend.Models.Vaccination", b =>
                 {
                     b.HasOne("backend.Models.Animal", "Animal")
-                        .WithMany("Vaccinations")
+                        .WithMany()
                         .HasForeignKey("AnimalId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Animal");
-                });
-
-            modelBuilder.Entity("backend.Models.Animal", b =>
-                {
-                    b.Navigation("Vaccinations");
                 });
 
             modelBuilder.Entity("backend.Models.CategorieProd", b =>

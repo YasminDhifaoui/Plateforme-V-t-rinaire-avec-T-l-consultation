@@ -21,6 +21,9 @@ using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System.Text;
+using backend.Repo.AdminRepo.VaccinationRepo;
+using backend.Repo.ClientRepo.VaccinationRepo;
+using backend.Repo.VetRepo.VaccinationRepo;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -91,19 +94,23 @@ builder.Services.AddScoped<IAdminRepo, AdminRepo>();
 builder.Services.AddScoped<IClientRepo, ClientRepo>();
 builder.Services.AddScoped<IVetRepo, VetRepo>();
 builder.Services.AddScoped<IAnimalRepo, AnimalRepo>();
-
 builder.Services.AddScoped<IRendezVousRepo, RendezVousRepo>();
 builder.Services.AddScoped<IConsultationRepo, consultationRepo>();
+builder.Services.AddScoped<IVaccinationRepo, VaccinationRepo>();
 
 // add Client Repositories
 builder.Services.AddScoped<IAnimalCRepo, AnimalCRepo>();
 builder.Services.AddScoped<IRendezVousCRepo, RendezVousCRepo>();
 builder.Services.AddScoped<IConsultationCRepo, ConsultationCRepo>();
+builder.Services.AddScoped<IVaccinationCRepo, VaccinationCRepo>();
+
 
 //add Veterinaire Repositories
 builder.Services.AddScoped<IAnimalVRepo, AnimalVRepo>();
 builder.Services.AddScoped<IRendezVousVRepo, RendezVousVRepo>();
 builder.Services.AddScoped<IConsultationVetRepo, ConsultationVetRepo>();
+builder.Services.AddScoped<IVaccinationVetRepo, VaccinationVetRepo>();
+
 
 // Add PostgreSQL DB connection
 builder.Services.AddDbContext<AppDbContext>(options =>
@@ -157,6 +164,7 @@ builder.Services.AddAuthorization(options =>
 });
 
 var app = builder.Build();
+
 
 
 

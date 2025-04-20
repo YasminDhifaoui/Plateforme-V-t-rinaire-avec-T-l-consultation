@@ -1,6 +1,6 @@
 {
   "Version": 1,
-  "Hash": "XP9F3PO+KXJyfA50oBvM+UzmiSs+8sFZaUkyAZ8m1cQ=",
+  "Hash": "mylR/GvDJNKNlI0SdSVVy8EJ7atiYYP22eHOeuT7SSQ=",
   "Source": "backend",
   "BasePath": "_content/backend",
   "Mode": "Default",
@@ -15,25 +15,5 @@
       "Pattern": "**"
     }
   ],
-  "Assets": [
-    {
-      "Identity": "D:\\Internships\\Pfe\\Plateforme-V-t-rinaire-avec-T-l-consultation\\backend\\backend\\wwwroot\\docs\\9999eb77-d3b9-4803-9f10-ffa811311098\\20250418_170120\\c4394dce-30d8-4a03-ac52-e4e7e5e553e5_[ENG] BTS (Jimin & Jungkook (지민 & 정국)) - We don t talk anymore pt.2 (Color Coded).mp3",
-      "SourceId": "backend",
-      "SourceType": "Discovered",
-      "ContentRoot": "D:\\Internships\\Pfe\\Plateforme-V-t-rinaire-avec-T-l-consultation\\backend\\backend\\wwwroot\\",
-      "BasePath": "_content/backend",
-      "RelativePath": "docs/9999eb77-d3b9-4803-9f10-ffa811311098/20250418_170120/c4394dce-30d8-4a03-ac52-e4e7e5e553e5_[ENG] BTS (Jimin & Jungkook (지민 & 정국)) - We don t talk anymore pt.2 (Color Coded).mp3",
-      "AssetKind": "All",
-      "AssetMode": "All",
-      "AssetRole": "Primary",
-      "AssetMergeBehavior": "PreferTarget",
-      "AssetMergeSource": "",
-      "RelatedAsset": "",
-      "AssetTraitName": "",
-      "AssetTraitValue": "",
-      "CopyToOutputDirectory": "Never",
-      "CopyToPublishDirectory": "PreserveNewest",
-      "OriginalItemSpec": "wwwroot\\docs\\9999eb77-d3b9-4803-9f10-ffa811311098\\20250418_170120\\c4394dce-30d8-4a03-ac52-e4e7e5e553e5_[ENG] BTS (Jimin & Jungkook (지민 & 정국)) - We don t talk anymore pt.2 (Color Coded).mp3"
-    }
-  ]
+  "Assets": []
 }

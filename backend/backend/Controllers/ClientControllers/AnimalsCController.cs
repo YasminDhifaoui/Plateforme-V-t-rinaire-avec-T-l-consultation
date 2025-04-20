@@ -99,7 +99,7 @@ namespace backend.Controllers.ClientControllers
             animalExist.Nom = updatedAnimal.Name;
             animalExist.Age = updatedAnimal.Age;
             animalExist.Allergies = updatedAnimal.Allergies;
-            animalExist.AnttecedentsMedicaux = updatedAnimal.AntecedentsMedicaux; // ← fixed from using old value
+            animalExist.AnttecedentsMedicaux = updatedAnimal.AntecedentsMedicaux; 
 
             animalExist.UpdatedAt = DateTime.UtcNow;
 

@@ -30,7 +30,6 @@ namespace backend.Models
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
 
-        public List<Vaccination> Vaccinations { get; set; } = new List<Vaccination>();
 
         [ForeignKey("AppUser")]
         public Guid OwnerId { get; set; }
