@@ -1,0 +1,96 @@
+<div class="header">
+   
+  </div>
+  
+  <div class="tous">
+    <input
+      type="text"
+      class="simple-input"
+      matInput
+      placeholder="Rechercher..."
+    />
+  
+    <div class="buttons-container">
+      <button class="styled-add" (click)="AddanimalDialog()">
+        Ajouter un animal
+      </button>
+    </div>
+  </div>
+  
+  <div class="mat-elevation-z8">
+    <table mat-table [dataSource]="dataSource" class="full-width-table">
+  
+      <!-- ID Column -->
+      <ng-container matColumnDef="id">
+        <th mat-header-cell *matHeaderCellDef> ID </th>
+        <td mat-cell *matCellDef="let element"> {{ element.id }} </td>
+      </ng-container>
+  
+      <!-- Name Column -->
+      <ng-container matColumnDef="nom">
+        <th mat-header-cell *matHeaderCellDef> Nom </th>
+        <td mat-cell *matCellDef="let element"> {{ element.name }} </td>
+      </ng-container>
+  
+      <!-- Race Column -->
+      <ng-container matColumnDef="race">
+        <th mat-header-cell *matHeaderCellDef> Race </th>
+        <td mat-cell *matCellDef="let element"> {{ element.race }} </td>
+      </ng-container>
+  
+      <!-- Sexe Column -->
+      <ng-container matColumnDef="sexe">
+        <th mat-header-cell *matHeaderCellDef> Sexe </th>
+        <td mat-cell *matCellDef="let element"> {{ element.sexe }} </td>
+      </ng-container>
+  
+      <!-- Allergies Column -->
+      <ng-container matColumnDef="allergies">
+        <th mat-header-cell *matHeaderCellDef> Allergies </th>
+        <td mat-cell *matCellDef="let element"> {{ element.allergies }} </td>
+      </ng-container>
+  
+      <!-- Owner Column -->
+      <ng-container matColumnDef="owner">
+        <th mat-header-cell *matHeaderCellDef> Client </th>
+        <td mat-cell *matCellDef="let element"> {{ element.ownerName }} </td>
+      </ng-container>
+  
+      <!-- Actions Column -->
+      <ng-container matColumnDef="actions">
+        <th mat-header-cell *matHeaderCellDef> Action </th>
+        <td mat-cell *matCellDef="let element">
+          <!-- Bouton Edit -->
+          <button
+            mat-icon-button
+            color="primary"
+            class="edit"
+            (click)="UpdateanimalDialog(element); $event.stopPropagation()"
+          >
+            <mat-icon>edit</mat-icon>
+          </button>
+  
+          <!-- Bouton Delete -->
+          <button
+            mat-icon-button
+            color="warn"
+            class="delete"
+            (click)="deleteanimal(element.id); $event.stopPropagation()"
+          >
+            <mat-icon>delete</mat-icon>
+          </button>
+        </td>
+      </ng-container>
+  
+      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+    </table>
+  
+    <mat-paginator
+      [pageSizeOptions]="[5, 10, 20]"
+      showFirstLastButtons
+      aria-label="Sélectionner la page"
+    >
+    </mat-paginator>
+  </div>
+  

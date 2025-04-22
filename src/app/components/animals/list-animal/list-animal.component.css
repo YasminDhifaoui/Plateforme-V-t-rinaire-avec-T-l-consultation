@@ -1,0 +1,180 @@
+
+.mat-elevation-z8 {
+    width: 80%;
+    margin: 0 auto;
+    margin-top: 20px; 
+    box-shadow: #fcfbfb;
+  }
+  .bleu {
+    color: rgb(5, 5, 238);
+  }
+  .full-width-table td, .full-width-table th {
+    /* padding: 12px 0;  */
+    border-bottom: 1px solid black; 
+  }
+  
+  .filter-field {
+    height: 26px;
+    flex-grow: 1;
+    max-width: 300px;
+  }
+  .mt-edit {
+    color: white;
+  }
+  .delete {
+    background-color: rgb(187, 17, 17);
+    padding: 5px;
+    width: 40px;
+    height: 40px;
+    border-radius: 5px;
+    border: none;
+    margin-left: 10px;
+    margin-left: 10px;
+  }
+  .edit{
+    background-color: rgb(54, 54, 220);
+    padding: 5px;
+    border-radius: 5px;
+    border: none;
+    margin-left: 10px;
+    width: 40px;
+    height: 40px;
+  }
+  .buttons-container {
+    display: flex;
+    gap: 10px;
+    height: 30px;
+    font-size: 15px;
+  }
+.header{
+    margin-top: 70px;
+}
+
+  .tous {
+    margin-top: 45px;
+    width: 80%;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 30px;
+  }
+  .styled-add {
+    background-color: #fff ;
+    display: flex;
+    align-items: center; /* Centre verticalement */
+    gap: 5px; /* Espace entre l'icône et le texte */
+    width: 180px;
+    justify-content: center; /* Centre le contenu horizontalement */
+    color: rgb(26, 66, 197);
+    border: none;
+    border-radius: 5px;
+    text-align: center;
+    padding: 8px 12px;
+    cursor: pointer;
+    transition: background 0.3s;
+  }
+  .simple-input {
+    height: 35px; /* Ajuste à la taille des boutons */
+    width: 300px; /* Ajuste à la taille des boutons */
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    padding: 10px;
+  }
+  
+  .matrow {
+    cursor: pointer;
+  }
+  .mat-column-action {
+    text-align: center;
+  }
+  .mat-column-action {
+    flex: 0 0 120px; 
+  }
+  
+  /* Style pour les boutons Edit et Delete */
+  .mat-column-action button {
+    margin-left: 20px; /* Espacement entre les boutons */
+  }
+  .matrow:hover {
+    background-color: #f5f5f5;
+  }
+  .matrow.selected {
+    background-color: #e0e0e0;
+  }
+  .pagination {
+    width: 80%;
+    margin: 10px auto;
+    display: flex;
+    justify-content: center;
+    margin-top: 10px;
+  }
+  
+  
+  
+  .styled-add mat-icon {
+    font-size: 20px; /* Ajuste la taille de l'icône */
+  }
+  .bar1 {
+    margin-top: 20px;
+    display: flex;
+    justify-content: space-between;
+    width: 80%;
+    margin: 0 auto;
+  }
+  .bar1 h4 {
+    text-decoration: underline;
+  }
+  .header-container {
+    width: 80%;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between; /* Espacement entre le titre et la section de droite */
+    align-items: center;
+    padding: 20px;
+    margin-bottom: 30px;
+  }
+  .right-section {
+    display: flex;
+    align-items: center;
+    gap: 10px; /* Ajoute un espace de 10px entre la notification et le profil */
+  }
+  .notification-icon {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 50px;
+    height: 50px;
+    border: 2px solid #000; 
+    border-radius: 15%; 
+    background-color: #f5f5f5; 
+  }
+  
+  .notification-icon-style {
+    font-size: 24px; 
+    color: #000;
+  }
+  .profile-info {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    border: 2px solid #000;
+    padding: 10px;
+    width: 150px;
+    border-radius: 10px;
+    height: 50px;
+  }
+  .title {
+    text-decoration: underline;
+  }
+  
+  .profile-name {
+    font-weight: bold;
+    font-size: 12px;
+  }
+  
+  .profile-role {
+    font-size: 15px;
+    color: #888;
+  }
+  

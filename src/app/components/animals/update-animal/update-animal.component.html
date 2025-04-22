@@ -1,0 +1,51 @@
+<form [formGroup]="animalForm" (ngSubmit)="onSubmit()">
+
+    <mat-form-field appearance="fill" class="full-width">
+      <mat-label>Nom</mat-label>
+      <input matInput formControlName="name" placeholder="Nom de l'animal" />
+    </mat-form-field>
+  
+    <mat-form-field appearance="fill" class="full-width">
+      <mat-label>Espèce</mat-label>
+      <input matInput formControlName="espece" placeholder="Espèce de l'animal" />
+    </mat-form-field>
+  
+    <mat-form-field appearance="fill" class="full-width">
+      <mat-label>Race</mat-label>
+      <input matInput formControlName="race" placeholder="Race" />
+    </mat-form-field>
+  
+    <mat-form-field appearance="fill" class="full-width">
+      <mat-label>Âge</mat-label>
+      <input matInput type="number" formControlName="age" placeholder="Âge" />
+    </mat-form-field>
+  
+    <mat-form-field appearance="fill" class="full-width">
+      <mat-label>Sexe</mat-label>
+      <input matInput formControlName="sexe" placeholder="Sexe" />
+    </mat-form-field>
+  
+    <mat-form-field appearance="fill" class="full-width">
+      <mat-label>Allergies</mat-label>
+      <input matInput formControlName="allergies" placeholder="Allergies" />
+    </mat-form-field>
+  
+    <mat-form-field appearance="fill" class="full-width">
+      <mat-label>Antécédents Médicaux</mat-label>
+      <input matInput formControlName="antecedentsMedicaux" placeholder="Antécédents médicaux" />
+    </mat-form-field>
+  
+    <mat-form-field appearance="fill" class="full-width">
+      <mat-label>ID du Propriétaire</mat-label>
+      <input matInput type="text" formControlName="ownerId" placeholder="ID du client" />
+    </mat-form-field>
+  
+    <div class="actions">
+      <button mat-raised-button color="primary" type="submit" [disabled]="animalForm.invalid">
+        Modifier
+      </button>
+      <button mat-button color="warn" type="button" (click)="close()">Annuler</button>
+    </div>
+  
+  </form>
+  

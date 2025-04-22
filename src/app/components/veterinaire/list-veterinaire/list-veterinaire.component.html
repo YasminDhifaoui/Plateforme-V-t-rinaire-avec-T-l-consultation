@@ -1,0 +1,64 @@
+<div class="header">
+
+</div>
+<div class="tous">
+  <input type="text" placeholder="Filtrer les vétérinaires" (keyup)="applyFilter($event)" />
+  <div class="buttons-container">
+    <button class="styled-add" (click)="AddVetDialog()">
+      Ajouter un vert
+      <mat-icon>add_circle_outline</mat-icon>
+    </button>
+  </div>
+</div>
+<div class="container">
+
+  <table mat-table [dataSource]="dataSource" class="mat-elevation-z8">
+
+    <!-- ID -->
+    <ng-container matColumnDef="id">
+      <th mat-header-cell *matHeaderCellDef>ID</th>
+      <td mat-cell *matCellDef="let vet">{{ vet.id }}</td>
+    </ng-container>
+
+    <!-- Nom -->
+    <ng-container matColumnDef="nom">
+      <th mat-header-cell *matHeaderCellDef>Nom</th>
+      <td mat-cell *matCellDef="let vet">{{ vet.username }}</td>
+    </ng-container>
+
+    <!-- Email -->
+    <ng-container matColumnDef="email">
+      <th mat-header-cell *matHeaderCellDef>Email</th>
+      <td mat-cell *matCellDef="let vet">{{ vet.email }}</td>
+    </ng-container>
+
+    <!-- Spécialité -->
+    <ng-container matColumnDef="numero">
+      <th mat-header-cell *matHeaderCellDef>numero de telephone</th>
+      <td mat-cell *matCellDef="let vet">{{ vet.phoneNumber }}</td>
+    </ng-container>
+
+    <!-- Actions -->
+    <ng-container matColumnDef="actions">
+      <th mat-header-cell *matHeaderCellDef> Action </th>
+      <td mat-cell *matCellDef="let element">
+        <!-- Bouton Edit -->
+        <button mat-icon-button color="primary" class="edit"
+          (click)="UpdateVeterinareDialog(element); $event.stopPropagation()">
+          <mat-icon class="mt-edit">edit</mat-icon>
+        </button>
+
+
+        <!-- Bouton Delete -->
+        <button mat-icon-button color="warn" (click)="deleteVet(element.id); $event.stopPropagation()" class="delete">
+          <mat-icon class="mt-edit">delete</mat-icon>
+        </button>
+      </td>
+    </ng-container>
+
+    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+    <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+  </table>
+
+  <mat-paginator [pageSizeOptions]="[8, 10, 25]" showFirstLastButtons></mat-paginator>
+</div>

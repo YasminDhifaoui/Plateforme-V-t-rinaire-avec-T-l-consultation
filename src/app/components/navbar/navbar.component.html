@@ -1,0 +1,15 @@
+<p>navbar works!</p>
+<nav class="navbar">
+    <div class="left">
+      <img src="assets/logo.png" alt="logo" width="40">
+    </div>
+    <div class="right">
+      <div class="profile" [matMenuTriggerFor]="menu">
+        <img src="assets/profile-icon.png" alt="profile" class="profile-icon">
+      </div>
+      <mat-menu #menu="matMenu">
+        <button mat-menu-item (click)="logout()">Logout</button>
+      </mat-menu>
+    </div>
+  </nav>
+  

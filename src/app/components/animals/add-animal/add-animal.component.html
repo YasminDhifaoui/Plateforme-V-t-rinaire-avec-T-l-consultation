@@ -1,0 +1,47 @@
+<h2>Ajouter un animal</h2>
+<form [formGroup]="animalForm" (ngSubmit)="onSubmit()">
+  <mat-form-field class="full-width">
+    <mat-label>Nom</mat-label>
+    <input matInput formControlName="name" />
+  </mat-form-field>
+
+  <mat-form-field class="full-width">
+    <mat-label>Espèce</mat-label>
+    <input matInput formControlName="espece" />
+  </mat-form-field>
+
+  <mat-form-field class="full-width">
+    <mat-label>Race</mat-label>
+    <input matInput formControlName="race" />
+  </mat-form-field>
+
+  <mat-form-field class="full-width">
+    <mat-label>Âge</mat-label>
+    <input matInput type="number" formControlName="age" />
+  </mat-form-field>
+
+  <mat-form-field class="full-width">
+    <mat-label>Sexe</mat-label>
+    <input matInput formControlName="sexe" />
+  </mat-form-field>
+
+  <mat-form-field class="full-width">
+    <mat-label>Allergies</mat-label>
+    <input matInput formControlName="allergies" />
+  </mat-form-field>
+
+  <mat-form-field class="full-width">
+    <mat-label>Antécédents médicaux</mat-label>
+    <textarea matInput formControlName="antecedentsMedicaux"></textarea>
+  </mat-form-field>
+
+  <mat-form-field class="full-width">
+    <mat-label>ID du propriétaire</mat-label>
+    <input matInput formControlName="ownerId" />
+  </mat-form-field>
+
+  <div class="actions">
+    <button mat-button type="button" (click)="close()">Annuler</button>
+    <button mat-raised-button color="primary" type="submit">Enregistrer</button>
+  </div>
+</form>
