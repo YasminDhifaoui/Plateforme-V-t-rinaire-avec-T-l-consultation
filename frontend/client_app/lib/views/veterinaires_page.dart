@@ -5,6 +5,8 @@ import '../models/veterinaire.dart';
 class VetListPage extends StatelessWidget {
   final VeterinaireService vetService = VeterinaireService();
 
+  VetListPage({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(

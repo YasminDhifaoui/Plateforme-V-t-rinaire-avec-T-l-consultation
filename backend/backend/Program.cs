@@ -27,6 +27,8 @@ using backend.Repo.VetRepo.VaccinationRepo;
 using backend.Repo.ClientRepo.ProfileRepo;
 using backend.Repo.VetRepo.ProfileRepo;
 using backend.Repo.AdminRepo.ProfileRepo;
+using backend.Repo.ClientRepo.VetRepo;
+using backend.Repo.VetRepo.ClientRepo;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -34,7 +36,13 @@ var jwtSettings = builder.Configuration.GetSection("JWT");
 
 
 
-builder.WebHost.UseUrls("http://localhost:5000", "https://localhost:7000");
+builder.WebHost.ConfigureKestrel(serverOptions =>
+{
+    serverOptions.ListenAnyIP(5000); // for HTTP
+    serverOptions.ListenAnyIP(5001, listenOptions => {
+        listenOptions.UseHttps();     // for HTTPS
+    });
+});
 
 // Add services to the container.
 builder.Services.AddCors(options =>
@@ -109,6 +117,7 @@ builder.Services.AddScoped<IRendezVousCRepo, RendezVousCRepo>();
 builder.Services.AddScoped<IConsultationCRepo, ConsultationCRepo>();
 builder.Services.AddScoped<IVaccinationCRepo, VaccinationCRepo>();
 builder.Services.AddScoped<IClientProfileRepo, ClientProfileRepo>();
+builder.Services.AddScoped<IVetCRepo, VetCRepo>();
 
 
 //add Veterinaire Repositories
@@ -117,6 +126,7 @@ builder.Services.AddScoped<IRendezVousVRepo, RendezVousVRepo>();
 builder.Services.AddScoped<IConsultationVetRepo, ConsultationVetRepo>();
 builder.Services.AddScoped<IVaccinationVetRepo, VaccinationVetRepo>();
 builder.Services.AddScoped<IVeterinaireProfileRepo, VeterinaireProfileRepo>();
+builder.Services.AddScoped<IClientVetRepo, ClientVetRepo>();
 
 
 
@@ -179,7 +189,7 @@ var app = builder.Build();
 // Enable CORS globally
 app.UseCors("AllowAll");
 
-app.UseHttpsRedirection();
+//app.UseHttpsRedirection();
 app.UseRouting();
 
 app.UseAuthentication();  // Authentication middleware comes first

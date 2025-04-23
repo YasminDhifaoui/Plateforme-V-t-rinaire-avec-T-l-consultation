@@ -131,7 +131,7 @@ namespace backend.Controllers.ClientControllers
                 AppUserId = user.Id
             };
 
-            _repository.AddClientAsync(client);
+            await _repository.AddClientAsync(client);
 
             if (!await _roleManager.RoleExistsAsync(ApplicationRole.Client))
             {
@@ -282,25 +282,39 @@ namespace backend.Controllers.ClientControllers
         public async Task<IActionResult> Login([FromBody] ClientLoginDto model)
         {
             var user = await _userManager.FindByEmailAsync(model.Email);
-
-            if (user != null && await _userManager.CheckPasswordAsync(user, model.Password) && user.EmailConfirmed)
+            // Check if user exists
+            if (user == null)
             {
-                if (user.UserName == null)
+                return NotFound(new ApiResponse
                 {
-                    return StatusCode(StatusCodes.Status500InternalServerError, new ApiResponse
-                    {
-                        Status = "Error",
-                        Message = "User name is null."
-                    });
-                }
-                if (user.Email == null)
+                    Status = "Error",
+                    Message = "User not found with the provided email."
+                });
+            }
+
+            // Check if email is confirmed
+            if (!user.EmailConfirmed)
+            {
+                return BadRequest(new ApiResponse
                 {
-                    return StatusCode(StatusCodes.Status500InternalServerError, new ApiResponse
-                    {
-                        Status = "Error",
-                        Message = "User email is null."
-                    });
-                }
+                    Status = "Error",
+                    Message = "Email not confirmed. Please check your inbox."
+                });
+            }
+
+            // Check if password is correct
+            var isPasswordCorrect = await _userManager.CheckPasswordAsync(user, model.Password);
+            if (!isPasswordCorrect)
+            {
+                return BadRequest(new ApiResponse
+                {
+                    Status = "Error",
+                    Message = "Incorrect password."
+                });
+            }
+
+          
+              
                 var UserRoles = await _userManager.GetRolesAsync(user);
                 var TwoFactorTokenAsyncToken = await _userManager.GenerateTwoFactorTokenAsync(user, "Email");
                 var Variables = new Dictionary<string, string>();
@@ -345,11 +359,7 @@ namespace backend.Controllers.ClientControllers
 
                 await _context.SaveChangesAsync();
                 return Ok(new ApiResponse { Status = "Success", Message = " your authentication code, check your email to confirm your login!" });
-            }
-            else
-            {
-                return Ok(new ApiResponse { Status = "Login failed", Message = " Login failed !" });
-            }
+            
 
         }
 
