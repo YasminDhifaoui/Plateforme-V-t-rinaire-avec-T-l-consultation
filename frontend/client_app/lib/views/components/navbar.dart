@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'client_login_page.dart';
-import 'client_register_page.dart';
+import '../Auth_pages/client_login_page.dart';
+import '../Auth_pages/client_register_page.dart';
 
 class Navbar extends StatelessWidget implements PreferredSizeWidget {
   const Navbar({super.key});
@@ -10,7 +10,7 @@ class Navbar extends StatelessWidget implements PreferredSizeWidget {
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Services'),
-        content: const Text('Services page is under construction.'),
+        content: const Text('under construction.'),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
@@ -31,14 +31,16 @@ class Navbar extends StatelessWidget implements PreferredSizeWidget {
           padding: const EdgeInsets.symmetric(horizontal: 8.0),
           child: TextButton(
             onPressed: () => _navigateToServices(context),
-            child: const Text('Services', style: TextStyle(color: Colors.white)),
+            child:
+                const Text('Services', style: TextStyle(color: Colors.white)),
           ),
         ),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 8.0),
           child: TextButton(
             style: TextButton.styleFrom(
-              backgroundColor: Colors.lightBlue, // Sky blue
+              backgroundColor:
+                  const Color.fromARGB(255, 55, 99, 120), // Sky blue
               foregroundColor: Colors.white,
             ),
             onPressed: () {
@@ -56,7 +58,8 @@ class Navbar extends StatelessWidget implements PreferredSizeWidget {
           padding: const EdgeInsets.symmetric(horizontal: 8.0),
           child: TextButton(
             style: TextButton.styleFrom(
-              backgroundColor: Colors.lightBlue, // Sky blue
+              backgroundColor:
+                  const Color.fromARGB(255, 55, 99, 120), // Sky blue
               foregroundColor: Colors.white,
             ),
             onPressed: () {

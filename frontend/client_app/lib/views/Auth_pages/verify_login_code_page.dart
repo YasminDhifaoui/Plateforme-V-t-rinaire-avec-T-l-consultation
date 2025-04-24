@@ -1,9 +1,9 @@
-import 'package:client_app/views/login_navbar.dart';
+import 'package:client_app/views/components/login_navbar.dart';
 import 'package:flutter/material.dart';
-import 'package:client_app/models/client_verify_login.dart';
-import 'package:client_app/services/client_auth_services.dart';
+import 'package:client_app/models/auth_models/client_verify_login.dart';
+import 'package:client_app/services/auth_services/client_auth_services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'home_page.dart';
+import '../home_page.dart';
 
 class VerifyLoginCodePage extends StatefulWidget {
   final String email;
@@ -15,6 +15,7 @@ class VerifyLoginCodePage extends StatefulWidget {
 }
 
 class _VerifyLoginCodePageState extends State<VerifyLoginCodePage> {
+  final _formKey = GlobalKey<FormState>();
   final TextEditingController codeController = TextEditingController();
   final ApiService _apiService = ApiService();
 
@@ -22,6 +23,9 @@ class _VerifyLoginCodePageState extends State<VerifyLoginCodePage> {
   bool isLoading = false;
 
   void verifyCode() async {
+    if (!_formKey.currentState!.validate()) {
+      return;
+    }
     setState(() {
       isLoading = true;
       responseMessage = '';
@@ -76,25 +80,34 @@ class _VerifyLoginCodePageState extends State<VerifyLoginCodePage> {
             border: Border.all(color: Colors.teal, width: 2),
             borderRadius: BorderRadius.circular(8),
           ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text('Enter the verification code sent to ${widget.email}'),
-              TextField(
-                controller: codeController,
-                decoration:
-                    const InputDecoration(labelText: 'Verification Code'),
-              ),
-              const SizedBox(height: 20),
-              isLoading
-                  ? const CircularProgressIndicator()
-                  : ElevatedButton(
-                      onPressed: verifyCode,
-                      child: const Text('Verify'),
-                    ),
-              const SizedBox(height: 20),
-              Text(responseMessage, style: const TextStyle(color: Colors.red)),
-            ],
+          child: Form(
+            key: _formKey,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text('Enter the verification code sent to ${widget.email}'),
+                TextFormField(
+                  controller: codeController,
+                  decoration:
+                      const InputDecoration(labelText: 'Verification Code'),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Verification code is required';
+                    }
+                    return null;
+                  },
+                ),
+                const SizedBox(height: 20),
+                isLoading
+                    ? const CircularProgressIndicator()
+                    : ElevatedButton(
+                        onPressed: verifyCode,
+                        child: const Text('Verify'),
+                      ),
+                const SizedBox(height: 20),
+                Text(responseMessage, style: const TextStyle(color: Colors.red)),
+              ],
+            ),
           ),
         ),
       ),

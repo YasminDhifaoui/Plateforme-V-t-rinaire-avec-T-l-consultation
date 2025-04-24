@@ -12,6 +12,7 @@ dependencies:
   cupertino_icons: ^1.0.2
   http: ^0.13.4
   shared_preferences: ^2.5.3
+  flutter_native_splash: ^2.4.6
 
 dev_dependencies:
   flutter_test:
@@ -21,3 +22,9 @@ flutter:
   uses-material-design: true
   assets:
     - assets/images/
+
+flutter_native_splash:
+  color: "#ffffff" # Background color of splash
+  image: assets/images/splash_app_logo.jpg # Path to your logo image
+  android: true
+  ios: true

@@ -1,9 +1,9 @@
 import 'dart:convert';
-import 'package:client_app/models/client_confirm_email.dart';
+import 'package:client_app/models/auth_models/client_confirm_email.dart';
 import 'package:http/http.dart' as http;
-import '../models/client_register.dart';
-import '../models/client_login.dart';
-import '../models/client_verify_login.dart';
+import '../../models/auth_models/client_register.dart';
+import '../../models/auth_models/client_login.dart';
+import '../../models/auth_models/client_verify_login.dart';
 
 class ApiService {
   static const String baseUrl =
@@ -22,19 +22,30 @@ class ApiService {
           )
           .timeout(const Duration(seconds: 10));
 
+      print('Raw response body: ${response.body}'); // Added for debugging
+      print('Response headers: ${response.headers}'); // Added for debugging
+
       if (response.body.isEmpty) {
         return {"success": false, "message": "Empty response from server"};
       }
 
-      final data = jsonDecode(response.body);
+      if (response.headers['content-type'] == null ||
+          !response.headers['content-type']!.contains('application/json')) {
+        print('Unexpected content-type: ${response.headers['content-type']}');
+        return {"success": false, "message": "Unexpected response format"};
+      }
 
-      if (response.statusCode == 200) {
-        return {"success": true, "message": data["message"]};
-      } else {
-        return {
-          "success": false,
-          "message": data["message"] ?? "Registration failed.",
-        };
+      try {
+        final data = jsonDecode(response.body);
+        final message = data["message"] ?? "Registration failed.";
+        if (response.statusCode == 200) {
+          return {"success": true, "message": message};
+        } else {
+          return {"success": false, "message": message};
+        }
+      } catch (jsonError) {
+        print('JSON decode error: $jsonError');
+        return {"success": false, "message": "Invalid response format"};
       }
     } catch (e, stacktrace) {
       print('Error during registerClient: $e');
