@@ -1,9 +1,9 @@
 import 'package:client_app/models/auth_models/client_login.dart';
-import 'package:client_app/models/auth_models/client_register.dart';
 import 'package:client_app/services/auth_services/client_auth_services.dart';
 import 'package:client_app/views/Auth_pages/client_register_page.dart';
 import 'package:client_app/views/components/login_navbar.dart';
 import 'package:client_app/views/Auth_pages/verify_login_code_page.dart';
+import 'package:client_app/views/Auth_pages/client_forgot_password_page.dart';
 import 'package:flutter/material.dart';
 
 class ClientLoginPage extends StatefulWidget {
@@ -109,6 +109,24 @@ class _ClientLoginPageState extends State<ClientLoginPage> {
                     onPressed: loginUser, child: const Text("Login")),
                 const SizedBox(height: 20),
                 Text(responseMessage),
+                const SizedBox(height: 20),
+                GestureDetector(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const ClientForgotPasswordPage(),
+                      ),
+                    );
+                  },
+                  child: const Text(
+                    "Did you forget your password ?",
+                    style: TextStyle(
+                      color: Colors.blue,
+                      decoration: TextDecoration.underline,
+                    ),
+                  ),
+                ),
                 const SizedBox(height: 20),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,

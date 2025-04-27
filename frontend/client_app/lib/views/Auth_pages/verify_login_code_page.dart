@@ -1,3 +1,4 @@
+import 'package:client_app/services/token_service.dart';
 import 'package:client_app/views/components/login_navbar.dart';
 import 'package:flutter/material.dart';
 import 'package:client_app/models/auth_models/client_verify_login.dart';
@@ -48,11 +49,11 @@ class _VerifyLoginCodePageState extends State<VerifyLoginCodePage> {
 
         _storeSession(token, username);
 
-        // Navigate to home page with username
+        // Navigate to home page with username and jwtToken
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
-            builder: (context) => HomePage(username: username),
+            builder: (context) => HomePage(username: username, jwtToken: token),
           ),
         );
       } else {
@@ -62,9 +63,8 @@ class _VerifyLoginCodePageState extends State<VerifyLoginCodePage> {
   }
 
   Future<void> _storeSession(String token, String username) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString('jwt_token', token);
-    await prefs.setString('username', username);
+    await TokenService.saveToken(token);
+    // You can also store username if needed, e.g. using SharedPreferences directly
   }
 
   @override
@@ -105,7 +105,8 @@ class _VerifyLoginCodePageState extends State<VerifyLoginCodePage> {
                         child: const Text('Verify'),
                       ),
                 const SizedBox(height: 20),
-                Text(responseMessage, style: const TextStyle(color: Colors.red)),
+                Text(responseMessage,
+                    style: const TextStyle(color: Colors.red)),
               ],
             ),
           ),

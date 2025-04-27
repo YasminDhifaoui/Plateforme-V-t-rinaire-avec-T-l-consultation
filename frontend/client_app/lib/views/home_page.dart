@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:client_app/views/components/home_navbar.dart';
-import 'package:client_app/views/veterinary_page.dart';
+import 'package:client_app/views/vet_pages/veterinary_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class HomePage extends StatefulWidget {
   final String username;
+  final String jwtToken;
 
-  const HomePage({Key? key, required this.username}) : super(key: key);
+  const HomePage({Key? key, required this.username, required this.jwtToken}) : super(key: key);
 
   @override
   State<HomePage> createState() => _HomePageState();
@@ -51,6 +52,7 @@ class _HomePageState extends State<HomePage> {
     return Scaffold(
       appBar: HomeNavbar(
         username: widget.username,
+        jwtToken: widget.jwtToken,
         onLogout: _handleLogout,
       ),
       body: Center(

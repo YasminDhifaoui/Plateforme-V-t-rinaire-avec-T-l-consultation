@@ -1,3 +1,4 @@
+import 'package:client_app/main.dart';
 import 'package:flutter/material.dart';
 
 class LoginNavbar extends StatelessWidget implements PreferredSizeWidget {
@@ -8,7 +9,15 @@ class LoginNavbar extends StatelessWidget implements PreferredSizeWidget {
     return AppBar(
       backgroundColor:
           const Color(0xFF003366), // Marine blue (same as main navbar)
-      title: Image.asset('assets/images/app_logo.png', height: 40),
+      title: GestureDetector(
+        onTap: () {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => const HomePage()),
+          );
+        },
+        child: Image.asset('assets/images/app_logo.png', height: 40),
+      ),
       centerTitle: true,
     );
   }

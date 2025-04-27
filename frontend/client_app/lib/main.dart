@@ -1,5 +1,5 @@
-import 'package:client_app/views/components/navbar.dart';
 import 'package:flutter/material.dart';
+import 'package:client_app/views/components/navbar.dart';
 
 void main() => runApp(const MyApp());
 

@@ -1,6 +1,6 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import '../models/veterinaire.dart';
+import '../../models/vet_models/veterinaire.dart';
 
 class VeterinaireService {
   //static const String baseUrl = "http://10.0.2.2:5000/api/client/VetsC";

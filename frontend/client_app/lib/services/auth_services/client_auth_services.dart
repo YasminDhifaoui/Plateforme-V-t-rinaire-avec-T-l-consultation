@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:client_app/models/auth_models/client_confirm_email.dart';
+import 'package:client_app/models/auth_models/client_forget_password.dart';
 import 'package:http/http.dart' as http;
 import '../../models/auth_models/client_register.dart';
 import '../../models/auth_models/client_login.dart';
@@ -148,6 +149,90 @@ class ApiService {
       }
     } catch (e, stacktrace) {
       print('Error during verifyLoginCode: $e');
+      print('Stacktrace: $stacktrace');
+      return {"success": false, "message": "Error: $e"};
+    }
+  }
+
+  /// Forgot password
+  Future<Map<String, dynamic>> forgotPassword(
+      ClientForgetPasswordDto model) async {
+    final url = Uri.parse("$baseUrl/forgot-password");
+
+    try {
+      final response = await http
+          .post(
+            url,
+            headers: {"Content-Type": "application/json"},
+            body: jsonEncode(model.toJson()),
+          )
+          .timeout(const Duration(seconds: 30));
+
+      if (response.body.isEmpty) {
+        return {"success": false, "message": "Empty response from server"};
+      }
+
+      final data = jsonDecode(response.body);
+
+      if (response.statusCode == 200) {
+        return {
+          "success": true,
+          "message": data["message"] ??
+              "Reset password URL has been sent to the email successfully!"
+        };
+      } else {
+        return {
+          "success": false,
+          "message": data["message"] ?? "Failed to send reset password URL"
+        };
+      }
+    } catch (e, stacktrace) {
+      print('Error during forgotPassword: $e');
+      print('Stacktrace: $stacktrace');
+      return {"success": false, "message": "Error: $e"};
+    }
+  }
+
+  /// Reset password
+  Future<Map<String, dynamic>> resetPassword({
+    required String email,
+    required String token,
+    required String newPassword,
+  }) async {
+    final url = Uri.parse("$baseUrl/reset-password");
+
+    try {
+      final response = await http
+          .post(
+            url,
+            headers: {"Content-Type": "application/json"},
+            body: jsonEncode({
+              "email": email,
+              "token": token,
+              "newPassword": newPassword,
+            }),
+          )
+          .timeout(const Duration(seconds: 10));
+
+      if (response.body.isEmpty) {
+        return {"success": false, "message": "Empty response from server"};
+      }
+
+      final data = jsonDecode(response.body);
+
+      if (response.statusCode == 200) {
+        return {
+          "success": true,
+          "message": data["message"] ?? "Password reset successful",
+        };
+      } else {
+        return {
+          "success": false,
+          "message": data["message"] ?? "Failed to reset password",
+        };
+      }
+    } catch (e, stacktrace) {
+      print('Error during resetPassword: $e');
       print('Stacktrace: $stacktrace');
       return {"success": false, "message": "Error: $e"};
     }

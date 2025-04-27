@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../services/veterinaire_service.dart';
-import '../models/veterinaire.dart';
-import 'components/home_navbar.dart';
+import '../../services/vet_services/veterinaire_service.dart';
+import '../../models/vet_models/veterinaire.dart';
+import '../components/home_navbar.dart';
 
 class VetListPage extends StatefulWidget {
   const VetListPage({Key? key}) : super(key: key);
@@ -14,17 +14,19 @@ class VetListPage extends StatefulWidget {
 class _VetListPageState extends State<VetListPage> {
   final VeterinaireService vetService = VeterinaireService();
   String username = '';
+  String jwtToken = '';
 
   @override
   void initState() {
     super.initState();
-    _loadUsername();
+    _loadUserData();
   }
 
-  Future<void> _loadUsername() async {
+  Future<void> _loadUserData() async {
     final prefs = await SharedPreferences.getInstance();
     setState(() {
       username = prefs.getString('username') ?? '';
+      jwtToken = prefs.getString('jwt_token') ?? '';
     });
   }
 
@@ -60,6 +62,7 @@ class _VetListPageState extends State<VetListPage> {
     return Scaffold(
       appBar: HomeNavbar(
         username: username,
+        jwtToken: jwtToken,
         onLogout: _handleLogout,
       ),
       body: Column(
@@ -123,5 +126,5 @@ class _VetListPageState extends State<VetListPage> {
         ],
       ),
     );
-  } 
+  }
 }

@@ -1,11 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:client_app/views/profile_pages/profile_page.dart';
 
 class HomeNavbar extends StatelessWidget implements PreferredSizeWidget {
   final String username;
+  final String jwtToken;
   final VoidCallback onLogout;
 
-  const HomeNavbar({Key? key, this.username = '', this.onLogout = _defaultOnLogout})
-      : super(key: key);
+  const HomeNavbar({
+    Key? key,
+    this.username = '',
+    required this.jwtToken,
+    this.onLogout = _defaultOnLogout,
+  }) : super(key: key);
 
   static void _defaultOnLogout() {}
 
@@ -34,17 +40,27 @@ class HomeNavbar extends StatelessWidget implements PreferredSizeWidget {
                   style: const TextStyle(fontSize: 16),
                 ),
                 const SizedBox(width: 8),
-                Container(
-                  width: 36,
-                  height: 36,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    border: Border.all(color: Colors.black, width: 2),
-                  ),
-                  child: ClipOval(
-                    child: Image.asset(
-                      'assets/images/pet_owner.png',
-                      fit: BoxFit.cover,
+                GestureDetector(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => ProfilePage(jwtToken: jwtToken),
+                      ),
+                    );
+                  },
+                  child: Container(
+                    width: 36,
+                    height: 36,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      border: Border.all(color: Colors.black, width: 2),
+                    ),
+                    child: ClipOval(
+                      child: Image.asset(
+                        'assets/images/pet_owner.png',
+                        fit: BoxFit.cover,
+                      ),
                     ),
                   ),
                 ),
