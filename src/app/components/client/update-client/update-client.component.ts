@@ -34,6 +34,7 @@ export class UpdateClientComponent implements OnInit {
       username: [''],
       email: [''],
       password: ['']
+      
     });
   }
 
@@ -46,9 +47,11 @@ export class UpdateClientComponent implements OnInit {
         username: this.data.username,
         email: this.data.email,
         password: this.data.password
+        
       });
     }
   }
+
 
   async onSubmit(): Promise<void> {
     if (this.clientForm.invalid) {

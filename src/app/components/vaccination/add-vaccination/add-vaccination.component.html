@@ -1,0 +1,39 @@
+<form [formGroup]="vaccinationForm" (ngSubmit)="onSubmit()">
+
+    <mat-form-field class="full-width">
+        <mat-label>Name</mat-label>
+        <input matInput formControlName="name" placeholder="Entrer le nom" />
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Animal</mat-label>
+        <mat-select formControlName="animalId" required>
+            <mat-option *ngFor="let animal of animal" [value]="animal.id">
+                {{ animal.id }}
+            </mat-option>
+        </mat-select>
+        <mat-error *ngIf="vaccinationForm.get('animalId')?.hasError('required')">
+            Veuillez choisir un animal
+        </mat-error>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Date de vaccination</mat-label>
+        <input matInput [matDatepicker]="picker" formControlName="date" required>
+        <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+        <mat-datepicker #picker></mat-datepicker>
+        <mat-error *ngIf="vaccinationForm.get('date')?.hasError('required')">
+            Veuillez choisir une date
+        </mat-error>
+    </mat-form-field>
+
+    <div class="button-row">
+        <button mat-raised-button color="primary" type="submit" [disabled]="vaccinationForm.invalid">
+            Valider
+        </button>
+        <button mat-button type="button" (click)="close()">
+            Annuler
+        </button>
+    </div>
+
+</form>

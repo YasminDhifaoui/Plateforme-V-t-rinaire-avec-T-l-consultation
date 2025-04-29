@@ -35,9 +35,14 @@
     <textarea matInput formControlName="antecedentsMedicaux"></textarea>
   </mat-form-field>
 
+  
   <mat-form-field class="full-width">
     <mat-label>ID du propriétaire</mat-label>
-    <input matInput formControlName="ownerId" />
+    <mat-select formControlName="ownerId">
+      <mat-option *ngFor="let cli of clients" [value]="cli.id">
+        {{ cli.userName }}
+      </mat-option>
+    </mat-select>
   </mat-form-field>
 
   <div class="actions">

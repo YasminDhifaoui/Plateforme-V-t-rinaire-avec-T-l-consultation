@@ -1,0 +1,31 @@
+:host {
+    display: block;
+    height: 100vh;
+    overflow: hidden;
+  }
+  
+  .main-container {
+    display: flex;
+    flex-direction: row;
+    height: calc(100vh - 64px); /* 64px = height de la navbar Material par défaut */
+    margin-top: 64px;
+  }
+  
+  .sidebar {
+    width: 240px; /* ou 200px selon ton style */
+    background-color: #f5f5f5;
+    border-right: 1px solid #ddd;
+    height: 100%;
+    position: fixed;
+    top: 64px; /* aligne avec la navbar */
+    left: 0;
+    bottom: 0;
+  }
+  
+  .content {
+    margin-left: 240px; /* même valeur que la largeur du sidebar */
+    padding: 20px;
+    width: calc(100% - 240px);
+    overflow-y: auto;
+  }
+  

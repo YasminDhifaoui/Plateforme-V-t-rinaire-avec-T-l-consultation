@@ -1,22 +1,37 @@
 import { Component } from '@angular/core';
-import { Router } from '@angular/router'
-import { AdminAuthService } from '../../services/admin-auth.service';
-import { MatMenuModule } from '@angular/material/menu'; // Pour mat-menu
-import { MatIconModule } from '@angular/material/icon';   // Pour les icônes (facultatif si utilisé)
-import { MatButtonModule } from '@angular/material/button'; // Si tu utilises des boutons mat-button
+import { Router } from '@angular/router';
+import { MatToolbarModule } from '@angular/material/toolbar';
+import { MatIconModule } from '@angular/material/icon';
+import { MatMenuModule } from '@angular/material/menu';
+import { MatButtonModule } from '@angular/material/button';
+import { jwtDecode } from 'jwt-decode';
 
 @Component({
   selector: 'app-navbar',
-  imports: [MatMenuModule, MatIconModule, MatButtonModule],
+  standalone: true,
+  imports: [MatToolbarModule, MatIconModule, MatMenuModule, MatButtonModule],
   templateUrl: './navbar.component.html',
   styleUrl: './navbar.component.css'
 })
 export class NavbarComponent {
-  constructor(private router: Router, private authService: AdminAuthService) {}
+  userEmail: string | null = null;
 
-  logout() {
-    this.authService.logout();
-    this.router.navigate(['/login']);
+  constructor(private router: Router) {
+    const token = localStorage.getItem('authToken');
+    if (token) {
+      const decodedToken: any = jwtDecode(token);
+      this.userEmail = decodedToken["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"];
+    }
   }
 
+  
+  modifierCompte() {
+    this.router.navigate(['/profile']); // Changé vers '/profile'
+  }
+
+
+  logout() {
+    localStorage.removeItem('authToken');
+    this.router.navigate(['/login']);
+  }
 }

@@ -14,6 +14,9 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
 import { MatIconModule } from '@angular/material/icon';
+import { VeterinaireService } from '../../../services/veterinaire.service';
+import { ClientService } from '../../../services/client.service';
+import { AnimalService } from '../../../animal.service';
 
 @Component({
   selector: 'app-add-rendez-vous',
@@ -34,13 +37,18 @@ import { MatIconModule } from '@angular/material/icon';
 })
 export class AddRendezVousComponent {
   rendezVousForm: FormGroup;
-  
+  veterinare: any [] = [];
+  clients: any [] = [];
+  animal: any [] = [];
 
   constructor(
     public dialogRef: MatDialogRef<AddRendezVousComponent>,
     private fb: FormBuilder,
     private router: Router,
-    private RendezVousService:RendezVousService
+    private RendezVousService:RendezVousService,
+    private verterinareServcie: VeterinaireService,
+    private ClientService: ClientService,
+    private animalService: AnimalService
   ) {
     this.rendezVousForm = this.fb.group({
       vetId: ['', Validators.required],
@@ -48,8 +56,46 @@ export class AddRendezVousComponent {
       animalId: ['', [Validators.required]],
       date: ['', [Validators.required]],
       status: ['', [Validators.required]],
+      
+
     });
   }
+  ngOnInit(): void {
+    this.loadveterinare(); 
+    this.loadClient();
+    this.loadAnimal();
+  }
+  // fonction t3ayet lele lista mte el veterinaire
+  // sna3na el fou9 list ver8a 
+  loadveterinare(): void {
+    this.verterinareServcie.getAllVeterinaires().subscribe({
+      next: (data) => {
+        console.log('Vétérinaires récupérés:', data);
+        this.veterinare = data as any[];
+      },
+      error: (err) => console.log(err)
+    });
+  }
+  loadClient(): void {
+    this.ClientService.getAllClients().subscribe({
+      next: (data) => {
+        console.log('clients récupérés:', data);
+        this.clients = data as any[];
+      },
+      error: (err) => console.log(err)
+    });
+  }
+  loadAnimal(): void {
+    this.animalService.getAllAnimals().subscribe({
+      next: (data) => {
+        console.log('animals récupérés:', data);
+        this.animal = data as any[];
+      },
+      error: (err) => console.log(err)
+    });
+  }
+  
+  
   async onSubmit(): Promise<void> {
     if (this.rendezVousForm.invalid) {
       await Swal.fire({

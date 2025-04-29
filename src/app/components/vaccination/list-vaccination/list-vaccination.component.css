@@ -1,0 +1,153 @@
+/* Container and general styling */
+.header {
+    text-align: center;
+    margin: 30px 0 20px;
+    font-size: 24px;
+    color: #333;
+  }
+  
+  .tous {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 15px;
+    margin: 20px 0;
+    padding: 0 10px;
+  }
+  
+  /* Input field styling */
+  .simple-input {
+    flex-grow: 1;
+    max-width: 300px;
+    height: 40px;
+    padding: 0 15px;
+    border: 1.5px solid #ddd;
+    border-radius: 8px;
+    font-size: 16px;
+    transition: border-color 0.3s ease;
+  }
+  
+  .simple-input:focus {
+    outline: none;
+    border-color: #3f51b5;
+    box-shadow: 0 0 8px rgba(63, 81, 181, 0.3);
+  }
+  
+  /* Add button styling */
+  .buttons-container {
+    display: flex;
+    align-items: center;
+  }
+  
+  .styled-add {
+    background-color: #3f51b5;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 10px 18px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: background-color 0.3s ease;
+  }
+  
+  .styled-add:hover {
+    background-color: #303f9f;
+  }
+  
+  /* Table container and style */
+  .mat-elevation-z8 {
+    border-radius: 12px;
+    overflow-x: auto;
+    background: white;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+    padding: 15px;
+  }
+  
+  /* Table header */
+  .mat-header-cell {
+    font-weight: 600;
+    color: #34495e;
+    background: #f0f2f5;
+    padding: 12px 15px;
+  }
+  
+  /* Table cells */
+  .mat-cell {
+    padding: 15px;
+    background: #f9f9f9;
+    color: #555;
+    border-bottom: 1px solid #e0e0e0;
+    vertical-align: middle;
+  }
+  
+  /* Row hover effect */
+  .mat-row:hover .mat-cell {
+    background-color: #e8f0fe;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  
+  /* Action buttons */
+  .edit, .delete {
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.3s ease;
+  }
+  
+  .edit {
+    background-color: #4caf50;
+    color: white;
+  }
+  
+  .edit:hover {
+    background-color: #388e3c;
+  }
+  
+  .delete {
+    background-color: #f44336;
+    color: white;
+  }
+  
+  .delete:hover {
+    background-color: #d32f2f;
+  }
+  
+  /* Icon styling */
+  .mt-edit {
+    font-size: 20px;
+  }
+  
+  /* Paginator styling */
+  .mat-paginator {
+    margin-top: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  
+  .mat-paginator .mat-paginator-range-actions {
+    margin-left: 15px;
+  }
+  
+  .mat-paginator .mat-button {
+    padding: 8px 16px;
+    font-size: 14px;
+    border-radius: 4px;
+    transition: background-color 0.3s;
+  }
+  
+  .mat-paginator .mat-button:hover {
+    background-color: #3f51b5;
+    color: white;
+  }
+  
+  

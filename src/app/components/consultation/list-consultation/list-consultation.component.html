@@ -1,0 +1,82 @@
+<div class="header">
+    <!-- Tu peux mettre ici un titre ou des infos générales -->
+  </div>
+  
+  <div class="tous">
+    <input
+      type="text"
+      class="simple-input"
+      matInput
+      (keyup)="applyFilter($event)"
+      placeholder="Rechercher..."
+    />
+  
+    <div class="buttons-container">
+      <button class="styled-add" (click)="AddconsultationDialog()">
+        Ajouter un consultation
+        <mat-icon>add_circle_outline</mat-icon>
+      </button>
+    </div>
+  </div>
+  
+  <div class="mat-elevation-z8">
+    <table mat-table [dataSource]="dataSource" class="mat-table" matSort>
+  
+      <!-- Rendez-vous ID -->
+      <ng-container matColumnDef="rendezVousId">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header> ID Rendez-vous </th>
+        <td mat-cell *matCellDef="let element"> {{element.rendezVousId}} </td>
+      </ng-container>
+  
+      <!-- Vétérinaire -->
+     <!-- Vétérinaire -->
+<ng-container matColumnDef="veterinaireName">
+  <th mat-header-cell *matHeaderCellDef mat-sort-header>Nom Vétérinaire</th>
+  <td mat-cell *matCellDef="let element"> {{ element.veterinaireName }} </td>
+</ng-container>
+
+      <!-- Client -->
+      <ng-container matColumnDef="clientId">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header> Nom client </th>
+        <td mat-cell *matCellDef="let element"> {{element.client?.userName}} </td>
+      </ng-container>
+  
+      <!-- Animal -->
+      <ng-container matColumnDef="animalId">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header> ID Animal </th>
+        <td mat-cell *matCellDef="let element"> {{element.animalId}} </td>
+      </ng-container>
+  
+      <!-- Date -->
+      <ng-container matColumnDef="date">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header> Date </th>
+        <td mat-cell *matCellDef="let element">
+          {{ element.date | date:'dd/MM/yyyy HH:mm' }}
+        </td>
+      </ng-container>
+  
+    
+  
+      <!-- Actions -->
+      <ng-container matColumnDef="actions">
+        <th mat-header-cell *matHeaderCellDef> Action </th>
+        <td mat-cell *matCellDef="let element">
+          <button mat-icon-button color="primary" class="edit"
+                  (click)="UpdateconsultationDialog(element); $event.stopPropagation()">
+            <mat-icon class="mt-edit">edit</mat-icon>
+          </button>
+  
+          <button mat-icon-button color="warn" class="delete"
+                  (click)="deleteconsultation(element.rendezVousId); $event.stopPropagation()">
+            <mat-icon class="mt-edit">delete</mat-icon>
+          </button>
+        </td>
+      </ng-container>
+  
+      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+    </table>
+  
+    <mat-paginator [pageSizeOptions]="[5, 10, 20]" showFirstLastButtons></mat-paginator>
+  </div>
+  

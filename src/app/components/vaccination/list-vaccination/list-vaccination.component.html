@@ -1,0 +1,61 @@
+<div class="header">
+
+</div>
+<div class="tous">
+  <input type="text" class="simple-input" matInput (keyup)="applyFilter($event)" placeholder="Rechercher...">
+  <div class="buttons-container">
+    <button class="styled-add" (click)="AddvaccinationDialog()">
+      Ajouter un vaccination
+      <mat-icon>add_circle_outline</mat-icon>
+    </button>
+  </div>
+</div>
+<div class="mat-elevation-z8">
+  <table mat-table [dataSource]="dataSource">
+
+    <!-- Position Column -->
+    <ng-container matColumnDef="name">
+      <th mat-header-cell *matHeaderCellDef>Name</th>
+      <td mat-cell *matCellDef="let element"> {{element.name}} </td>
+    </ng-container>
+
+    <!-- Name Column -->
+    <ng-container matColumnDef="date">
+      <th mat-header-cell *matHeaderCellDef>date </th>
+      <td mat-cell *matCellDef="let element"> {{element.date}} </td>
+    </ng-container>
+  
+    <ng-container matColumnDef="animalId">
+        <th mat-header-cell *matHeaderCellDef>animal</th>
+        <td mat-cell *matCellDef="let element"> {{element.animal.name}} </td>
+      </ng-container>
+    
+   
+      
+      <ng-container matColumnDef="actions">
+        <th mat-header-cell *matHeaderCellDef> Action </th>
+        <td mat-cell *matCellDef="let element">
+          <!-- Bouton Edit -->
+          <button mat-icon-button color="primary" class="edit"
+          (click)="  UpdatevaccinationDialog(element)"
+          (click)="$event.stopPropagation()">
+    <mat-icon class="mt-edit">edit</mat-icon>
+  </button>
+  
+          <!-- Bouton Delete -->
+          <button mat-icon-button color="warn" (click)="deletevaccination(element.id); $event.stopPropagation()"
+            class="delete">
+            <mat-icon class="mt-edit">delete</mat-icon>
+          </button>
+        </td>
+      </ng-container>
+  
+
+
+    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+    <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+  </table>
+
+  <mat-paginator [pageSizeOptions]="[5, 10, 20]" showFirstLastButtons aria-label="Select page of periodic elements">
+  </mat-paginator>
+</div>

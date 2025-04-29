@@ -1,0 +1,50 @@
+<div mat-dialog-content>
+  <h2>Ajouter une Consultation</h2>
+
+  <form [formGroup]="consultationForm" (ngSubmit)="onSubmit()">
+    <label for="date">Date de consultation</label>
+    <input type="date" id="date" formControlName="date" class="form-control" />
+
+    <mat-form-field class="full-width">
+      <mat-label>Diagnostic</mat-label>
+      <input matInput formControlName="Diagnostic" />
+    </mat-form-field>
+
+    <mat-form-field class="full-width">
+      <mat-label>Traitement</mat-label>
+      <input matInput formControlName="Treatment" />
+    </mat-form-field>
+
+    <mat-form-field class="full-width">
+      <mat-label>Prescription</mat-label>
+      <input matInput formControlName="Prescription" />
+    </mat-form-field>
+
+    <mat-form-field class="full-width">
+      <mat-label>Notes</mat-label>
+      <input matInput formControlName="Notes" />
+    </mat-form-field>..
+
+    <div class="file-upload">
+      <label for="file">Document :</label>
+      <input id="file" type="file" (change)="onFileSelected($event)" />
+    </div>
+
+    <mat-form-field appearance="fill" class="full-width">
+      <mat-label>Rendez-vous</mat-label>
+      <mat-select formControlName="rendezVousID" required>
+        <mat-option *ngFor="let rdv of rendezVous" [value]="rdv.id">
+          {{ rdv.id }}
+        </mat-option>
+      </mat-select>
+      <mat-error *ngIf="consultationForm.get('rendezVousID')?.hasError('required')">
+        Le rendez-vous est obligatoire
+      </mat-error>
+    </mat-form-field>
+
+    <div mat-dialog-actions>
+      <button mat-button type="button" (click)="close()">Annuler</button>
+      <button mat-raised-button color="primary" type="submit">Enregistrer</button>
+    </div>
+  </form>
+</div>

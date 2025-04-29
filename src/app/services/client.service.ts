@@ -7,7 +7,7 @@ import { Observable } from 'rxjs';
 })
 export class ClientService {
 
-  url = 'https://localhost:7000/api/Clients'
+  url = 'https://localhost:7000/api/admin/Clients'
   constructor(private http: HttpClient) { }
 
   getAllClients(){

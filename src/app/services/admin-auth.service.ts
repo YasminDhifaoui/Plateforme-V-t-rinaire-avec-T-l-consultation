@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
 
+
 @Injectable({
   providedIn: 'root'
 })
@@ -20,11 +21,16 @@ export class AdminAuthService {
   verifyLoginCode(data: any): Observable<any> {
     return this.http.post(`${this.baseUrl}/verify-login-code`, data);
   }
+  verifyAdminCode(data: any): Observable<any> {
+    return this.http.post(`${this.baseUrl}/confirm-admin-email`, data);
+  }
   logout() {
-    localStorage.removeItem('token');
+    localStorage.removeItem('authToken');
   }
 
   isAuthenticated(): boolean {
-    return !!localStorage.getItem('token');
+    return !!localStorage.getItem('authToken');
   }
+ 
+  
 }

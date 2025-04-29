@@ -1,0 +1,27 @@
+<div class="profile-container" *ngIf="profileData && !isLoading">
+  <h2>{{ profileData.name }}'s Profile</h2>
+
+  <div class="profile-info">
+    <p><strong>Email:</strong> {{ profileData.email }}</p>
+    <p><strong>Name:</strong> {{ profileData.name }}</p>
+    <p><strong>Phone Number:</strong> {{ profileData.phoneNumber }}</p>
+    <p><strong>First Name:</strong> {{ profileData.firstName }}</p>
+    <p><strong>Last Name:</strong> {{ profileData.lastName }}</p>
+    <p><strong>Birth Date:</strong> {{ profileData.birthDate | date }}</p>
+    <p><strong>Address:</strong> {{ profileData.address }}</p>
+    <p><strong>Zip Code:</strong> {{ profileData.zipCode }}</p>
+  </div>
+
+  <button mat-raised-button color="primary" class="update-button" >
+    Update your profile
+  </button>
+</div>
+
+<div *ngIf="isLoading" class="loading">
+  <mat-spinner diameter="40"></mat-spinner>
+  <span>Loading profile data...</span>
+</div>
+
+<div *ngIf="errorMessage" class="alert alert-danger">
+  {{ errorMessage }}
+</div>

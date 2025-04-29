@@ -1,0 +1,58 @@
+.navbar {
+    position: fixed;
+    top: 0;
+    left: 5rem; /* shifted right to avoid covering sidebar */
+    right: 0;
+    z-index: 1100;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    height: 64px;
+    padding: 0 24px;
+    box-shadow: 0 4px 12px rgba(118, 75, 162, 0.4);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    transition: background-color 0.3s ease;
+}
+
+.navbar:hover {
+    background: linear-gradient(135deg, #764ba2, #667eea);
+}
+
+.app-name {
+    font-weight: 700;
+    font-size: 1.5rem;
+    user-select: none;
+}
+
+.spacer {
+    flex: 1;
+}
+
+button[mat-icon-button] {
+    color: white;
+    transition: color 0.3s ease, transform 0.2s ease;
+}
+
+button[mat-icon-button]:hover {
+    color: #d1c4e9;
+    transform: scale(1.1);
+}
+
+mat-icon {
+    font-size: 28px;
+}
+
+mat-menu {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-weight: 600;
+}
+
+.user-email {
+    margin-left: 0.5rem;
+    font-weight: 500;
+    font-size: 1rem;
+    user-select: none;
+    color: #e0e0e0;
+}

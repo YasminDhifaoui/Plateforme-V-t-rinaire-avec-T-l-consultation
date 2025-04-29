@@ -1,0 +1,57 @@
+<div class="admin-list-card">
+  <div class="header">
+    <h2>Liste des Admins</h2>
+  </div>
+  <div class="controls">
+    <input type="text" class="search-input" matInput (keyup)="applyFilter($event)" placeholder="Rechercher...">
+    <button class="add-button" (click)="AddAdminDialog()">
+      Ajouter un Admin
+      <mat-icon>add_circle_outline</mat-icon>
+    </button>
+  </div>
+  <div class="table-container mat-elevation-z8">
+    <table mat-table [dataSource]="dataSource" class="admin-table">
+
+      <!-- ID Column -->
+      <ng-container matColumnDef="id">
+        <th mat-header-cell *matHeaderCellDef> ID </th>
+        <td mat-cell *matCellDef="let element"> {{element.id}} </td>
+      </ng-container>
+
+      <!-- Name Column -->
+      <ng-container matColumnDef="username">
+        <th mat-header-cell *matHeaderCellDef> Name </th>
+        <td mat-cell *matCellDef="let element"> {{element.username}} </td>
+      </ng-container>
+
+      <!-- Email Column -->
+      <ng-container matColumnDef="email">
+        <th mat-header-cell *matHeaderCellDef> Email </th>
+        <td mat-cell *matCellDef="let element"> {{element.email}} </td>
+      </ng-container>
+
+      <!-- Actions Column -->
+      <ng-container matColumnDef="actions">
+        <th mat-header-cell *matHeaderCellDef> Action </th>
+        <td mat-cell *matCellDef="let element" class="actions-cell">
+          <button mat-icon-button color="primary" class="edit"
+            (click)="UpdateAdminDialog(element)"
+            (click)="$event.stopPropagation()">
+            <mat-icon class="mt-edit">edit</mat-icon>
+          </button>
+
+          <button mat-icon-button color="warn" (click)="deleteAdmin(element.id); $event.stopPropagation()"
+            class="delete">
+            <mat-icon class="mt-edit">delete</mat-icon>
+          </button>
+        </td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns;" class="table-row"></tr>
+    </table>
+
+    <mat-paginator [pageSizeOptions]="[5, 10, 20]" showFirstLastButtons aria-label="Select page of periodic elements">
+    </mat-paginator>
+  </div>
+</div>

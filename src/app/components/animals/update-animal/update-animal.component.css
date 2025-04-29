@@ -1,30 +1,70 @@
-.form-title {
-    font-size: 24px;
-    font-weight: bold;
-    margin-bottom: 20px;
-    color: #3f51b5;
-    text-align: center;
-  }
-  
-  .animal-form {
-    max-width: 600px;
-    margin: 0 auto;
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-    background-color: #f9f9f9;
-    padding: 30px;
-    border-radius: 12px;
-    box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
-  }
-  
-  .full-width {
-    width: 100%;
-  }
-  
-  .form-actions {
-    display: flex;
-    justify-content: space-between;
-    margin-top: 20px;
-  }
-  
+/* 1) Conteneur parent (dialog ou sidenav) */
+:host ::ng-deep .mat-dialog-container,
+.mat-sidenav-content {
+  max-height: 100vh;
+  overflow-y: auto;
+}
+
+/* 2) Ton formulaire */
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  max-width: 600px;
+  margin: 40px auto;
+  background: #fff;
+  padding: 30px 25px;
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+
+  /* **ajouté pour le scroll interne** */
+  max-height: calc(100vh - 160px); /* Ajuste selon la hauteur de ton header/footer */
+  overflow-y: auto;  /* Permet le scroll interne si le formulaire est trop long */
+}
+
+/* Form fields */
+.full-width {
+  width: 100%;
+}
+
+.mat-form-field {
+  background: #f9f9f9;
+  border-radius: 8px;
+}
+
+/* Action buttons container */
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 15px;
+  margin-top: 10px;
+}
+
+/* Buttons styling */
+.actions button {
+  min-width: 120px;
+  height: 40px;
+  font-weight: 600;
+  border-radius: 8px;
+  transition: background-color 0.3s ease;
+}
+
+/* Save (Modifier) button */
+.actions button[type="submit"] {
+  background-color: #3f51b5;
+  color: white;
+}
+
+.actions button[type="submit"]:hover {
+  background-color: #303f9f;
+}
+
+/* Cancel button */
+.actions button[type="button"] {
+  background-color: #f44336;
+  color: white;
+}
+
+.actions button[type="button"]:hover {
+  background-color: #d32f2f;
+}

@@ -1,0 +1,66 @@
+/* Title styling */
+h2 {
+  text-align: center;
+  color: #3f51b5;
+  margin-bottom: 25px;
+  font-size: 28px;
+}
+
+/* Form container */
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  max-width: 500px;
+  margin: 0 auto;
+  background: #ffffff;
+  padding: 30px 20px;
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+}
+
+/* Form fields */
+.full-width {
+  width: 100%;
+}
+
+.mat-form-field {
+  background: #f9f9f9;
+  border-radius: 8px;
+}
+
+/* Action buttons */
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 15px;
+  margin-top: 10px;
+}
+
+.actions button {
+  min-width: 120px;
+  height: 40px;
+  font-weight: 600;
+  border-radius: 8px;
+  transition: background-color 0.3s ease;
+}
+
+/* Cancel button */
+.actions button:first-child {
+  background-color: #f44336;
+  color: white;
+}
+
+.actions button:first-child:hover {
+  background-color: #d32f2f;
+}
+
+/* Save button */
+.actions button:last-child {
+  background-color: #3f51b5;
+  color: white;
+}
+
+.actions button:last-child:hover {
+  background-color: #303f9f;
+}

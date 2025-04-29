@@ -1,9 +1,104 @@
 /* You can add global styles to this file, and also import other style files */
-body{
-    background-color: #f0f1f3;
+body {
+  background-color: #e0e0e0;
+  font-family: 'Poppins', sans-serif;
+  margin: 0;
+  height: 100%;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  /* Neumorphism background */
+  background: #e0e0e0;
 }
+
 * {
-    font-family: 'Poppins', sans-serif;
+  box-sizing: border-box;
 }
-html, body { height: 100%; }
-body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
+
+html, body {
+  height: 100%;
+  margin: 0;
+  font-family: Roboto, "Helvetica Neue", sans-serif;
+}
+
+/* Neumorphism container style */
+.neumorphism-container {
+  background: #e0e0e0;
+  border-radius: 16px;
+  box-shadow:
+    8px 8px 16px #bebebe,
+    -8px -8px 16px #ffffff;
+  padding: 1rem;
+}
+
+/* Neumorphism card style */
+.neumorphism-card {
+  background: #e0e0e0;
+  border-radius: 16px;
+  box-shadow:
+    6px 6px 12px #bebebe,
+    -6px -6px 12px #ffffff;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+/* Neumorphism button style */
+.neumorphism-button {
+  background: #e0e0e0;
+  border-radius: 12px;
+  box-shadow:
+    4px 4px 6px #bebebe,
+    -4px -4px 6px #ffffff;
+  border: none;
+  padding: 0.6rem 1.2rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: box-shadow 0.3s ease;
+}
+
+.neumorphism-button:hover {
+  box-shadow:
+    inset 4px 4px 6px #bebebe,
+    inset -4px -4px 6px #ffffff;
+}
+
+/* Neumorphism input style */
+.neumorphism-input {
+  background: #e0e0e0;
+  border-radius: 12px;
+  box-shadow:
+    inset 4px 4px 6px #bebebe,
+    inset -4px -4px 6px #ffffff;
+  border: none;
+  padding: 0.6rem 1rem;
+  font-size: 1rem;
+  outline: none;
+  transition: box-shadow 0.3s ease;
+}
+
+.neumorphism-input:focus {
+  box-shadow:
+    inset 2px 2px 4px #bebebe,
+    inset -2px -2px 4px #ffffff;
+  outline: none;
+}
+
+/* Scrollbar styling for neumorphism */
+::-webkit-scrollbar {
+  width: 12px;
+}
+
+::-webkit-scrollbar-track {
+  background: #e0e0e0;
+  border-radius: 10px;
+  box-shadow:
+    inset 2px 2px 5px #bebebe,
+    inset -2px -2px 5px #ffffff;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 10px;
+  box-shadow:
+    inset 2px 2px 5px #a3a3a3,
+    inset -2px -2px 5px #d1d1d1;
+}

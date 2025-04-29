@@ -1,15 +1,27 @@
-<p>navbar works!</p>
-<nav class="navbar">
-    <div class="left">
-      <img src="assets/logo.png" alt="logo" width="40">
-    </div>
-    <div class="right">
-      <div class="profile" [matMenuTriggerFor]="menu">
-        <img src="assets/profile-icon.png" alt="profile" class="profile-icon">
-      </div>
-      <mat-menu #menu="matMenu">
-        <button mat-menu-item (click)="logout()">Logout</button>
-      </mat-menu>
-    </div>
-  </nav>
+<mat-toolbar color="primary" class="navbar">
+    <span class="app-name">MonApp</span>
+  
+    <span class="spacer"></span>
+  
+    <!-- Icône de notification -->
+    <button mat-icon-button>
+      <mat-icon>notifications</mat-icon>
+    </button>
+  
+    <!-- Icône profil avec menu -->
+<button mat-icon-button [matMenuTriggerFor]="menu">
+  <mat-icon>account_circle</mat-icon>
+</button>
+{{ userEmail }}
+
+<mat-menu #menu="matMenu">
+  <button mat-menu-item (click)="modifierCompte()">
+    See your profile
+  </button>
+  <button mat-menu-item (click)="logout()">
+    Déconnexion
+  </button>
+</mat-menu>
+
+  </mat-toolbar>
   

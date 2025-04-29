@@ -1,0 +1,16 @@
+<div class="verification-container">
+    <h3>Vérification du code</h3>
+    <form (ngSubmit)="verifyCode()">
+      <label for="email">Adresse email :</label>
+      <input type="email" id="email" [(ngModel)]="formData.email" name="email" required />
+  
+      <label for="code">Code de vérification :</label>
+      <input type="text" id="code" [(ngModel)]="formData.code" name="code" required />
+  
+      <button type="submit">Valider</button>
+    </form>
+  
+    <p *ngIf="errorMessage" class="error">{{ errorMessage }}</p>
+  </div>
+  
+  

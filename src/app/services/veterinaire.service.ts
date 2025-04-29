@@ -30,7 +30,7 @@ export class VeterinaireService {
   }
 
   getVeterinaireById(id: any): Observable<any> {
-    return this.http.get(this.url + '/get-veterinaire-by-id/' + id);
+    return this.http.get(this.url + '/get-vet-by-id/' + id);
   }
 
 }

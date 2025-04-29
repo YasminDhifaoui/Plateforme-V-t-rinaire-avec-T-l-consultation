@@ -4,21 +4,32 @@
   <!-- Vétérinaire -->
   <mat-form-field class="full-width">
     <mat-label>Vétérinaire</mat-label>
-    <input matInput formControlName="vetId" placeholder="ID du vétérinaire" />
+    <mat-select formControlName="vetId">
+      <mat-option *ngFor="let vet of veterinare" [value]="vet.vetId">
+        {{ vet.userName }}
+      </mat-option>
+    </mat-select>
   </mat-form-field>
-
+  
   <!-- Client -->
   <mat-form-field class="full-width">
     <mat-label>Client</mat-label>
-    <input matInput formControlName="clientId" placeholder="ID du client" />
+    <mat-select formControlName="clientId">
+      <mat-option *ngFor="let cli of clients" [value]="cli.id">
+        (ID: {{ cli.id }})
+      </mat-option>
+    </mat-select>
   </mat-form-field>
-
   <!-- Animal -->
   <mat-form-field class="full-width">
     <mat-label>Animal</mat-label>
-    <input matInput formControlName="animalId" placeholder="ID de l'animal" />
+    <mat-select formControlName="animalId">
+      <mat-option *ngFor="let An of animal" [value]="An.id">
+        {{ An.id }}
+      </mat-option>
+    </mat-select>
   </mat-form-field>
-
+  
   <!-- Date -->
   <mat-form-field class="full-width">
     <mat-label>Date du rendez-vous</mat-label>
@@ -32,8 +43,8 @@
     <mat-label>Statut</mat-label>
     <mat-select formControlName="status">
       <mat-option [value]="0">En attente</mat-option>
-      <mat-option [value]="1">Confirmé</mat-option>
-      <mat-option [value]="2">Annulé</mat-option>
+      <mat-option [value]="1">Terminé</mat-option>
+     
     </mat-select>
   </mat-form-field>
 

@@ -10,6 +10,8 @@ import Swal from 'sweetalert2';
 import { Router, RouterModule } from '@angular/router';
 import { AddRendezVousComponent } from '../add-rendez-vous/add-rendez-vous.component';
 import { UpdateRendezVousComponent } from '../update-rendez-vous/update-rendez-vous.component';
+import { VeterinaireService } from '../../../services/veterinaire.service';
+import { error } from 'console';
 
 @Component({
   selector: 'app-list-rendez-vous',
@@ -18,11 +20,11 @@ import { UpdateRendezVousComponent } from '../update-rendez-vous/update-rendez-v
   styleUrl: './list-rendez-vous.component.css'
 })
 export class ListRendezVousComponent implements OnInit{
-  constructor(private dialog: MatDialog,private RendezVousService: RendezVousService,private router: Router) {}
-
-  displayedColumns: string[] = ['vetid', 'clid', 'date','status','actions'];
+  constructor(private dialog: MatDialog,private RendezVousService: RendezVousService,private router: Router,private verterinareServcie: VeterinaireService) {}
+veterinare: any[]= []; 
+  displayedColumns: string[] = ['vetId', 'clientId','date','status','actions'];
   dataSource = new MatTableDataSource<RendezVous>();
-
+  statusFilter: string = '';
   @ViewChild(MatPaginator) paginator!: MatPaginator;
 
   ngOnInit(): void {
@@ -70,7 +72,11 @@ export class ListRendezVousComponent implements OnInit{
       }
     });
   }
-  
+
+  applyStatusFilter() {
+    console.log('Filter applied!');
+    // Ici tu pourras ajouter la logique pour filtrer ta liste de rendez-vous
+  }
   
   deleteRendezVous(id: any) {
     Swal.fire({
@@ -113,10 +119,11 @@ export class ListRendezVousComponent implements OnInit{
 }
 
 export interface RendezVous {
-  Vetid: string;
-  clid: string;
+  vetId: string;
+  clientId: string;
+  animalId: string;
   date: Date;
-  status: string;
+ status: string;
 
 }
 

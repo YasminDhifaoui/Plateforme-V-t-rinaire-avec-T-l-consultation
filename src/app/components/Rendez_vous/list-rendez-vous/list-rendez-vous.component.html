@@ -3,6 +3,11 @@
 </div>
 <div class="tous">
   <input type="text" class="simple-input" matInput (keyup)="applyFilter($event)" placeholder="Rechercher...">
+  <select [(ngModel)]="statusFilter" (change)="applyStatusFilter()" class="status-filter">
+    <option value="">Tous les statuts</option>
+    <option value="0">En attente</option>
+    <option value="1">Terminé</option>
+  </select>
   <div class="buttons-container">
     <button class="styled-add" (click)="AddRendezVousDialog()">
       Ajouter un RendezVous
@@ -14,28 +19,38 @@
   <table mat-table [dataSource]="dataSource">
 
     <!-- Position Column -->
-    <ng-container matColumnDef="id">
-      <th mat-header-cell *matHeaderCellDef> veterinaire </th>
-      <td mat-cell *matCellDef="let element"> {{element.id.username}} </td>
+    <ng-container matColumnDef="vetId">
+      <th mat-header-cell *matHeaderCellDef>Nom veterinaire </th>
+      <td mat-cell *matCellDef="let element"> {{element.veterinaire.userName}} </td>
     </ng-container>
 
     <!-- Name Column -->
-    <ng-container matColumnDef="username">
-      <th mat-header-cell *matHeaderCellDef> client </th>
-      <td mat-cell *matCellDef="let element"> {{element.id.username}} </td>
+    <ng-container matColumnDef="clientId">
+      <th mat-header-cell *matHeaderCellDef>Nom client </th>
+      <td mat-cell *matCellDef="let element"> {{element.client.userName}} </td>
     </ng-container>
+  
 
     <!-- Weight Column -->
-    <ng-container matColumnDef="email">
+    <ng-container matColumnDef="date">
         <th mat-header-cell *matHeaderCellDef> date </th>
-        <td mat-cell *matCellDef="let element"> {{element.date}} </td>
+        <td mat-cell *matCellDef="let element"> {{ element.date | date:'dd/MM/yyyy HH:mm' }} </td>
       </ng-container>
-    <ng-container matColumnDef="status">
-        <th mat-header-cell *matHeaderCellDef> statut </th>
+      <ng-container matColumnDef="status">
+        <th mat-header-cell *matHeaderCellDef> Statut </th>
         <td mat-cell *matCellDef="let element">
-          <div class="status">{{element.status}}</div>
+          <div class="status">
+            {{ element.status === 0 ? 'En attente' : element.status === 1 ? 'Terminé' : element.status }}
+          </div>
         </td>
       </ng-container>
+      <select [(ngModel)]="statusFilter" (change)="applyStatusFilter()" class="status-filter">
+        <option value="">Tous les statuts</option>
+        <option value="0">En attente</option>
+        <option value="1">Terminé</option>
+      </select>
+      
+      
     <ng-container matColumnDef="actions">
       <th mat-header-cell *matHeaderCellDef> Action </th>
       <td mat-cell *matCellDef="let element">

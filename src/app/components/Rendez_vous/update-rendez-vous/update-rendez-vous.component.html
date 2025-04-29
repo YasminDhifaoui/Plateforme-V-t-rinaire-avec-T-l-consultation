@@ -1,1 +1,53 @@
-<p>update-rendez-vous works!</p>
+<h2 mat-dialog-title>Modifier le rendez-vous</h2>
+
+<form [formGroup]="rendezvousForm" (ngSubmit)="onSubmit()" class="form-container">
+
+ <!-- Vétérinaire -->
+ <mat-form-field class="full-width">
+    <mat-label>Vétérinaire</mat-label>
+    <mat-select formControlName="vetId">
+      <mat-option *ngFor="let vet of veterinare" [value]="vet.id">
+        {{ vet.userName }}
+      </mat-option>
+    </mat-select>
+  </mat-form-field>
+  
+  <!-- Client -->
+  <mat-form-field class="full-width">
+    <mat-label>Client</mat-label>
+    <mat-select formControlName="clientId">
+      <mat-option *ngFor="let cli of clients" [value]="cli.id">
+        {{ cli.userName }}
+      </mat-option>
+    </mat-select>
+  </mat-form-field>
+  <!-- Animal -->
+  <mat-form-field class="full-width">
+    <mat-label>Animal</mat-label>
+    <mat-select formControlName="animalId">
+      <mat-option *ngFor="let An of animal" [value]="An.id">
+        {{ An.userName }}
+      </mat-option>
+    </mat-select>
+  </mat-form-field>
+  <mat-form-field appearance="outline" class="full-width">
+    <mat-label>Date</mat-label>
+    <input matInput formControlName="date" [matDatepicker]="picker">
+    <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+    <mat-datepicker #picker></mat-datepicker>
+  </mat-form-field>
+
+  <mat-form-field appearance="outline" class="full-width">
+    <mat-label>Statut</mat-label>
+    <mat-select formControlName="status">
+      <mat-option value="En attente">En attente</mat-option>
+      <mat-option value="Confirmé">Confirmé</mat-option>
+      <mat-option value="Annulé">Annulé</mat-option>
+    </mat-select>
+  </mat-form-field>
+
+  <div class="button-group">
+    <button mat-raised-button color="primary" type="submit">Enregistrer</button>
+    <button mat-button color="warn" type="button" (click)="close()">Annuler</button>
+  </div>
+</form>
