@@ -145,13 +145,16 @@ namespace backend.Controllers.VetControllers
                 await _context.UserRoles.AddAsync(applicationUserRole);
                 await _context.SaveChangesAsync();
             }
-            await _repository.AddVeterinaire(veterinaire);
 
             var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
             if (string.IsNullOrEmpty(token))
             {
                 Console.WriteLine("Failed to generate a confirmation token.");
-                return BadRequest("Token generation failed.");
+                return BadRequest(new ApiResponse
+                {
+                    Status = "Error",
+                    Message = "Token generation failed."
+                });
             }
 
             user.TwoFactorCode = token;
@@ -174,6 +177,8 @@ namespace backend.Controllers.VetControllers
                 EmailSubject = "Veterinaire Registration: Email Confirmation",
                 Variables = Variables
             };
+            await _repository.AddVeterinaire(veterinaire);
+
             try
             {
                 _emailService.SendHTMLTemplateMail(mailData);

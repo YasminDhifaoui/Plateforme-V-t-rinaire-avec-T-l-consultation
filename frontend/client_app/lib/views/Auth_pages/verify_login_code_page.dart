@@ -1,4 +1,4 @@
-import 'package:client_app/services/token_service.dart';
+import 'package:client_app/services/auth_services/token_service.dart';
 import 'package:client_app/views/components/login_navbar.dart';
 import 'package:flutter/material.dart';
 import 'package:client_app/models/auth_models/client_verify_login.dart';
@@ -27,44 +27,72 @@ class _VerifyLoginCodePageState extends State<VerifyLoginCodePage> {
     if (!_formKey.currentState!.validate()) {
       return;
     }
+
     setState(() {
       isLoading = true;
       responseMessage = '';
     });
 
-    final verifyDto = ClientVerifyLoginDto(
-      email: widget.email,
-      code: codeController.text.trim(),
-    );
+    try {
+      final verifyDto = ClientVerifyLoginDto(
+        email: widget.email,
+        code: codeController.text.trim(),
+      );
 
-    final result = await _apiService.verifyLoginCode(verifyDto);
+      final result = await _apiService.verifyLoginCode(verifyDto);
+      print('Result: $result');
 
-    setState(() {
-      isLoading = false;
-      if (result['success'] == true) {
-        // Store JWT and username in shared preferences
+      if (result['success'] == true && result['data'] != null) {
         final data = result['data'];
-        final token = data['token'];
-        final username = data['data']['username'];
 
-        _storeSession(token, username);
+        final token = data['token'] ?? '';
+        final username = data['data'] != null ? data['data']['username'] : '';
 
-        // Navigate to home page with username and jwtToken
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-            builder: (context) => HomePage(username: username, jwtToken: token),
-          ),
-        );
+        // Debug print
+        print('Token: $token');
+        print('Username: $username');
+
+        if (token.isEmpty || username.isEmpty) {
+          setState(() {
+            responseMessage = 'Invalid token or username received.';
+            isLoading = false;
+          });
+          return;
+        }
+
+        await _storeSession(token, username);
+
+        if (mounted) {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (context) => HomePage(username: username),
+            ),
+          );
+        }
       } else {
-        responseMessage = result['message'] ?? 'Verification failed.';
+        setState(() {
+          responseMessage = result['message'] ?? 'Verification failed.';
+        });
       }
-    });
+    } catch (e) {
+      setState(() {
+        responseMessage = 'An error occurred: $e';
+      });
+    } finally {
+      if (mounted) {
+        setState(() {
+          isLoading = false;
+        });
+      }
+    }
   }
 
   Future<void> _storeSession(String token, String username) async {
     await TokenService.saveToken(token);
-    // You can also store username if needed, e.g. using SharedPreferences directly
+
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('username', username);
   }
 
   @override

@@ -76,7 +76,7 @@ namespace backend.Repo.VetRepo.ConsultationRepo
                 UpdatedAt = now,
                 VeterinaireId = vetId,
                 AnimalId = rendezVous.AnimalId,
-                Date = now
+                Date = dto.Date
             };
 
             await _context.Consultations.AddAsync(consultation);

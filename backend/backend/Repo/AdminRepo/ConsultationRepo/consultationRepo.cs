@@ -57,7 +57,7 @@ namespace backend.Repo.AdminRepo.ConsultationRepo
             var consultation = new Consultation
             {
                 Id = Guid.NewGuid(),
-                Date = consultationDate,
+                Date = dto.Date,
                 RendezVousId = dto.RendezVousID,
                 Diagnostic = dto.Diagnostic,
                 Treatment = dto.Treatment,

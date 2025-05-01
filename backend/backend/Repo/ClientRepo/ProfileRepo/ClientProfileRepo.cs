@@ -28,7 +28,7 @@ namespace backend.Repo.ClientRepo.ProfileRepo
                 .ToListAsync();
 
             return new ClientProfileDto
-            {
+            {   
                 Email = user.Email,
                 UserName = user.UserName,
                 PhoneNumber = user.PhoneNumber,

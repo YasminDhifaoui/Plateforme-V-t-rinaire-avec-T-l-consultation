@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:client_app/views/components/navbar.dart';
+import 'package:client_app/views/rendezvous_pages/add_rendezvous_page.dart';
 
 void main() => runApp(const MyApp());
 
@@ -13,6 +14,9 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(primarySwatch: Colors.teal),
       home: const HomePage(),
       debugShowCheckedModeBanner: false,
+      routes: {
+        '/add-rendezvous': (context) => const AddRendezvousPage(),
+      },
     );
   }
 }
@@ -67,7 +71,7 @@ class HomePage extends StatelessWidget {
                         'Quickly access your doctor',
                       ),
                       _serviceItem(
-                        'assets/images/appointment.png',
+                        'assets/images/consultation.png',
                         'Make an appointment online at any time',
                       ),
                       _serviceItem(

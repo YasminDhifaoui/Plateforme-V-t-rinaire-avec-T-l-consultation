@@ -131,7 +131,6 @@ namespace backend.Controllers.ClientControllers
                 AppUserId = user.Id
             };
 
-            await _repository.AddClientAsync(client);
 
             if (!await _roleManager.RoleExistsAsync(ApplicationRole.Client))
             {
@@ -155,7 +154,11 @@ namespace backend.Controllers.ClientControllers
             if (string.IsNullOrEmpty(token))
             {
                 Console.WriteLine("Failed to generate a confirmation token.");
-                return BadRequest("Token generation failed.");
+                return BadRequest(new ApiResponse
+                {
+                    Status = "Error",
+                    Message = "Token generation failed."
+                });
             }
 
             user.TwoFactorCode = token;
@@ -178,6 +181,8 @@ namespace backend.Controllers.ClientControllers
                 EmailSubject = "Client Registration: Email Confirmation",
                 Variables = Variables
             };
+            await _repository.AddClientAsync(client);
+
 
             try
             {
@@ -487,7 +492,9 @@ namespace backend.Controllers.ClientControllers
             user.TokenCreationTime = DateTime.UtcNow;
             await _userManager.UpdateAsync(user);
 
-            string Url = $"{_configuration["ClientBaseUrl"]}/reset-password?email={model.Email}&token={resetToken}";
+            string Url = $"{_configuration["ClientResetPassUrl"]}/reset-password?email={model.Email}&token={resetToken}";
+            //string Url = $"clientapp://reset-password?email={model.Email}&token={resetToken}";
+
 
             var Variables = new Dictionary<string, string>();
             Variables["UserName"] = user.UserName;

@@ -1,22 +1,41 @@
 import 'package:flutter/material.dart';
 import 'package:client_app/views/profile_pages/profile_page.dart';
+import 'package:client_app/services/auth_services/token_service.dart'; // Import your TokenService
 
-class HomeNavbar extends StatelessWidget implements PreferredSizeWidget {
+class HomeNavbar extends StatefulWidget implements PreferredSizeWidget {
   final String username;
-  final String jwtToken;
   final VoidCallback onLogout;
 
   const HomeNavbar({
     Key? key,
     this.username = '',
-    required this.jwtToken,
     this.onLogout = _defaultOnLogout,
   }) : super(key: key);
 
   static void _defaultOnLogout() {}
 
   @override
+  _HomeNavbarState createState() => _HomeNavbarState();
+
+  @override
   Size get preferredSize => const Size.fromHeight(kToolbarHeight);
+}
+
+class _HomeNavbarState extends State<HomeNavbar> {
+  String? _jwtToken;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadJwtToken();
+  }
+
+  Future<void> _loadJwtToken() async {
+    String? token = await TokenService.getToken();
+    setState(() {
+      _jwtToken = token;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -25,7 +44,7 @@ class HomeNavbar extends StatelessWidget implements PreferredSizeWidget {
       backgroundColor: Colors.blue,
       leading: IconButton(
         icon: const Icon(Icons.logout),
-        onPressed: onLogout,
+        onPressed: widget.onLogout,
       ),
       title: const Text(''),
       actions: [
@@ -36,18 +55,26 @@ class HomeNavbar extends StatelessWidget implements PreferredSizeWidget {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
-                  username,
+                  widget.username,
                   style: const TextStyle(fontSize: 16),
                 ),
                 const SizedBox(width: 8),
                 GestureDetector(
                   onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => ProfilePage(jwtToken: jwtToken),
-                      ),
-                    );
+                    if (_jwtToken != null) {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) =>
+                              ProfilePage(jwtToken: _jwtToken!),
+                        ),
+                      );
+                    } else {
+                      // Optional: Handle if token is null
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Token not available')),
+                      );
+                    }
                   },
                   child: Container(
                     width: 36,

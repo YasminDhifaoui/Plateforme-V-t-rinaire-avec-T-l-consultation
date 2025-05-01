@@ -216,7 +216,8 @@ class _ProfilePageState extends State<ProfilePage> {
                                     context,
                                     MaterialPageRoute(
                                       builder: (context) => ProfileEditPage(
-                                        profile: _profile!, // send the current profile
+                                        profile:
+                                            _profile!, // send the current profile
                                         jwtToken: widget.jwtToken,
                                       ),
                                     ),
@@ -238,7 +239,7 @@ class _ProfilePageState extends State<ProfilePage> {
   Widget _infoRow(IconData icon, String label, String value) {
     // Check if the value is null or empty
     value = value.isEmpty ? 'Not provided' : value;
-    
+
     // Format the birth date if the label is "Birth Date"
     if (label == 'Birth Date') {
       try {

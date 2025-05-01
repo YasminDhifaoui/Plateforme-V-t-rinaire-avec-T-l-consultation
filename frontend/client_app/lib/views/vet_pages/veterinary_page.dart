@@ -3,6 +3,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../services/vet_services/veterinaire_service.dart';
 import '../../models/vet_models/veterinaire.dart';
 import '../components/home_navbar.dart';
+import '../../utils/logout_helper.dart';
 
 class VetListPage extends StatefulWidget {
   const VetListPage({Key? key}) : super(key: key);
@@ -14,7 +15,6 @@ class VetListPage extends StatefulWidget {
 class _VetListPageState extends State<VetListPage> {
   final VeterinaireService vetService = VeterinaireService();
   String username = '';
-  String jwtToken = '';
 
   @override
   void initState() {
@@ -26,35 +26,7 @@ class _VetListPageState extends State<VetListPage> {
     final prefs = await SharedPreferences.getInstance();
     setState(() {
       username = prefs.getString('username') ?? '';
-      jwtToken = prefs.getString('jwt_token') ?? '';
     });
-  }
-
-  Future<void> _handleLogout() async {
-    final shouldLogout = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Confirm Logout'),
-        content: const Text('Are you sure you want to logout?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('No'),
-          ),
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(true),
-            child: const Text('OK'),
-          ),
-        ],
-      ),
-    );
-
-    if (shouldLogout == true) {
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.remove('jwt_token');
-      await prefs.remove('username');
-      Navigator.pushNamedAndRemoveUntil(context, '/', (route) => false);
-    }
   }
 
   @override
@@ -62,8 +34,7 @@ class _VetListPageState extends State<VetListPage> {
     return Scaffold(
       appBar: HomeNavbar(
         username: username,
-        jwtToken: jwtToken,
-        onLogout: _handleLogout,
+        onLogout: () => LogoutHelper.handleLogout(context),
       ),
       body: Column(
         children: [
@@ -111,10 +82,57 @@ class _VetListPageState extends State<VetListPage> {
                           style: const TextStyle(
                               fontWeight: FontWeight.bold, fontSize: 18),
                         ),
-                        subtitle: Text(
-                          vet.email,
-                          style:
-                              const TextStyle(fontSize: 14, color: Colors.grey),
+                        subtitle: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                const Icon(Icons.email,
+                                    size: 16, color: Colors.grey),
+                                const SizedBox(width: 6),
+                                Expanded(
+                                  child: Text(
+                                    vet.email,
+                                    style: const TextStyle(
+                                        fontSize: 14, color: Colors.grey),
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 4),
+                            Row(
+                              children: [
+                                const Icon(Icons.phone,
+                                    size: 16, color: Colors.grey),
+                                const SizedBox(width: 6),
+                                Expanded(
+                                  child: Text(
+                                    vet.phoneNumber,
+                                    style: const TextStyle(
+                                        fontSize: 14, color: Colors.grey),
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 4),
+                            Row(
+                              children: [
+                                const Icon(Icons.location_on,
+                                    size: 16, color: Colors.grey),
+                                const SizedBox(width: 6),
+                                Expanded(
+                                  child: Text(
+                                    vet.address,
+                                    style: const TextStyle(
+                                        fontSize: 14, color: Colors.grey),
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
                         ),
                       ),
                     );
