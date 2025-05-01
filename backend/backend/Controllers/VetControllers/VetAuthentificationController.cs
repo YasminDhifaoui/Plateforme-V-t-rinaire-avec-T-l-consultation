@@ -280,7 +280,34 @@ namespace backend.Controllers.VetControllers
         public async Task<IActionResult> Login([FromBody] VetLoginDto model)
         {
             var user = await _userManager.FindByEmailAsync(model.Email);
-           
+            // Check if user exists
+            if (user == null)
+            {
+                return NotFound(new ApiResponse
+                {
+                    Status = "Error",
+                    Message = "User not found with the provided email."
+                });
+            }
+            // Check if email is confirmed
+            if (!user.EmailConfirmed)
+            {
+                return BadRequest(new ApiResponse
+                {
+                    Status = "Error",
+                    Message = "Email not confirmed. Please check your inbox."
+                });
+            }
+            // Check if password is correct
+            var isPasswordCorrect = await _userManager.CheckPasswordAsync(user, model.Password);
+            if (!isPasswordCorrect)
+            {
+                return BadRequest(new ApiResponse
+                {
+                    Status = "Error",
+                    Message = "Incorrect password."
+                });
+            }
             if (user != null && await _userManager.CheckPasswordAsync(user, model.Password) && user.EmailConfirmed)
             {
                 var UserRoles = await _userManager.GetRolesAsync(user);

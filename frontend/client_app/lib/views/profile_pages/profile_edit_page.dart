@@ -45,10 +45,8 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
         TextEditingController(text: widget.profile.birthDate);
     _addressController = TextEditingController(text: widget.profile.address);
     _zipCodeController = TextEditingController(text: widget.profile.zipCode);
-    _emailController = TextEditingController(
-        text: widget.profile.email); // Initialize email controller
-    _gender = widget.profile.gender ??
-        'male'; // Ensure gender defaults to 'male' if null
+    _emailController = TextEditingController(text: widget.profile.email);
+    _gender = widget.profile.gender;
   }
 
   @override
