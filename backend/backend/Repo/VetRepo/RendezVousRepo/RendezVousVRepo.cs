@@ -14,9 +14,13 @@ namespace backend.Repo.VetRepo.RendezVousRepo
         }
         public async Task<IEnumerable<RendezVous>> GetRendezVousByVetId(Guid vetId)
         {
-            var rendezVous =await _context.RendezVous
-                                     .Where(r => r.VeterinaireId == vetId)
-                                     .ToListAsync();
+            
+            var rendezVous = await _context.RendezVous
+                    .Include(r => r.Client)
+                    .Include(r => r.Animal)
+                    .Include(r => r.Veterinaire)
+                .Where(r => r.VeterinaireId == vetId)
+                .ToListAsync();
 
             return rendezVous;
         }

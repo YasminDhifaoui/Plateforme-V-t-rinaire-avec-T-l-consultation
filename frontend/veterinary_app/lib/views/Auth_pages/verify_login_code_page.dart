@@ -63,7 +63,7 @@ class _VerifyLoginCodePageState extends State<VerifyLoginCodePage> {
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(
-              builder: (context) => HomePage(username: username),
+              builder: (context) => HomePage(username: username, token: token),
             ),
           );
         }

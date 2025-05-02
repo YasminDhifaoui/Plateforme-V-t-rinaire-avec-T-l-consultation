@@ -41,6 +41,7 @@ namespace backend.Controllers.VetControllers
         [HttpPut]
         [Route("update-status/{rendezVousId}")]
         public async Task<IActionResult> UpdateRendezVousStatus(Guid rendezVousId, [FromBody] RendezVousStatus newStatus)
+
         {
             var vetId = Guid.Parse(User.FindFirst("Id")?.Value);
             if (vetId == Guid.Empty)

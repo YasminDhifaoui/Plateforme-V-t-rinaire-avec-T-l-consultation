@@ -3,16 +3,12 @@
   "WorkspaceRootPath": "D:\\Internships\\Pfe\\Plateforme-V-t-rinaire-avec-T-l-consultation\\backend\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{26F21D31-1B72-4CCD-BEDC-8662D6E3799E}|backend\\backend.csproj|d:\\internships\\pfe\\plateforme-v-t-rinaire-avec-t-l-consultation\\backend\\backend\\controllers\\vetcontrollers\\veterinaireprofilecontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{26F21D31-1B72-4CCD-BEDC-8662D6E3799E}|backend\\backend.csproj|solutionrelative:backend\\controllers\\vetcontrollers\\veterinaireprofilecontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{26F21D31-1B72-4CCD-BEDC-8662D6E3799E}|backend\\backend.csproj|d:\\internships\\pfe\\plateforme-v-t-rinaire-avec-t-l-consultation\\backend\\backend\\controllers\\vetcontrollers\\vaccinationsvetcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{26F21D31-1B72-4CCD-BEDC-8662D6E3799E}|backend\\backend.csproj|solutionrelative:backend\\controllers\\vetcontrollers\\vaccinationsvetcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{26F21D31-1B72-4CCD-BEDC-8662D6E3799E}|backend\\backend.csproj|d:\\internships\\pfe\\plateforme-v-t-rinaire-avec-t-l-consultation\\backend\\backend\\controllers\\vetcontrollers\\vetauthentificationcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{26F21D31-1B72-4CCD-BEDC-8662D6E3799E}|backend\\backend.csproj|solutionrelative:backend\\controllers\\vetcontrollers\\vetauthentificationcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{26F21D31-1B72-4CCD-BEDC-8662D6E3799E}|backend\\backend.csproj|d:\\internships\\pfe\\plateforme-v-t-rinaire-avec-t-l-consultation\\backend\\backend\\controllers\\clientcontrollers\\clientauthenticationcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{26F21D31-1B72-4CCD-BEDC-8662D6E3799E}|backend\\backend.csproj|solutionrelative:backend\\controllers\\clientcontrollers\\clientauthenticationcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{26F21D31-1B72-4CCD-BEDC-8662D6E3799E}|backend\\backend.csproj|D:\\Internships\\Pfe\\Plateforme-V-t-rinaire-avec-T-l-consultation\\backend\\backend\\controllers\\vetcontrollers\\consultationsvetcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{26F21D31-1B72-4CCD-BEDC-8662D6E3799E}|backend\\backend.csproj|solutionrelative:backend\\controllers\\vetcontrollers\\consultationsvetcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     }
   ],
   "DocumentGroupContainers": [
@@ -22,50 +18,37 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 0,
+          "SelectedChildIndex": 1,
           "Children": [
             {
-              "$type": "Document",
-              "DocumentIndex": 0,
-              "Title": "VeterinaireProfileController.cs",
-              "DocumentMoniker": "D:\\Internships\\Pfe\\Plateforme-V-t-rinaire-avec-T-l-consultation\\backend\\backend\\Controllers\\VetControllers\\VeterinaireProfileController.cs",
-              "RelativeDocumentMoniker": "backend\\Controllers\\VetControllers\\VeterinaireProfileController.cs",
-              "ToolTip": "D:\\Internships\\Pfe\\Plateforme-V-t-rinaire-avec-T-l-consultation\\backend\\backend\\Controllers\\VetControllers\\VeterinaireProfileController.cs",
-              "RelativeToolTip": "backend\\Controllers\\VetControllers\\VeterinaireProfileController.cs",
-              "ViewState": "AQIAAAMAAAAAAAAAAAAAAAoAAAAbAAAA",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-05-01T23:06:40.997Z",
-              "EditorCaption": ""
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{b1e99781-ab81-11d0-b683-00aa00a3ee26}"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 2,
-              "Title": "ClientAuthenticationController.cs",
-              "DocumentMoniker": "D:\\Internships\\Pfe\\Plateforme-V-t-rinaire-avec-T-l-consultation\\backend\\backend\\Controllers\\ClientControllers\\ClientAuthenticationController.cs",
-              "RelativeDocumentMoniker": "backend\\Controllers\\ClientControllers\\ClientAuthenticationController.cs",
-              "ToolTip": "D:\\Internships\\Pfe\\Plateforme-V-t-rinaire-avec-T-l-consultation\\backend\\backend\\Controllers\\ClientControllers\\ClientAuthenticationController.cs",
-              "RelativeToolTip": "backend\\Controllers\\ClientControllers\\ClientAuthenticationController.cs",
-              "ViewState": "AQIAABsBAAAAAAAAAAAuwCEBAAAJAAAA",
+              "DocumentIndex": 0,
+              "Title": "VaccinationsVetController.cs",
+              "DocumentMoniker": "D:\\Internships\\Pfe\\Plateforme-V-t-rinaire-avec-T-l-consultation\\backend\\backend\\Controllers\\VetControllers\\VaccinationsVetController.cs",
+              "RelativeDocumentMoniker": "backend\\Controllers\\VetControllers\\VaccinationsVetController.cs",
+              "ToolTip": "D:\\Internships\\Pfe\\Plateforme-V-t-rinaire-avec-T-l-consultation\\backend\\backend\\Controllers\\VetControllers\\VaccinationsVetController.cs",
+              "RelativeToolTip": "backend\\Controllers\\VetControllers\\VaccinationsVetController.cs",
+              "ViewState": "AQIAADsAAAAAAAAAAAAswEQAAAAJAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-05-01T20:43:39.199Z",
+              "WhenOpened": "2025-05-02T23:52:26.578Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
               "DocumentIndex": 1,
-              "Title": "VetAuthentificationController.cs",
-              "DocumentMoniker": "D:\\Internships\\Pfe\\Plateforme-V-t-rinaire-avec-T-l-consultation\\backend\\backend\\Controllers\\VetControllers\\VetAuthentificationController.cs",
-              "RelativeDocumentMoniker": "backend\\Controllers\\VetControllers\\VetAuthentificationController.cs",
-              "ToolTip": "D:\\Internships\\Pfe\\Plateforme-V-t-rinaire-avec-T-l-consultation\\backend\\backend\\Controllers\\VetControllers\\VetAuthentificationController.cs",
-              "RelativeToolTip": "backend\\Controllers\\VetControllers\\VetAuthentificationController.cs",
-              "ViewState": "AQIAAPIAAAAAAAAAAAAAABQBAAAJAAAA",
+              "Title": "ConsultationsVetController.cs",
+              "DocumentMoniker": "D:\\Internships\\Pfe\\Plateforme-V-t-rinaire-avec-T-l-consultation\\backend\\backend\\Controllers\\VetControllers\\ConsultationsVetController.cs",
+              "RelativeDocumentMoniker": "backend\\Controllers\\VetControllers\\ConsultationsVetController.cs",
+              "ToolTip": "D:\\Internships\\Pfe\\Plateforme-V-t-rinaire-avec-T-l-consultation\\backend\\backend\\Controllers\\VetControllers\\ConsultationsVetController.cs",
+              "RelativeToolTip": "backend\\Controllers\\VetControllers\\ConsultationsVetController.cs",
+              "ViewState": "AQIAAAYAAAAAAAAAAAAAABsAAAA8AAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-05-01T20:43:11.586Z",
+              "WhenOpened": "2025-05-02T13:16:10.927Z",
               "EditorCaption": ""
-            },
-            {
-              "$type": "Bookmark",
-              "Name": "ST:0:0:{b1e99781-ab81-11d0-b683-00aa00a3ee26}"
             }
           ]
         }
