@@ -14,5 +14,6 @@
         public Guid RendezVousID { get; set; }
         public string ClientName { get; set; }
         public Guid AnimalId { get; set; }
+        public string AnimalName { get; set;}
     }
 }

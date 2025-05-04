@@ -51,7 +51,7 @@ namespace backend.Repo.VetRepo.VaccinationRepo
             {
                 Id = Guid.NewGuid(),
                 Name = dto.Name,
-                Date = dto.Date,
+                Date = dto.Date.ToUniversalTime(),
                 AnimalId = dto.AnimalId,
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow

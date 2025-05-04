@@ -4,6 +4,7 @@ import 'package:veterinary_app/views/consultation_pages/consultation_page.dart';
 import 'package:veterinary_app/views/rendezvous_pages/rendezvous_list_page.dart';
 import 'package:veterinary_app/views/animal_pages/animals_list_page.dart';
 import 'package:veterinary_app/views/client_pages/clients_list_page.dart'; // <-- Import the client page
+import 'package:veterinary_app/views/vaccination_pages/vaccination_list_page.dart'; // <-- Import the vaccination list page
 import 'components/home_navbar.dart';
 
 class HomePage extends StatefulWidget {
@@ -83,17 +84,38 @@ class _HomePageState extends State<HomePage> {
               },
               child: const Text('View Clients List'),
             ),
+            const SizedBox(height: 20),
+
             ElevatedButton(
               onPressed: () {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
                     builder:
-                        (context) => ConsultationListPage(token: widget.token),
+                        (context) => ConsultationListPage(
+                          token: widget.token,
+                          username: widget.username,
+                        ),
                   ),
                 );
               },
               child: const Text('View Consultations'),
+            ),
+            const SizedBox(height: 20),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder:
+                        (context) => VaccinationListPage(
+                          token: widget.token,
+                          username: widget.username,
+                        ),
+                  ),
+                );
+              },
+              child: const Text('View Vaccinations List'),
             ),
           ],
         ),

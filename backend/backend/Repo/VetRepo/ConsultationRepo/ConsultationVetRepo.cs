@@ -32,7 +32,8 @@ namespace backend.Repo.VetRepo.ConsultationRepo
                     UpdatedAt = c.UpdatedAt,
                     RendezVousID = c.RendezVousId,
                     ClientName = c.Animal.Owner.UserName,
-                    AnimalId = c.AnimalId
+                    AnimalId = c.AnimalId,
+                    AnimalName = c.Animal.Nom
                 }).ToListAsync();
         }
 
