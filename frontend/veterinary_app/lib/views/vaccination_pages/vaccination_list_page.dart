@@ -87,13 +87,11 @@ class _VaccinationListPageState extends State<VaccinationListPage> {
               itemCount: vaccinations.length,
               itemBuilder: (context, index) {
                 final vaccination = vaccinations[index];
+                print('Vaccination Name: ${vaccination.name}');
                 final animal = animalMap[vaccination.animalId];
                 final animalName = animal?.name ?? 'Unknown';
-                final ownerId = animal?.ownerId ?? '';
-                ClientModel? owner = clientMapByUsername[ownerId];
-                owner ??= clientMapByEmail[ownerId];
-                owner ??= clientMapByPhone[ownerId];
-                final ownerName = owner?.username ?? 'Unknown';
+                final ownerName =
+                    vaccination.animal?.owner?.username ?? 'Unknown';
                 return Card(
                   margin: const EdgeInsets.symmetric(
                     horizontal: 12,
@@ -108,9 +106,420 @@ class _VaccinationListPageState extends State<VaccinationListPage> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
-                          'Vaccine: ${vaccination.vaccineName}',
-                          style: const TextStyle(fontWeight: FontWeight.bold),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              'Vaccine: ${vaccination.name.isNotEmpty ? vaccination.name : "Unknown Vaccine"}',
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            PopupMenuButton<String>(
+                              onSelected: (value) {
+                                switch (value) {
+                                  case 'see_animal':
+                                    showDialog(
+                                      context: context,
+                                      builder: (context) {
+                                        final animal = vaccination.animal;
+                                        return AlertDialog(
+                                          title: const Text('Animal Details'),
+                                          content:
+                                              animal == null
+                                                  ? const Text(
+                                                    'No animal data available.',
+                                                  )
+                                                  : Column(
+                                                    mainAxisSize:
+                                                        MainAxisSize.min,
+                                                    crossAxisAlignment:
+                                                        CrossAxisAlignment
+                                                            .start,
+                                                    children: [
+                                                      Text(
+                                                        'Name: ${animal.name}',
+                                                      ),
+                                                      Text(
+                                                        'Species: ${animal.espece}',
+                                                      ),
+                                                      Text(
+                                                        'Race: ${animal.race}',
+                                                      ),
+                                                      Text(
+                                                        'Age: ${animal.age}',
+                                                      ),
+                                                      Text(
+                                                        'Sex: ${animal.sexe}',
+                                                      ),
+                                                      Text(
+                                                        'Allergies: ${animal.allergies}',
+                                                      ),
+                                                      Text(
+                                                        'Medical History: ${animal.anttecedentsmedicaux}',
+                                                      ),
+                                                    ],
+                                                  ),
+                                          actions: [
+                                            TextButton(
+                                              onPressed: () {
+                                                Navigator.of(context).pop();
+                                              },
+                                              child: const Text('Close'),
+                                            ),
+                                          ],
+                                        );
+                                      },
+                                    );
+                                    break;
+                                  case 'see_client':
+                                    showDialog(
+                                      context: context,
+                                      builder: (context) {
+                                        final client =
+                                            vaccination.animal?.owner;
+                                        return AlertDialog(
+                                          title: const Text('Client Details'),
+                                          content:
+                                              client == null
+                                                  ? const Text(
+                                                    'No client data available.',
+                                                  )
+                                                  : Column(
+                                                    mainAxisSize:
+                                                        MainAxisSize.min,
+                                                    crossAxisAlignment:
+                                                        CrossAxisAlignment
+                                                            .start,
+                                                    children: [
+                                                      Text(
+                                                        'Username: ${client.username}',
+                                                      ),
+                                                      Text(
+                                                        'Email: ${client.email}',
+                                                      ),
+                                                      Text(
+                                                        'Phone: ${client.phoneNumber}',
+                                                      ),
+                                                      Text(
+                                                        'Address: ${client.address}',
+                                                      ),
+                                                    ],
+                                                  ),
+                                          actions: [
+                                            TextButton(
+                                              onPressed: () {
+                                                Navigator.of(context).pop();
+                                              },
+                                              child: const Text('Close'),
+                                            ),
+                                          ],
+                                        );
+                                      },
+                                    );
+                                    break;
+                                  case 'see_details':
+                                    showDialog(
+                                      context: context,
+                                      builder: (context) {
+                                        return AlertDialog(
+                                          title: const Text(
+                                            'Vaccination Details',
+                                          ),
+                                          content: Column(
+                                            mainAxisSize: MainAxisSize.min,
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              Text(
+                                                'Vaccine: ${vaccination.name}',
+                                              ),
+                                              Text(
+                                                'Animal: ${vaccination.animal?.name ?? "Unknown"}',
+                                              ),
+                                              Text(
+                                                'Owner: ${vaccination.animal?.owner?.username ?? "Unknown"}',
+                                              ),
+                                              Text(
+                                                'Date: ${vaccination.date.toLocal().toString().split(' ')[0]}',
+                                              ),
+                                            ],
+                                          ),
+                                          actions: [
+                                            TextButton(
+                                              onPressed: () {
+                                                Navigator.of(context).pop();
+                                              },
+                                              child: const Text('Close'),
+                                            ),
+                                          ],
+                                        );
+                                      },
+                                    );
+                                    break;
+                                  case 'update':
+                                    final formKey = GlobalKey<FormState>();
+                                    final TextEditingController
+                                    vaccineNameController =
+                                        TextEditingController(
+                                          text: vaccination.name,
+                                        );
+                                    DateTime? selectedDate = vaccination.date;
+                                    final TextEditingController dateController =
+                                        TextEditingController(
+                                          text:
+                                              vaccination.date
+                                                  .toLocal()
+                                                  .toString()
+                                                  .split(' ')[0],
+                                        );
+
+                                    showDialog(
+                                      context: context,
+                                      builder: (context) {
+                                        return StatefulBuilder(
+                                          builder: (context, setStateDialog) {
+                                            return AlertDialog(
+                                              title: const Text(
+                                                'Update Vaccination',
+                                              ),
+                                              content: Form(
+                                                key: formKey,
+                                                child: Column(
+                                                  mainAxisSize:
+                                                      MainAxisSize.min,
+                                                  children: [
+                                                    TextFormField(
+                                                      controller:
+                                                          vaccineNameController,
+                                                      decoration:
+                                                          const InputDecoration(
+                                                            labelText:
+                                                                'Vaccine Name',
+                                                          ),
+                                                      validator: (value) {
+                                                        if (value == null ||
+                                                            value.isEmpty) {
+                                                          return 'Please enter Vaccine Name';
+                                                        }
+                                                        return null;
+                                                      },
+                                                    ),
+                                                    TextFormField(
+                                                      controller:
+                                                          dateController,
+                                                      readOnly: true,
+                                                      decoration:
+                                                          const InputDecoration(
+                                                            labelText:
+                                                                'Date (YYYY-MM-DD)',
+                                                            suffixIcon: Icon(
+                                                              Icons
+                                                                  .calendar_today,
+                                                            ),
+                                                          ),
+                                                      onTap: () async {
+                                                        DateTime? pickedDate =
+                                                            await showDatePicker(
+                                                              context: context,
+                                                              initialDate:
+                                                                  selectedDate ??
+                                                                  DateTime.now(),
+                                                              firstDate:
+                                                                  DateTime(
+                                                                    2000,
+                                                                  ),
+                                                              lastDate:
+                                                                  DateTime(
+                                                                    2100,
+                                                                  ),
+                                                            );
+                                                        if (pickedDate !=
+                                                            null) {
+                                                          setStateDialog(() {
+                                                            selectedDate =
+                                                                pickedDate;
+                                                            dateController
+                                                                    .text =
+                                                                pickedDate
+                                                                    .toLocal()
+                                                                    .toString()
+                                                                    .split(
+                                                                      ' ',
+                                                                    )[0];
+                                                          });
+                                                        }
+                                                      },
+                                                      validator: (value) {
+                                                        if (value == null ||
+                                                            value.isEmpty) {
+                                                          return 'Please enter Date';
+                                                        }
+                                                        return null;
+                                                      },
+                                                    ),
+                                                  ],
+                                                ),
+                                              ),
+                                              actions: [
+                                                TextButton(
+                                                  onPressed: () {
+                                                    Navigator.of(context).pop();
+                                                  },
+                                                  child: const Text('Cancel'),
+                                                ),
+                                                ElevatedButton(
+                                                  onPressed: () async {
+                                                    if (formKey.currentState!
+                                                            .validate() &&
+                                                        selectedDate != null) {
+                                                      final dto = {
+                                                        'AnimalId':
+                                                            vaccination
+                                                                .animalId,
+                                                        'Name':
+                                                            vaccineNameController
+                                                                .text,
+                                                        'Date':
+                                                            selectedDate!
+                                                                .toIso8601String(),
+                                                      };
+                                                      try {
+                                                        await _service
+                                                            .updateVaccination(
+                                                              widget.token,
+                                                              vaccination.id,
+                                                              dto,
+                                                            );
+                                                        setState(() {
+                                                          _vaccinationsFuture =
+                                                              _service
+                                                                  .getAllVaccinations(
+                                                                    widget
+                                                                        .token,
+                                                                  );
+                                                        });
+                                                        Navigator.of(
+                                                          context,
+                                                        ).pop();
+                                                        ScaffoldMessenger.of(
+                                                          context,
+                                                        ).showSnackBar(
+                                                          const SnackBar(
+                                                            content: Text(
+                                                              'Vaccination updated successfully',
+                                                            ),
+                                                          ),
+                                                        );
+                                                      } catch (e) {
+                                                        ScaffoldMessenger.of(
+                                                          context,
+                                                        ).showSnackBar(
+                                                          SnackBar(
+                                                            content: Text(
+                                                              'Failed to update vaccination: $e',
+                                                            ),
+                                                          ),
+                                                        );
+                                                      }
+                                                    }
+                                                  },
+                                                  child: const Text('OK'),
+                                                ),
+                                              ],
+                                            );
+                                          },
+                                        );
+                                      },
+                                    );
+                                    break;
+                                  case 'delete':
+                                    showDialog(
+                                      context: context,
+                                      builder: (context) {
+                                        return AlertDialog(
+                                          title: const Text('Confirm Delete'),
+                                          content: const Text(
+                                            'Are you sure you want to delete this vaccination?',
+                                          ),
+                                          actions: [
+                                            TextButton(
+                                              onPressed: () {
+                                                Navigator.of(context).pop();
+                                              },
+                                              child: const Text('Cancel'),
+                                            ),
+                                            ElevatedButton(
+                                              onPressed: () async {
+                                                Navigator.of(context).pop();
+                                                try {
+                                                  await _service
+                                                      .deleteVaccination(
+                                                        widget.token,
+                                                        vaccination.id,
+                                                      );
+                                                  setState(() {
+                                                    _vaccinationsFuture =
+                                                        _service
+                                                            .getAllVaccinations(
+                                                              widget.token,
+                                                            );
+                                                  });
+                                                  ScaffoldMessenger.of(
+                                                    context,
+                                                  ).showSnackBar(
+                                                    const SnackBar(
+                                                      content: Text(
+                                                        'Vaccination deleted successfully',
+                                                      ),
+                                                    ),
+                                                  );
+                                                } catch (e) {
+                                                  ScaffoldMessenger.of(
+                                                    context,
+                                                  ).showSnackBar(
+                                                    SnackBar(
+                                                      content: Text(
+                                                        'Failed to delete vaccination: \$e',
+                                                      ),
+                                                    ),
+                                                  );
+                                                }
+                                              },
+                                              child: const Text('Delete'),
+                                            ),
+                                          ],
+                                        );
+                                      },
+                                    );
+                                    break;
+                                }
+                              },
+                              itemBuilder:
+                                  (context) => [
+                                    const PopupMenuItem(
+                                      value: 'see_animal',
+                                      child: Text('See Animal'),
+                                    ),
+                                    const PopupMenuItem(
+                                      value: 'see_client',
+                                      child: Text('See Client'),
+                                    ),
+                                    const PopupMenuItem(
+                                      value: 'see_details',
+                                      child: Text('See Details'),
+                                    ),
+                                    const PopupMenuItem(
+                                      value: 'update',
+                                      child: Text('Update'),
+                                    ),
+                                    const PopupMenuItem(
+                                      value: 'delete',
+                                      child: Text('Delete'),
+                                    ),
+                                  ],
+                            ),
+                          ],
                         ),
                         const SizedBox(height: 4),
                         Text('Animal: $animalName'),
@@ -153,7 +562,7 @@ class _VaccinationListPageState extends State<VaccinationListPage> {
   }
 
   void _showAddVaccinationDialog() {
-    final _formKey = GlobalKey<FormState>();
+    final formKey = GlobalKey<FormState>();
     final TextEditingController vaccineNameController = TextEditingController();
     final TextEditingController notesController = TextEditingController();
 
@@ -174,7 +583,7 @@ class _VaccinationListPageState extends State<VaccinationListPage> {
               } else {
                 final animals = snapshot.data!;
                 return Form(
-                  key: _formKey,
+                  key: formKey,
                   child: SingleChildScrollView(
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
@@ -266,7 +675,7 @@ class _VaccinationListPageState extends State<VaccinationListPage> {
             ),
             ElevatedButton(
               onPressed: () async {
-                if (_formKey.currentState!.validate() &&
+                if (formKey.currentState!.validate() &&
                     _selectedAnimalId != null &&
                     _selectedDate != null) {
                   final dto = {

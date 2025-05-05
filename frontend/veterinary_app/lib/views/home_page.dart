@@ -20,104 +20,158 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
+    final cardTextStyle = TextStyle(
+      fontSize: 16,
+      fontWeight: FontWeight.w600,
+      color: Colors.blueGrey[900],
+    );
+    final cardIconColor = Colors.blueAccent;
+
     return Scaffold(
       appBar: HomeNavbar(
         username: widget.username,
         onLogout: () => LogoutHelper.handleLogout(context),
       ),
-      body: Center(
+      body: Padding(
+        padding: const EdgeInsets.all(24.0),
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text('Welcome', style: TextStyle(fontSize: 24)),
-            const SizedBox(height: 20),
-
-            // Animals Button
-            ElevatedButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder:
-                        (context) => AnimalsListPage(
-                          token: widget.token,
-                          username: widget.username,
+            const SizedBox(height: 32),
+            Expanded(
+              child: GridView.count(
+                crossAxisCount: 2,
+                crossAxisSpacing: 24,
+                mainAxisSpacing: 24,
+                children: [
+                  _buildHomeCard(
+                    context,
+                    icon: Icons.pets,
+                    label: 'Animals',
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder:
+                              (context) => AnimalsListPage(
+                                token: widget.token,
+                                username: widget.username,
+                              ),
                         ),
+                      );
+                    },
+                    textStyle: cardTextStyle,
+                    iconColor: cardIconColor,
                   ),
-                );
-              },
-              child: const Text('View Animals List'),
-            ),
-            const SizedBox(height: 20),
-
-            // RDV Button
-            ElevatedButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder:
-                        (context) => RendezVousListPage(
-                          token: widget.token,
-                          username: widget.username,
+                  _buildHomeCard(
+                    context,
+                    icon: Icons.event,
+                    label: 'RDV',
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder:
+                              (context) => RendezVousListPage(
+                                token: widget.token,
+                                username: widget.username,
+                              ),
                         ),
+                      );
+                    },
+                    textStyle: cardTextStyle,
+                    iconColor: cardIconColor,
                   ),
-                );
-              },
-              child: const Text('View RDV List'),
-            ),
-            const SizedBox(height: 20),
-
-            // Clients Button
-            ElevatedButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder:
-                        (context) => ClientsListPage(
-                          token: widget.token,
-                          username: widget.username,
+                  _buildHomeCard(
+                    context,
+                    icon: Icons.people,
+                    label: 'Clients',
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder:
+                              (context) => ClientsListPage(
+                                token: widget.token,
+                                username: widget.username,
+                              ),
                         ),
+                      );
+                    },
+                    textStyle: cardTextStyle,
+                    iconColor: cardIconColor,
                   ),
-                );
-              },
-              child: const Text('View Clients List'),
-            ),
-            const SizedBox(height: 20),
-
-            ElevatedButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder:
-                        (context) => ConsultationListPage(
-                          token: widget.token,
-                          username: widget.username,
+                  _buildHomeCard(
+                    context,
+                    icon: Icons.medical_services,
+                    label: 'Consultations',
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder:
+                              (context) => ConsultationListPage(
+                                token: widget.token,
+                                username: widget.username,
+                              ),
                         ),
+                      );
+                    },
+                    textStyle: cardTextStyle,
+                    iconColor: cardIconColor,
                   ),
-                );
-              },
-              child: const Text('View Consultations'),
-            ),
-            const SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder:
-                        (context) => VaccinationListPage(
-                          token: widget.token,
-                          username: widget.username,
+                  _buildHomeCard(
+                    context,
+                    icon: Icons.vaccines,
+                    label: 'Vaccinations',
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder:
+                              (context) => VaccinationListPage(
+                                token: widget.token,
+                                username: widget.username,
+                              ),
                         ),
+                      );
+                    },
+                    textStyle: cardTextStyle,
+                    iconColor: cardIconColor,
                   ),
-                );
-              },
-              child: const Text('View Vaccinations List'),
+                ],
+              ),
             ),
           ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildHomeCard(
+    BuildContext context, {
+    required IconData icon,
+    required String label,
+    required VoidCallback onTap,
+    required TextStyle textStyle,
+    required Color iconColor,
+  }) {
+    return Card(
+      elevation: 6,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(16),
+        onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 32, horizontal: 16),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(icon, size: 48, color: iconColor),
+              const SizedBox(height: 16),
+              Text(label, style: textStyle, textAlign: TextAlign.center),
+            ],
+          ),
         ),
       ),
     );

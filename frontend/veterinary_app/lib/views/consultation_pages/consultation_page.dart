@@ -5,6 +5,11 @@ import 'package:veterinary_app/services/consultation_services/consultation_servi
 import 'package:veterinary_app/views/components/home_navbar.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:veterinary_app/views/consultation_pages/add_consultation_page.dart';
+import 'package:veterinary_app/views/consultation_pages/update_consultation_page.dart';
+import 'package:veterinary_app/services/animal_services/animals_vet_service.dart';
+import 'package:veterinary_app/models/animal_models/animal_model.dart';
+import 'package:veterinary_app/services/client_services/client_service.dart';
+import 'package:veterinary_app/models/client_models/client_model.dart';
 
 class ConsultationListPage extends StatefulWidget {
   final String token;
@@ -22,11 +27,162 @@ class ConsultationListPage extends StatefulWidget {
 
 class _ConsultationListPageState extends State<ConsultationListPage> {
   late Future<List<Consultation>> _consultations;
+  List<AnimalModel> _animals = [];
+  bool _isLoadingAnimals = false;
+  List<ClientModel> _clients = [];
+  bool _isLoadingClients = false;
 
   @override
   void initState() {
     super.initState();
     _consultations = ConsultationService.fetchConsultations(widget.token);
+    _fetchAnimals();
+    _fetchClients();
+  }
+
+  Future<void> _fetchAnimals() async {
+    setState(() {
+      _isLoadingAnimals = true;
+    });
+    try {
+      final animals = await AnimalsVetService().getAnimalsList(widget.token);
+      setState(() {
+        _animals = animals;
+      });
+    } catch (e) {
+      // Handle error, optionally show a message
+      if (context.mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Failed to load animals: \$e')));
+      }
+    } finally {
+      setState(() {
+        _isLoadingAnimals = false;
+      });
+    }
+  }
+
+  Future<void> _fetchClients() async {
+    setState(() {
+      _isLoadingClients = true;
+    });
+    try {
+      final clients = await ClientService().getAllClients(widget.token);
+      setState(() {
+        _clients = clients;
+      });
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Failed to load clients: \$e')));
+      }
+    } finally {
+      setState(() {
+        _isLoadingClients = false;
+      });
+    }
+  }
+
+  void _showAnimalDetails(String animalName) {
+    final animal = _animals.firstWhere(
+      (a) => a.name == animalName,
+      orElse:
+          () => AnimalModel(
+            id: '',
+            name: 'Unknown',
+            espece: '',
+            race: '',
+            age: 0,
+            sexe: '',
+            allergies: '',
+            anttecedentsmedicaux: '',
+            ownerId: '',
+          ),
+    );
+
+    if (animal.id == '') {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Animal details not found')),
+        );
+      }
+      return;
+    }
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Animal Details: ${animal.name}'),
+          content: SingleChildScrollView(
+            child: ListBody(
+              children: [
+                Text('Species: ${animal.espece}'),
+                Text('Breed: ${animal.race}'),
+                Text('Age: ${animal.age}'),
+                Text('Sex: ${animal.sexe}'),
+                Text('Allergies: ${animal.allergies}'),
+                Text('Medical History: ${animal.anttecedentsmedicaux}'),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              child: const Text('Close'),
+              onPressed: () => Navigator.of(context).pop(),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _showClientDetails(String clientName) {
+    final client = _clients.firstWhere(
+      (c) => c.username == clientName,
+      orElse:
+          () => ClientModel(
+            username: 'Unknown',
+            email: '',
+            phoneNumber: '',
+            address: '',
+          ),
+    );
+
+    if (client.username == 'Unknown') {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Client details not found')),
+        );
+      }
+      return;
+    }
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Client Details: ${client.username}'),
+          content: SingleChildScrollView(
+            child: ListBody(
+              children: [
+                Text('Email: ${client.email}'),
+                Text('Phone: ${client.phoneNumber}'),
+                Text('Address: ${client.address}'),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              child: const Text('Close'),
+              onPressed: () => Navigator.of(context).pop(),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   String formatDate(DateTime date) {
@@ -172,16 +328,35 @@ class _ConsultationListPageState extends State<ConsultationListPage> {
                             onSelected: (value) {
                               switch (value) {
                                 case 'see_animal':
-                                  // TODO: implement animal view logic
+                                  _showAnimalDetails(consult.animalName);
                                   break;
                                 case 'see_client':
-                                  // TODO: implement client view logic
+                                  _showClientDetails(consult.clientName);
                                   break;
                                 case 'see_doc':
                                   _downloadDocument(consult.documentPath);
                                   break;
                                 case 'update':
-                                  // TODO: implement update logic
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder:
+                                          (context) => UpdateConsultationPage(
+                                            token: widget.token,
+                                            username: widget.username,
+                                            consultation: consult,
+                                          ),
+                                    ),
+                                  ).then((value) {
+                                    if (value == true) {
+                                      setState(() {
+                                        _consultations =
+                                            ConsultationService.fetchConsultations(
+                                              widget.token,
+                                            );
+                                      });
+                                    }
+                                  });
                                   break;
                                 case 'delete':
                                   // TODO: implement delete logic

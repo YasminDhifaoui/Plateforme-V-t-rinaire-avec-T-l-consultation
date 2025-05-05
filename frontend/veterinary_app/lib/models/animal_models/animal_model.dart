@@ -1,3 +1,5 @@
+import 'package:veterinary_app/models/client_models/client_model.dart';
+
 class AnimalModel {
   final String id;
   final String name;
@@ -8,6 +10,7 @@ class AnimalModel {
   final String allergies;
   final String anttecedentsmedicaux;
   final String ownerId;
+  final ClientModel? owner;
 
   AnimalModel({
     required this.id,
@@ -19,12 +22,13 @@ class AnimalModel {
     required this.allergies,
     required this.anttecedentsmedicaux,
     required this.ownerId,
+    this.owner,
   });
 
   factory AnimalModel.fromJson(Map<String, dynamic> json) {
     return AnimalModel(
       id: json['id'] ?? '',
-      name: json['name'] ?? '',
+      name: json['nom'] ?? json['name'] ?? '',
       espece: json['espece'] ?? '',
       race: json['race'] ?? '',
       age: json['age'] ?? 0,
@@ -32,9 +36,9 @@ class AnimalModel {
       allergies: json['allergies'] ?? '',
       anttecedentsmedicaux: json['anttecedentsmedicaux'] ?? '',
       ownerId: json['ownerId'] ?? '',
+      owner: json['owner'] != null ? ClientModel.fromJson(json['owner']) : null,
     );
   }
-
   Map<String, dynamic> toJson() {
     return {
       'id': id,
@@ -46,6 +50,7 @@ class AnimalModel {
       'allergies': allergies,
       'anttecedentsmedicaux': anttecedentsmedicaux,
       'ownerId': ownerId,
+      'owner': owner?.toJson(),
     };
   }
 }

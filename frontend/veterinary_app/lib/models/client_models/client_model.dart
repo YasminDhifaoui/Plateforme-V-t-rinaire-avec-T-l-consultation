@@ -13,10 +13,19 @@ class ClientModel {
 
   factory ClientModel.fromJson(Map<String, dynamic> json) {
     return ClientModel(
-      username: json['username']?? "",
-      email: json['email']?? "",
-      phoneNumber: json['phoneNumber']?? "",
-      address: json['address']?? "",
+      username: json['userName'] ?? json['username'] ?? "",
+      email: json['email'] ?? "",
+      phoneNumber: json['phoneNumber'] ?? "",
+      address: json['address'] ?? "",
     );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'username': username,
+      'email': email,
+      'phoneNumber': phoneNumber,
+      'address': address,
+    };
   }
 }

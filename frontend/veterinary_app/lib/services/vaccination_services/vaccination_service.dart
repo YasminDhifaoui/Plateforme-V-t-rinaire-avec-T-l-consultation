@@ -77,7 +77,7 @@ class VaccinationService {
     }
   }
 
-  Future<VaccinationModel> updateVaccination(
+  Future<bool> updateVaccination(
     String token,
     String id,
     Map<String, dynamic> dto,
@@ -94,7 +94,8 @@ class VaccinationService {
     );
 
     if (response.statusCode == 200) {
-      return VaccinationModel.fromJson(json.decode(response.body));
+      // Assuming success response is plain text or no content
+      return true;
     } else {
       throw Exception(
         'Failed to update vaccination: ${response.statusCode} ${response.body}',
