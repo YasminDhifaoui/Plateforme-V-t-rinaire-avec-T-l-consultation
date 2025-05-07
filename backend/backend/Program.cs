@@ -31,6 +31,7 @@ using backend.Repo.ClientRepo.VetRepo;
 using backend.Repo.VetRepo.ClientRepo;
 using backend.Repo.AdminRepo.ProductsRepo;
 using backend.Repo.VetRepo.ProductRepo;
+using backend.Controllers.twilio;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -58,6 +59,10 @@ builder.Services.AddCors(options =>
 });
 
 builder.Services.AddControllers();
+
+builder.Services.Configure<TwilioSettings>(
+    builder.Configuration.GetSection("Twilio"));
+
 
 // Swagger Configuration
 builder.Services.AddEndpointsApiExplorer();
