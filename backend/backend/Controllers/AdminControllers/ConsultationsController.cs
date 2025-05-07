@@ -9,7 +9,7 @@ namespace backend.Controllers.AdminControllers
 {
     [Route("api/admin/[controller]")]
     [ApiController]
-    //[Authorize(Policy = "Admin")]
+    [Authorize(Policy = "Admin")]
     public class ConsultationController : ControllerBase
     {
         private readonly IConsultationRepo _consultationRepo;

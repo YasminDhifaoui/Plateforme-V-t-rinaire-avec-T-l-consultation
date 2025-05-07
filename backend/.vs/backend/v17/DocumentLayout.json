@@ -3,16 +3,24 @@
   "WorkspaceRootPath": "D:\\Internships\\Pfe\\Plateforme-V-t-rinaire-avec-T-l-consultation\\backend\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{26F21D31-1B72-4CCD-BEDC-8662D6E3799E}|backend\\backend.csproj|d:\\internships\\pfe\\plateforme-v-t-rinaire-avec-t-l-consultation\\backend\\backend\\repo\\vetrepo\\vaccinationrepo\\vaccinationvetrepo.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{26F21D31-1B72-4CCD-BEDC-8662D6E3799E}|backend\\backend.csproj|solutionrelative:backend\\repo\\vetrepo\\vaccinationrepo\\vaccinationvetrepo.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{26F21D31-1B72-4CCD-BEDC-8662D6E3799E}|backend\\backend.csproj|d:\\internships\\pfe\\plateforme-v-t-rinaire-avec-t-l-consultation\\backend\\backend\\controllers\\admincontrollers\\productscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{26F21D31-1B72-4CCD-BEDC-8662D6E3799E}|backend\\backend.csproj|solutionrelative:backend\\controllers\\admincontrollers\\productscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{26F21D31-1B72-4CCD-BEDC-8662D6E3799E}|backend\\backend.csproj|d:\\internships\\pfe\\plateforme-v-t-rinaire-avec-t-l-consultation\\backend\\backend\\controllers\\vetcontrollers\\vaccinationsvetcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{26F21D31-1B72-4CCD-BEDC-8662D6E3799E}|backend\\backend.csproj|solutionrelative:backend\\controllers\\vetcontrollers\\vaccinationsvetcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{26F21D31-1B72-4CCD-BEDC-8662D6E3799E}|backend\\backend.csproj|D:\\Internships\\Pfe\\Plateforme-V-t-rinaire-avec-T-l-consultation\\backend\\backend\\repo\\vetrepo\\productrepo\\productvetrepo.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{26F21D31-1B72-4CCD-BEDC-8662D6E3799E}|backend\\backend.csproj|solutionrelative:backend\\repo\\vetrepo\\productrepo\\productvetrepo.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{26F21D31-1B72-4CCD-BEDC-8662D6E3799E}|backend\\backend.csproj|d:\\internships\\pfe\\plateforme-v-t-rinaire-avec-t-l-consultation\\backend\\backend\\controllers\\vetcontrollers\\consultationsvetcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{26F21D31-1B72-4CCD-BEDC-8662D6E3799E}|backend\\backend.csproj|solutionrelative:backend\\controllers\\vetcontrollers\\consultationsvetcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{26F21D31-1B72-4CCD-BEDC-8662D6E3799E}|backend\\backend.csproj|D:\\Internships\\Pfe\\Plateforme-V-t-rinaire-avec-T-l-consultation\\backend\\backend\\repo\\adminrepo\\productsrepo\\iproductrepo.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{26F21D31-1B72-4CCD-BEDC-8662D6E3799E}|backend\\backend.csproj|solutionrelative:backend\\repo\\adminrepo\\productsrepo\\iproductrepo.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{26F21D31-1B72-4CCD-BEDC-8662D6E3799E}|backend\\backend.csproj|D:\\Internships\\Pfe\\Plateforme-V-t-rinaire-avec-T-l-consultation\\backend\\backend\\repo\\adminrepo\\productsrepo\\productrepo.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{26F21D31-1B72-4CCD-BEDC-8662D6E3799E}|backend\\backend.csproj|solutionrelative:backend\\repo\\adminrepo\\productsrepo\\productrepo.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{26F21D31-1B72-4CCD-BEDC-8662D6E3799E}|backend\\backend.csproj|D:\\Internships\\Pfe\\Plateforme-V-t-rinaire-avec-T-l-consultation\\backend\\backend\\dtos\\admindtos\\productdtos\\updateproductdto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{26F21D31-1B72-4CCD-BEDC-8662D6E3799E}|backend\\backend.csproj|solutionrelative:backend\\dtos\\admindtos\\productdtos\\updateproductdto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     }
   ],
   "DocumentGroupContainers": [
@@ -22,7 +30,7 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 1,
+          "SelectedChildIndex": 4,
           "Children": [
             {
               "$type": "Bookmark",
@@ -30,42 +38,64 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 0,
-              "Title": "VaccinationVetRepo.cs",
-              "DocumentMoniker": "D:\\Internships\\Pfe\\Plateforme-V-t-rinaire-avec-T-l-consultation\\backend\\backend\\Repo\\VetRepo\\VaccinationRepo\\VaccinationVetRepo.cs",
-              "RelativeDocumentMoniker": "backend\\Repo\\VetRepo\\VaccinationRepo\\VaccinationVetRepo.cs",
-              "ToolTip": "D:\\Internships\\Pfe\\Plateforme-V-t-rinaire-avec-T-l-consultation\\backend\\backend\\Repo\\VetRepo\\VaccinationRepo\\VaccinationVetRepo.cs",
-              "RelativeToolTip": "backend\\Repo\\VetRepo\\VaccinationRepo\\VaccinationVetRepo.cs",
-              "ViewState": "AQIAACgAAAAAAAAAAAAIwDYAAAAoAAAA",
+              "DocumentIndex": 1,
+              "Title": "ProductVetRepo.cs",
+              "DocumentMoniker": "D:\\Internships\\Pfe\\Plateforme-V-t-rinaire-avec-T-l-consultation\\backend\\backend\\Repo\\VetRepo\\ProductRepo\\ProductVetRepo.cs",
+              "RelativeDocumentMoniker": "backend\\Repo\\VetRepo\\ProductRepo\\ProductVetRepo.cs",
+              "ToolTip": "D:\\Internships\\Pfe\\Plateforme-V-t-rinaire-avec-T-l-consultation\\backend\\backend\\Repo\\VetRepo\\ProductRepo\\ProductVetRepo.cs",
+              "RelativeToolTip": "backend\\Repo\\VetRepo\\ProductRepo\\ProductVetRepo.cs",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAABQAAAA3AAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-05-04T12:24:36.606Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-05-07T22:19:17.251Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 1,
-              "Title": "VaccinationsVetController.cs",
-              "DocumentMoniker": "D:\\Internships\\Pfe\\Plateforme-V-t-rinaire-avec-T-l-consultation\\backend\\backend\\Controllers\\VetControllers\\VaccinationsVetController.cs",
-              "RelativeDocumentMoniker": "backend\\Controllers\\VetControllers\\VaccinationsVetController.cs",
-              "ToolTip": "D:\\Internships\\Pfe\\Plateforme-V-t-rinaire-avec-T-l-consultation\\backend\\backend\\Controllers\\VetControllers\\VaccinationsVetController.cs",
-              "RelativeToolTip": "backend\\Controllers\\VetControllers\\VaccinationsVetController.cs",
-              "ViewState": "AQIAACIAAAAAAAAAAAAuwDAAAAAzAAAA",
+              "DocumentIndex": 4,
+              "Title": "UpdateProductDto.cs",
+              "DocumentMoniker": "D:\\Internships\\Pfe\\Plateforme-V-t-rinaire-avec-T-l-consultation\\backend\\backend\\Dtos\\AdminDtos\\ProductDtos\\UpdateProductDto.cs",
+              "RelativeDocumentMoniker": "backend\\Dtos\\AdminDtos\\ProductDtos\\UpdateProductDto.cs",
+              "ToolTip": "D:\\Internships\\Pfe\\Plateforme-V-t-rinaire-avec-T-l-consultation\\backend\\backend\\Dtos\\AdminDtos\\ProductDtos\\UpdateProductDto.cs",
+              "RelativeToolTip": "backend\\Dtos\\AdminDtos\\ProductDtos\\UpdateProductDto.cs",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAYAAAAqAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-05-04T12:08:43.916Z",
+              "WhenOpened": "2025-05-07T22:08:25.62Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "ProductRepo.cs",
+              "DocumentMoniker": "D:\\Internships\\Pfe\\Plateforme-V-t-rinaire-avec-T-l-consultation\\backend\\backend\\Repo\\AdminRepo\\ProductsRepo\\ProductRepo.cs",
+              "RelativeDocumentMoniker": "backend\\Repo\\AdminRepo\\ProductsRepo\\ProductRepo.cs",
+              "ToolTip": "D:\\Internships\\Pfe\\Plateforme-V-t-rinaire-avec-T-l-consultation\\backend\\backend\\Repo\\AdminRepo\\ProductsRepo\\ProductRepo.cs",
+              "RelativeToolTip": "backend\\Repo\\AdminRepo\\ProductsRepo\\ProductRepo.cs",
+              "ViewState": "AQIAADEAAAAAAAAAAAAkwDsAAAAJAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-05-07T12:11:12.991Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "ProductsController.cs",
+              "DocumentMoniker": "D:\\Internships\\Pfe\\Plateforme-V-t-rinaire-avec-T-l-consultation\\backend\\backend\\Controllers\\AdminControllers\\ProductsController.cs",
+              "RelativeDocumentMoniker": "backend\\Controllers\\AdminControllers\\ProductsController.cs",
+              "ToolTip": "D:\\Internships\\Pfe\\Plateforme-V-t-rinaire-avec-T-l-consultation\\backend\\backend\\Controllers\\AdminControllers\\ProductsController.cs",
+              "RelativeToolTip": "backend\\Controllers\\AdminControllers\\ProductsController.cs",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAoAAAAEAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-05-07T12:15:06.384Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
               "DocumentIndex": 2,
-              "Title": "ConsultationsVetController.cs",
-              "DocumentMoniker": "D:\\Internships\\Pfe\\Plateforme-V-t-rinaire-avec-T-l-consultation\\backend\\backend\\Controllers\\VetControllers\\ConsultationsVetController.cs",
-              "RelativeDocumentMoniker": "backend\\Controllers\\VetControllers\\ConsultationsVetController.cs",
-              "ToolTip": "D:\\Internships\\Pfe\\Plateforme-V-t-rinaire-avec-T-l-consultation\\backend\\backend\\Controllers\\VetControllers\\ConsultationsVetController.cs",
-              "RelativeToolTip": "backend\\Controllers\\VetControllers\\ConsultationsVetController.cs",
-              "ViewState": "AQIAABUAAAAAAAAAAIA2wCAAAABZAAAA",
+              "Title": "IProductRepo.cs",
+              "DocumentMoniker": "D:\\Internships\\Pfe\\Plateforme-V-t-rinaire-avec-T-l-consultation\\backend\\backend\\Repo\\AdminRepo\\ProductsRepo\\IProductRepo.cs",
+              "RelativeDocumentMoniker": "backend\\Repo\\AdminRepo\\ProductsRepo\\IProductRepo.cs",
+              "ToolTip": "D:\\Internships\\Pfe\\Plateforme-V-t-rinaire-avec-T-l-consultation\\backend\\backend\\Repo\\AdminRepo\\ProductsRepo\\IProductRepo.cs",
+              "RelativeToolTip": "backend\\Repo\\AdminRepo\\ProductsRepo\\IProductRepo.cs",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAoAAAA5AAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-05-03T21:45:38.027Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-05-07T11:58:36.109Z"
             }
           ]
         }

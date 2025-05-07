@@ -21,6 +21,22 @@
       "PackagePath": "staticwebassets\\docs\\ce159c0d-5bac-43e8-8403-b4f43208acc5\\20250429_234738\\1330ed35-88c7-4e22-aaf9-15fc43174232_Fyodor Dostoevsky - Crime and Punishment(Z-Lib.io).epub"
     },
     {
+      "Id": "D:\\Internships\\Pfe\\Plateforme-V-t-rinaire-avec-T-l-consultation\\backend\\backend\\wwwroot\\images\\33659182-338e-4302-b30d-93b93a2c0e06.jpg",
+      "PackagePath": "staticwebassets\\images\\33659182-338e-4302-b30d-93b93a2c0e06.jpg"
+    },
+    {
+      "Id": "D:\\Internships\\Pfe\\Plateforme-V-t-rinaire-avec-T-l-consultation\\backend\\backend\\wwwroot\\images\\5978bfc1-f483-4c46-a91d-d8c2ddc78f50.jpg",
+      "PackagePath": "staticwebassets\\images\\5978bfc1-f483-4c46-a91d-d8c2ddc78f50.jpg"
+    },
+    {
+      "Id": "D:\\Internships\\Pfe\\Plateforme-V-t-rinaire-avec-T-l-consultation\\backend\\backend\\wwwroot\\images\\bff1ee60-ca85-49ab-821a-0e6848943bad.jpg",
+      "PackagePath": "staticwebassets\\images\\bff1ee60-ca85-49ab-821a-0e6848943bad.jpg"
+    },
+    {
+      "Id": "D:\\Internships\\Pfe\\Plateforme-V-t-rinaire-avec-T-l-consultation\\backend\\backend\\wwwroot\\images\\d0e0019a-f95d-4dc2-bc2f-f63fe5ec9354.jpg",
+      "PackagePath": "staticwebassets\\images\\d0e0019a-f95d-4dc2-bc2f-f63fe5ec9354.jpg"
+    },
+    {
       "Id": "obj\\Debug\\net8.0\\staticwebassets\\msbuild.backend.Microsoft.AspNetCore.StaticWebAssets.props",
       "PackagePath": "build\\Microsoft.AspNetCore.StaticWebAssets.props"
     },

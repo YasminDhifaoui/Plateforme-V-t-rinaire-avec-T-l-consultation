@@ -361,7 +361,7 @@ class _ConsultationListPageState extends State<ConsultationListPage> {
                                 case 'delete':
                                   // TODO: implement delete logic
                                   break;
-                                case 'details':
+                                case 'detail0s':
                                   _showConsultationDetails(consult);
                                   break;
                               }

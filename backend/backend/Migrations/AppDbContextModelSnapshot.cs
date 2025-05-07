@@ -534,16 +534,17 @@ namespace backend.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<Guid>("CategorieId")
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid?>("CommandeId")
-                        .HasColumnType("uuid");
+                    b.Property<int>("Available")
+                        .HasColumnType("integer");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("ImageUrl")
                         .IsRequired()
                         .HasColumnType("text");
 
@@ -555,17 +556,10 @@ namespace backend.Migrations
                     b.Property<decimal>("Price")
                         .HasColumnType("numeric");
 
-                    b.Property<int>("Stock")
-                        .HasColumnType("integer");
-
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("CategorieId");
-
-                    b.HasIndex("CommandeId");
 
                     b.ToTable("Produits");
                 });
@@ -770,21 +764,6 @@ namespace backend.Migrations
                     b.Navigation("Commande");
                 });
 
-            modelBuilder.Entity("backend.Models.Produit", b =>
-                {
-                    b.HasOne("backend.Models.CategorieProd", "Categorie")
-                        .WithMany("Produits")
-                        .HasForeignKey("CategorieId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("backend.Models.Commande", null)
-                        .WithMany("Produits")
-                        .HasForeignKey("CommandeId");
-
-                    b.Navigation("Categorie");
-                });
-
             modelBuilder.Entity("backend.Models.RendezVous", b =>
                 {
                     b.HasOne("backend.Models.Animal", "Animal")
@@ -821,16 +800,6 @@ namespace backend.Migrations
                         .IsRequired();
 
                     b.Navigation("Animal");
-                });
-
-            modelBuilder.Entity("backend.Models.CategorieProd", b =>
-                {
-                    b.Navigation("Produits");
-                });
-
-            modelBuilder.Entity("backend.Models.Commande", b =>
-                {
-                    b.Navigation("Produits");
                 });
 #pragma warning restore 612, 618
         }

@@ -17,6 +17,9 @@ class AnimalsVetService {
       },
     );
 
+    print('AnimalsVetService response status: ${response.statusCode}');
+    print('AnimalsVetService response body: ${response.body}');
+
     if (response.statusCode == 200) {
       final List<dynamic> jsonList = json.decode(response.body);
       return jsonList.map((json) => AnimalModel.fromJson(json)).toList();

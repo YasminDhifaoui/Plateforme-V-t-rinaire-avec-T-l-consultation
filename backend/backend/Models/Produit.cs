@@ -10,6 +10,8 @@ namespace backend.Models
 
         [Required, MaxLength(100)]
         public string NomProduit { get; set; }
+        public string ImageUrl { get; set; }
+
 
         public string Description { get; set; }
 
@@ -17,14 +19,11 @@ namespace backend.Models
         public decimal Price { get; set; } 
 
         [Required]
-        public int Stock { get; set; }
+        public int Available { get; set; }
 
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
 
-
-        [ForeignKey("CategorieProd")]
-        public Guid CategorieId { get; set; }
-        public CategorieProd Categorie { get; set; }
+       
     }
 }

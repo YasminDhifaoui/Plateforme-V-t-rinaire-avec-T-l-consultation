@@ -87,7 +87,6 @@ class _VaccinationListPageState extends State<VaccinationListPage> {
               itemCount: vaccinations.length,
               itemBuilder: (context, index) {
                 final vaccination = vaccinations[index];
-                print('Vaccination Name: ${vaccination.name}');
                 final animal = animalMap[vaccination.animalId];
                 final animalName = animal?.name ?? 'Unknown';
                 final ownerName =

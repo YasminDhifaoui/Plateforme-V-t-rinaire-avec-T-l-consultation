@@ -24,6 +24,7 @@ namespace backend.Repo.VetRepo.VaccinationRepo
         {
             return await _context.Vaccinations
                 .Include(v => v.Animal)
+                .Include(v => v.Animal.Owner)
                 .Where(v => _context.RendezVous
                     .Any(r => r.VeterinaireId == vetId && r.AnimalId == v.AnimalId))
                 .ToListAsync();
@@ -72,7 +73,7 @@ namespace backend.Repo.VetRepo.VaccinationRepo
                 return "You do not have permission to update this vaccination.";
 
             vacc.Name = dto.Name;
-            vacc.Date = dto.Date;
+            vacc.Date = dto.Date.ToUniversalTime();
             vacc.AnimalId = dto.AnimalId;
             vacc.UpdatedAt = DateTime.UtcNow;
 

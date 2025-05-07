@@ -29,6 +29,8 @@ using backend.Repo.VetRepo.ProfileRepo;
 using backend.Repo.AdminRepo.ProfileRepo;
 using backend.Repo.ClientRepo.VetRepo;
 using backend.Repo.VetRepo.ClientRepo;
+using backend.Repo.AdminRepo.ProductsRepo;
+using backend.Repo.VetRepo.ProductRepo;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -109,6 +111,8 @@ builder.Services.AddScoped<IRendezVousRepo, RendezVousRepo>();
 builder.Services.AddScoped<IConsultationRepo, consultationRepo>();
 builder.Services.AddScoped<IVaccinationRepo, VaccinationRepo>();
 builder.Services.AddScoped<IAdminProfileRepo, AdminProfileRepo>();
+builder.Services.AddScoped<IProductRepository, ProductRepo>();
+
 
 
 // add Client Repositories
@@ -127,6 +131,7 @@ builder.Services.AddScoped<IConsultationVetRepo, ConsultationVetRepo>();
 builder.Services.AddScoped<IVaccinationVetRepo, VaccinationVetRepo>();
 builder.Services.AddScoped<IVeterinaireProfileRepo, VeterinaireProfileRepo>();
 builder.Services.AddScoped<IClientVetRepo, ClientVetRepo>();
+builder.Services.AddScoped<IProductVetRepo, ProductVetRepo>();
 
 
 
@@ -201,7 +206,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
-
+app.UseStaticFiles();
 app.MapControllers();
 
 app.Run();

@@ -23,7 +23,7 @@ namespace backend.Models
         public Guid ClientId { get; set; }
         public AppUser Client { get; set; }
 
-        public List<Produit> Produits { get; set; }
+        //public List<Produit> Produits { get; set; }
     }
 
     public enum CommandeStatus
