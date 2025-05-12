@@ -44,7 +44,7 @@
               "RelativeDocumentMoniker": "backend\\Controllers\\VetControllers\\ClientVetController.cs",
               "ToolTip": "D:\\Internships\\Pfe\\Plateforme-V-t-rinaire-avec-T-l-consultation\\backend\\backend\\Controllers\\VetControllers\\ClientVetController.cs",
               "RelativeToolTip": "backend\\Controllers\\VetControllers\\ClientVetController.cs",
-              "ViewState": "AQIAAAkAAAAAAAAAAAAAABkAAAAwAAAA",
+              "ViewState": "AQIAAAkAAAAAAAAAAAAuwBYAAAANAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-05-11T20:56:23.631Z",
               "EditorCaption": ""
@@ -83,8 +83,7 @@
               "RelativeToolTip": "backend\\Hubs\\WebRTCHub.cs",
               "ViewState": "AQIAAAwAAAAAAAAAAAAgwA4AAAAgAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-05-11T18:53:26.054Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-05-11T18:53:26.054Z"
             },
             {
               "$type": "Document",
