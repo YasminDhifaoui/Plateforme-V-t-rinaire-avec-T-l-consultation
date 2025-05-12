@@ -1,10 +1,12 @@
 class ClientModel {
+  final int id;
   final String username;
   final String email;
   final String phoneNumber;
   final String address;
 
   ClientModel({
+    required this.id,
     required this.username,
     required this.email,
     required this.phoneNumber,
@@ -13,6 +15,7 @@ class ClientModel {
 
   factory ClientModel.fromJson(Map<String, dynamic> json) {
     return ClientModel(
+      id: int.tryParse(json['id'].toString()) ?? 0, // Safe parsing
       username: json['userName'] ?? json['username'] ?? "",
       email: json['email'] ?? "",
       phoneNumber: json['phoneNumber'] ?? "",
@@ -22,10 +25,11 @@ class ClientModel {
 
   Map<String, dynamic> toJson() {
     return {
-      'username': username,
-      'email': email,
-      'phoneNumber': phoneNumber,
-      'address': address,
+      'id': id ?? 0,
+      'username': username ?? '',
+      'email': email ?? '',
+      'phoneNumber': phoneNumber ?? '',
+      'address': address?? '',
     };
   }
 }

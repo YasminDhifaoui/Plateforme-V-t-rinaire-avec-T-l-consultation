@@ -360,3 +360,7 @@ D:\Internships\Pfe\Plateforme-V-t-rinaire-avec-T-l-consultation\backend\backend\
 D:\Internships\Pfe\Plateforme-V-t-rinaire-avec-T-l-consultation\backend\backend\bin\Debug\net8.0\Microsoft.Bcl.Memory.dll
 D:\Internships\Pfe\Plateforme-V-t-rinaire-avec-T-l-consultation\backend\backend\bin\Debug\net8.0\Newtonsoft.Json.dll
 D:\Internships\Pfe\Plateforme-V-t-rinaire-avec-T-l-consultation\backend\backend\bin\Debug\net8.0\Twilio.dll
+D:\Internships\Pfe\Plateforme-V-t-rinaire-avec-T-l-consultation\backend\backend\bin\Debug\net8.0\Microsoft.Extensions.Diagnostics.Abstractions.dll
+D:\Internships\Pfe\Plateforme-V-t-rinaire-avec-T-l-consultation\backend\backend\bin\Debug\net8.0\Microsoft.Extensions.Hosting.Abstractions.dll
+D:\Internships\Pfe\Plateforme-V-t-rinaire-avec-T-l-consultation\backend\backend\bin\Debug\net8.0\Microsoft.Extensions.ObjectPool.dll
+D:\Internships\Pfe\Plateforme-V-t-rinaire-avec-T-l-consultation\backend\backend\bin\Debug\net8.0\System.Net.WebSockets.WebSocketProtocol.dll

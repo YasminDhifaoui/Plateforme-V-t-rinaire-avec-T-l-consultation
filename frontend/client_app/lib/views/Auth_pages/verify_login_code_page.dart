@@ -3,7 +3,6 @@ import 'package:client_app/views/components/login_navbar.dart';
 import 'package:flutter/material.dart';
 import 'package:client_app/models/auth_models/client_verify_login.dart';
 import 'package:client_app/services/auth_services/client_auth_services.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import '../home_page.dart';
 
 class VerifyLoginCodePage extends StatefulWidget {
@@ -24,9 +23,7 @@ class _VerifyLoginCodePageState extends State<VerifyLoginCodePage> {
   bool isLoading = false;
 
   void verifyCode() async {
-    if (!_formKey.currentState!.validate()) {
-      return;
-    }
+    if (!_formKey.currentState!.validate()) return;
 
     setState(() {
       isLoading = true;
@@ -43,24 +40,25 @@ class _VerifyLoginCodePageState extends State<VerifyLoginCodePage> {
       print('Result: $result');
 
       if (result['success'] == true && result['data'] != null) {
-        final data = result['data'];
 
-        final token = data['token'] ?? '';
-        final username = data['data'] != null ? data['data']['username'] : '';
+        final token = result['token'];
+        final userData = result['data'];
+        final userId = userData['clientId'];
+        final username = userData['username'];
 
-        // Debug print
         print('Token: $token');
+        print('User ID: $userId');
         print('Username: $username');
 
-        if (token.isEmpty || username.isEmpty) {
+        if (token.isEmpty || userId.isEmpty || username.isEmpty) {
           setState(() {
-            responseMessage = 'Invalid token or username received.';
+            responseMessage = 'Invalid token or user data received.';
             isLoading = false;
           });
           return;
         }
 
-        await _storeSession(token, username);
+        await _storeSession(token, userId);
 
         if (mounted) {
           Navigator.pushReplacement(
@@ -88,11 +86,8 @@ class _VerifyLoginCodePageState extends State<VerifyLoginCodePage> {
     }
   }
 
-  Future<void> _storeSession(String token, String username) async {
-    await TokenService.saveToken(token);
-
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString('username', username);
+  Future<void> _storeSession(String token, String userId) async {
+    await TokenService.saveToken(token, userId);
   }
 
   @override
@@ -117,7 +112,7 @@ class _VerifyLoginCodePageState extends State<VerifyLoginCodePage> {
                 TextFormField(
                   controller: codeController,
                   decoration:
-                      const InputDecoration(labelText: 'Verification Code'),
+                  const InputDecoration(labelText: 'Verification Code'),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
                       return 'Verification code is required';
@@ -129,9 +124,9 @@ class _VerifyLoginCodePageState extends State<VerifyLoginCodePage> {
                 isLoading
                     ? const CircularProgressIndicator()
                     : ElevatedButton(
-                        onPressed: verifyCode,
-                        child: const Text('Verify'),
-                      ),
+                  onPressed: verifyCode,
+                  child: const Text('Verify'),
+                ),
                 const SizedBox(height: 20),
                 Text(responseMessage,
                     style: const TextStyle(color: Colors.red)),

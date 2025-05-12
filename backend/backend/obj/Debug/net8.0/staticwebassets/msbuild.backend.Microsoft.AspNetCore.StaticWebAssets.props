@@ -80,6 +80,70 @@
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
       <OriginalItemSpec>$([System.IO.Path]::GetFullPath($(MSBuildThisFileDirectory)..\staticwebassets\docs\ce159c0d-5bac-43e8-8403-b4f43208acc5\20250429_234738\1330ed35-88c7-4e22-aaf9-15fc43174232_Fyodor Dostoevsky - Crime and Punishment(Z-Lib.io).epub))</OriginalItemSpec>
     </StaticWebAsset>
+    <StaticWebAsset Include="$([System.IO.Path]::GetFullPath($(MSBuildThisFileDirectory)..\staticwebassets\docs\ce159c0d-5bac-43e8-8403-b4f43208acc5\20250508_135351\c8a9c826-4f19-4453-96e3-f6d7071a940f_page de garde.docx))">
+      <SourceType>Package</SourceType>
+      <SourceId>backend</SourceId>
+      <ContentRoot>$(MSBuildThisFileDirectory)..\staticwebassets\</ContentRoot>
+      <BasePath>_content/backend</BasePath>
+      <RelativePath>docs/ce159c0d-5bac-43e8-8403-b4f43208acc5/20250508_135351/c8a9c826-4f19-4453-96e3-f6d7071a940f_page de garde.docx</RelativePath>
+      <AssetKind>All</AssetKind>
+      <AssetMode>All</AssetMode>
+      <AssetRole>Primary</AssetRole>
+      <RelatedAsset></RelatedAsset>
+      <AssetTraitName></AssetTraitName>
+      <AssetTraitValue></AssetTraitValue>
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      <OriginalItemSpec>$([System.IO.Path]::GetFullPath($(MSBuildThisFileDirectory)..\staticwebassets\docs\ce159c0d-5bac-43e8-8403-b4f43208acc5\20250508_135351\c8a9c826-4f19-4453-96e3-f6d7071a940f_page de garde.docx))</OriginalItemSpec>
+    </StaticWebAsset>
+    <StaticWebAsset Include="$([System.IO.Path]::GetFullPath($(MSBuildThisFileDirectory)..\staticwebassets\docs\ce159c0d-5bac-43e8-8403-b4f43208acc5\20250508_135450\353f509d-9f81-48ee-8cae-4beb53708de4_access_doctor.png))">
+      <SourceType>Package</SourceType>
+      <SourceId>backend</SourceId>
+      <ContentRoot>$(MSBuildThisFileDirectory)..\staticwebassets\</ContentRoot>
+      <BasePath>_content/backend</BasePath>
+      <RelativePath>docs/ce159c0d-5bac-43e8-8403-b4f43208acc5/20250508_135450/353f509d-9f81-48ee-8cae-4beb53708de4_access_doctor.png</RelativePath>
+      <AssetKind>All</AssetKind>
+      <AssetMode>All</AssetMode>
+      <AssetRole>Primary</AssetRole>
+      <RelatedAsset></RelatedAsset>
+      <AssetTraitName></AssetTraitName>
+      <AssetTraitValue></AssetTraitValue>
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      <OriginalItemSpec>$([System.IO.Path]::GetFullPath($(MSBuildThisFileDirectory)..\staticwebassets\docs\ce159c0d-5bac-43e8-8403-b4f43208acc5\20250508_135450\353f509d-9f81-48ee-8cae-4beb53708de4_access_doctor.png))</OriginalItemSpec>
+    </StaticWebAsset>
+    <StaticWebAsset Include="$([System.IO.Path]::GetFullPath($(MSBuildThisFileDirectory)..\staticwebassets\docs\ce159c0d-5bac-43e8-8403-b4f43208acc5\20250508_135513\02e789e8-22bd-4cef-a5f5-2de1be14963f_access_doctor.png))">
+      <SourceType>Package</SourceType>
+      <SourceId>backend</SourceId>
+      <ContentRoot>$(MSBuildThisFileDirectory)..\staticwebassets\</ContentRoot>
+      <BasePath>_content/backend</BasePath>
+      <RelativePath>docs/ce159c0d-5bac-43e8-8403-b4f43208acc5/20250508_135513/02e789e8-22bd-4cef-a5f5-2de1be14963f_access_doctor.png</RelativePath>
+      <AssetKind>All</AssetKind>
+      <AssetMode>All</AssetMode>
+      <AssetRole>Primary</AssetRole>
+      <RelatedAsset></RelatedAsset>
+      <AssetTraitName></AssetTraitName>
+      <AssetTraitValue></AssetTraitValue>
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      <OriginalItemSpec>$([System.IO.Path]::GetFullPath($(MSBuildThisFileDirectory)..\staticwebassets\docs\ce159c0d-5bac-43e8-8403-b4f43208acc5\20250508_135513\02e789e8-22bd-4cef-a5f5-2de1be14963f_access_doctor.png))</OriginalItemSpec>
+    </StaticWebAsset>
+    <StaticWebAsset Include="$([System.IO.Path]::GetFullPath($(MSBuildThisFileDirectory)..\staticwebassets\docs\ce159c0d-5bac-43e8-8403-b4f43208acc5\20250508_135523\5916efb1-c9aa-4e62-83ec-ed89904d7a3f_access_doctor.png))">
+      <SourceType>Package</SourceType>
+      <SourceId>backend</SourceId>
+      <ContentRoot>$(MSBuildThisFileDirectory)..\staticwebassets\</ContentRoot>
+      <BasePath>_content/backend</BasePath>
+      <RelativePath>docs/ce159c0d-5bac-43e8-8403-b4f43208acc5/20250508_135523/5916efb1-c9aa-4e62-83ec-ed89904d7a3f_access_doctor.png</RelativePath>
+      <AssetKind>All</AssetKind>
+      <AssetMode>All</AssetMode>
+      <AssetRole>Primary</AssetRole>
+      <RelatedAsset></RelatedAsset>
+      <AssetTraitName></AssetTraitName>
+      <AssetTraitValue></AssetTraitValue>
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      <OriginalItemSpec>$([System.IO.Path]::GetFullPath($(MSBuildThisFileDirectory)..\staticwebassets\docs\ce159c0d-5bac-43e8-8403-b4f43208acc5\20250508_135523\5916efb1-c9aa-4e62-83ec-ed89904d7a3f_access_doctor.png))</OriginalItemSpec>
+    </StaticWebAsset>
     <StaticWebAsset Include="$([System.IO.Path]::GetFullPath($(MSBuildThisFileDirectory)..\staticwebassets\images\33659182-338e-4302-b30d-93b93a2c0e06.jpg))">
       <SourceType>Package</SourceType>
       <SourceId>backend</SourceId>

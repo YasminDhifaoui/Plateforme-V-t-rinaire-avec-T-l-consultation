@@ -31,7 +31,7 @@ using backend.Repo.ClientRepo.VetRepo;
 using backend.Repo.VetRepo.ClientRepo;
 using backend.Repo.AdminRepo.ProductsRepo;
 using backend.Repo.VetRepo.ProductRepo;
-using backend.Controllers.twilio;
+using backend.Hubs;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -60,8 +60,6 @@ builder.Services.AddCors(options =>
 
 builder.Services.AddControllers();
 
-builder.Services.Configure<TwilioSettings>(
-    builder.Configuration.GetSection("Twilio"));
 
 
 // Swagger Configuration
@@ -102,6 +100,8 @@ builder.Services.AddSwaggerGen(c =>
     c.SupportNonNullableReferenceTypes(); 
 
 });
+
+builder.Services.AddSignalR();
 
 
 // Email SMTP Service
@@ -162,6 +162,9 @@ builder.Services.Configure<IdentityOptions>(options =>
     options.SignIn.RequireConfirmedEmail = true;
 });
 
+
+builder.Services.AddSignalR();
+
 // Configure Authentication
 builder.Services.AddAuthentication(options =>
 {
@@ -180,6 +183,16 @@ builder.Services.AddAuthentication(options =>
         ValidAudience = jwtSettings["ValidAudience"],
         IssuerSigningKey = new SymmetricSecurityKey(
             Encoding.UTF8.GetBytes(jwtSettings["SecretKey"]))
+    };
+    options.Events = new JwtBearerEvents
+    {
+        OnMessageReceived = context => {
+            var accessToken = context.Request.Query["access_token"];
+            var path = context.HttpContext.Request.Path;
+            if (!string.IsNullOrEmpty(accessToken) && path.StartsWithSegments("/webrtchub"))
+                context.Token = accessToken;
+            return Task.CompletedTask;
+        }
     };
 });
 //add authorization with role
@@ -205,6 +218,9 @@ app.UseRouting();
 app.UseAuthentication();  // Authentication middleware comes first
 app.UseAuthorization();   // Authorization middleware should come after authentication
 
+app.MapHub<WebRTCHub>("/webrtchub");
+
+
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
@@ -213,5 +229,6 @@ if (app.Environment.IsDevelopment())
 }
 app.UseStaticFiles();
 app.MapControllers();
+
 
 app.Run();

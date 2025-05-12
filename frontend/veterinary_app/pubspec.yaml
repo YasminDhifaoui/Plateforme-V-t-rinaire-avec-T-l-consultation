@@ -15,6 +15,13 @@ dependencies:
   intl: ^0.20.2
   url_launcher: ^6.2.1
   fl_chart: 0.50.1
+  permission_handler: ^11.0.1
+  flutter_webrtc:
+    git:
+      url: https://github.com/flutter-webrtc/flutter-webrtc.git
+      ref: main
+  signalr_core: ^1.1.1
+
 
   cupertino_icons: ^1.0.8
 

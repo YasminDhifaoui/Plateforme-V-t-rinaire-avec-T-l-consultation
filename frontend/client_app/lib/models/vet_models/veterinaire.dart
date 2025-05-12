@@ -1,4 +1,5 @@
 class Veterinaire {
+  final int id; // Add this line
   final String username;
   final String email;
   final String phoneNumber;
@@ -7,6 +8,7 @@ class Veterinaire {
   final String lastName;
 
   Veterinaire({
+    required this.id, // Add this
     required this.username,
     required this.email,
     required this.phoneNumber,
@@ -17,10 +19,11 @@ class Veterinaire {
 
   factory Veterinaire.fromJson(Map<String, dynamic> json) {
     return Veterinaire(
-      username: json['username'],
-      email: json['email'],
-      phoneNumber: json['phoneNumber'],
-      address: json['address'],
+      id: int.tryParse(json['id'].toString()) ?? 0,
+      username: json['username']?? "",
+      email: json['email']?? "",
+      phoneNumber: json['phoneNumber']?? "",
+      address: json['address']?? "",
       firstName: json['firstName'] ?? '',
       lastName: json['lastName'] ?? '',
     );

@@ -423,6 +423,7 @@ namespace backend.Controllers.VetControllers
                         data = new
                         {
                             expiration = token_res.ValidTo,
+                            vetId = user.Id.ToString(),
                             created = DateTime.Now,
                             email = user.Email,
                             username = user.UserName,
