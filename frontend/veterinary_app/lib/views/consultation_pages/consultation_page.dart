@@ -144,6 +144,7 @@ class _ConsultationListPageState extends State<ConsultationListPage> {
       (c) => c.username == clientName,
       orElse:
           () => ClientModel(
+            id:0,
             username: 'Unknown',
             email: '',
             phoneNumber: '',
@@ -313,11 +314,40 @@ class _ConsultationListPageState extends State<ConsultationListPage> {
                                     ),
                                   ),
                                   IconButton(
-                                    icon: const Icon(Icons.download),
-                                    onPressed:
-                                        () => _downloadDocument(
-                                          consult.documentPath,
-                                        ),
+                                    icon: const Icon(Icons.remove_red_eye),
+                                    onPressed: () async {
+                                      try {
+                                        final Uri uri = Uri.parse(
+                                          'http://10.0.2.2:5000/${consult.documentPath}',
+                                        );
+                                        if (!await launchUrl(
+                                          uri,
+                                          mode: LaunchMode.externalApplication,
+                                        )) {
+                                          ScaffoldMessenger.of(
+                                            context,
+                                          ).showSnackBar(
+                                            const SnackBar(
+                                              content: Text(
+                                                'Could not open document in browser',
+                                              ),
+                                              backgroundColor: Colors.red,
+                                            ),
+                                          );
+                                        }
+                                      } catch (e) {
+                                        ScaffoldMessenger.of(
+                                          context,
+                                        ).showSnackBar(
+                                          SnackBar(
+                                            content: Text(
+                                              'Error opening document: $e',
+                                            ),
+                                            backgroundColor: Colors.red,
+                                          ),
+                                        );
+                                      }
+                                    },
                                   ),
                                 ],
                               ),

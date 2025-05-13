@@ -428,6 +428,7 @@ namespace backend.Controllers.ClientControllers
                         data = new
                         {
                             expiration = token_res.ValidTo,
+                            clientId = user.Id.ToString(),
                             created = DateTime.Now,
                             email = user.Email,
                             username = user.UserName,

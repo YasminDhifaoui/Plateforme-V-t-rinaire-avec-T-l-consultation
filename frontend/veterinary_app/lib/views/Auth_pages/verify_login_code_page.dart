@@ -85,10 +85,8 @@ class _VerifyLoginCodePageState extends State<VerifyLoginCodePage> {
     }
   }
 
-  Future<void> _storeSession(String token, String username) async {
-    await TokenService.saveToken(token);
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString('username', username);
+  Future<void> _storeSession(String token, String userId) async {
+    await TokenService.saveToken(token, userId);
   }
 
   @override

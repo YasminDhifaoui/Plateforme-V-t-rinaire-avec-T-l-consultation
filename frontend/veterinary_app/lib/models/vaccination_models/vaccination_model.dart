@@ -19,7 +19,7 @@ class VaccinationModel {
 
   factory VaccinationModel.fromJson(Map<String, dynamic> json) {
     return VaccinationModel(
-      id: json['id'] ?? '',
+      id: json['id'] ?? 0,
       animalId: json['animalId'] ?? '',
       name: json['name'] ?? '',
       date:

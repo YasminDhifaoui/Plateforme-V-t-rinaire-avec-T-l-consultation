@@ -1,8 +1,22 @@
 import 'package:flutter/material.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:veterinary_app/models/client_models/client_model.dart';
 import 'package:veterinary_app/services/client_services/client_service.dart';
-
+import '../../services/auth_services/token_service.dart';
+import '../ChatPage.dart';
 import '../components/home_navbar.dart';
+import '../video_call_page.dart';
+
+Future<void> _requestPermissions() async {
+  await Permission.camera.request();
+  await Permission.microphone.request();
+
+  if (await Permission.camera.isGranted && await Permission.microphone.isGranted) {
+    print("Permissions granted");
+  } else {
+    print("Permissions denied");
+  }
+}
 
 class ClientsListPage extends StatefulWidget {
   final String token;
@@ -72,28 +86,70 @@ class _ClientsListPageState extends State<ClientsListPage> {
                           vertical: 6,
                         ),
                         child: ListTile(
-                          title: Text(
-                            client.username,
-                          ), // Displaying the username
+                          title: Text(client.username),
                           subtitle: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(
-                                'Email: ${client.email}',
-                              ), // Displaying the email
-                              SizedBox(height: 4), // Space between fields
-                              Text(
-                                'Phone: ${client.phoneNumber}',
-                              ), // Displaying the phone number
-                              SizedBox(height: 4), // Space between fields
-                              Text(
-                                'Address: ${client.address}',
-                              ), // Displaying the address
+                              Text('Email: ${client.email}'),
+                              const SizedBox(height: 4),
+                              Text('Phone: ${client.phoneNumber}'),
+                              const SizedBox(height: 4),
+                              Text('Address: ${client.address}'),
                             ],
                           ),
-                          trailing: Icon(
-                            Icons.person,
-                          ), // Optional icon at the end of the ListTile
+                          trailing: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              IconButton(
+                                icon: const Icon(Icons.chat, color: Colors.blue),
+                                tooltip: 'Chat',
+                                onPressed: () async {
+                                  final token = await TokenService.getToken();
+                                  if (token == null) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(content: Text('Token not available')),
+                                    );
+                                    return;
+                                  }
+
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (_) => ChatPage(
+                                        token: token,
+                                        receiverId: client.id.toString(),
+                                      ),
+                                    ),
+                                  );
+                                },
+                              ),
+                              IconButton(
+                                icon: const Icon(Icons.video_call, color: Colors.green),
+                                tooltip: 'Video Call',
+                                onPressed: () async {
+                                  await _requestPermissions();
+
+                                  final token = await TokenService.getToken();
+                                  if (token == null) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(content: Text('Token not available')),
+                                    );
+                                    return;
+                                  }
+
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => VideoCallPageVet(
+                                        jwtToken: token,
+                                        peerId: client.id.toString(),
+                                      ),
+                                    ),
+                                  );
+                                },
+                              ),
+                            ],
+                          ),
                         ),
                       );
                     },

@@ -129,7 +129,11 @@ class _VetProfilePageState extends State<VetProfilePage> {
                           ),
                         ),
                         const SizedBox(height: 24),
-                        _infoRow(Icons.person, 'Name', _vetProfile!.userName),
+                        _infoRow(
+                          Icons.person,
+                          'Username',
+                          _vetProfile!.userName,
+                        ),
                         _infoRow(Icons.email, 'Email', _vetProfile!.email),
                         _infoRow(
                           Icons.phone,
@@ -150,7 +154,7 @@ class _VetProfilePageState extends State<VetProfilePage> {
                         const SizedBox(height: 16),
                         _infoRow(
                           Icons.cake,
-                          'Birth Date',
+                          'Birth Date (YYYY-MM-DD)',
                           formatDate(_vetProfile!.birthDate),
                         ),
                         const SizedBox(height: 16),
@@ -162,7 +166,6 @@ class _VetProfilePageState extends State<VetProfilePage> {
                           _vetProfile!.zipCode,
                         ),
                         const SizedBox(height: 16),
-                        _infoRow(Icons.wc, 'Gender', _vetProfile!.gender),
                       ],
                     ),
                   ),
@@ -172,13 +175,7 @@ class _VetProfilePageState extends State<VetProfilePage> {
         onPressed: () {
           Navigator.push(
             context,
-            MaterialPageRoute(
-              builder:
-                  (context) => ProfileEditPage(
-                    profile: _vetProfile!,
-                    jwtToken: jwtToken!,
-                  ),
-            ),
+            MaterialPageRoute(builder: (context) => EditProfilePage()),
           ).then((_) => _initialize());
         },
         backgroundColor: Colors.green,

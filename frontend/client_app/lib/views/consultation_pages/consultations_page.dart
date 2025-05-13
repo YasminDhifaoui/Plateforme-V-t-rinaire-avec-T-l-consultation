@@ -8,6 +8,7 @@ import 'package:permission_handler/permission_handler.dart';
 import '../../services/consultation_services/consultation_service.dart';
 import 'package:client_app/utils/logout_helper.dart';
 import '../components/home_navbar.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 Future<bool> requestPermissions() async {
   if (Platform.isAndroid) {
@@ -243,6 +244,36 @@ class _ConsultationsPageState extends State<ConsultationsPage> {
                                             extractFileName(
                                                 consultation.documentPath),
                                             context);
+                                      },
+                                    ),
+                                    IconButton(
+                                      icon: const Icon(Icons.remove_red_eye),
+                                      onPressed: () async {
+                                        try {
+                                          final Uri uri = Uri.parse(
+                                              'http://10.0.2.2:5000/${consultation.documentPath}');
+                                          if (!await launchUrl(uri,
+                                              mode: LaunchMode
+                                                  .externalApplication)) {
+                                            ScaffoldMessenger.of(context)
+                                                .showSnackBar(
+                                              const SnackBar(
+                                                content: Text(
+                                                    'Could not open document in browser'),
+                                                backgroundColor: Colors.red,
+                                              ),
+                                            );
+                                          }
+                                        } catch (e) {
+                                          ScaffoldMessenger.of(context)
+                                              .showSnackBar(
+                                            SnackBar(
+                                              content: Text(
+                                                  'Error opening document: $e'),
+                                              backgroundColor: Colors.red,
+                                            ),
+                                          );
+                                        }
                                       },
                                     ),
                                   ],

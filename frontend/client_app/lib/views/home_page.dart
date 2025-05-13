@@ -19,8 +19,11 @@ class _HomePageState extends State<HomePage> {
   void _navigateToVeterinary() {
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => VetListPage()),
+      MaterialPageRoute(
+        builder: (context) => VetListPage(username: widget.username), // Pass the username
+      ),
     );
+
   }
 
   void _navigateToConsultations() {

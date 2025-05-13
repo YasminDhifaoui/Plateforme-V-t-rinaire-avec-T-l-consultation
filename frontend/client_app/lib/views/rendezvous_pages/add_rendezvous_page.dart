@@ -8,6 +8,8 @@ import 'package:client_app/services/vet_services/veterinaire_service.dart';
 import 'package:client_app/models/vet_models/veterinaire.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../services/auth_services/token_service.dart';
+
 class AddRendezvousPage extends StatefulWidget {
   const AddRendezvousPage({Key? key}) : super(key: key);
 
@@ -110,21 +112,33 @@ class _AddRendezvousPageState extends State<AddRendezvousPage> {
       return;
     }
 
+    // Get the client ID (user ID) from shared preferences
+    final clientId = await TokenService.getUserId();
+
+    if (clientId == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Utilisateur non authentifié')),
+      );
+      return;
+    }
+
     final data = {
-      "AnimalId": _selectedAnimal!.id,
-      "VetId": _selectedVeterinaire!.username,
-      "Date": _selectedDateTime!.toIso8601String(),
+      "animalName": _selectedAnimal!.name,
+      "vetId": _selectedVeterinaire!.id,
+      "date": _selectedDateTime!.toIso8601String(),
     };
+    print('Sending data: $data');
 
     try {
       await AddRendezvousService().addRendezvous(data);
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Rendez-vous ajouté')),
+        const SnackBar(content: Text('Appointment added successfully')),
       );
       Navigator.pop(context);
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Erreur lors de l\'ajout: ${e.toString()}')),
+        SnackBar(
+            content: Text('Erreur adding the appointment: ${e.toString()}')),
       );
     }
   }
@@ -146,7 +160,7 @@ class _AddRendezvousPageState extends State<AddRendezvousPage> {
                   ElevatedButton.icon(
                     onPressed: () => Navigator.pop(context),
                     icon: const Icon(Icons.arrow_back),
-                    label: const Text('Retour'),
+                    label: const Text('Back'),
                     style: ElevatedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(
                           horizontal: 24, vertical: 14),
@@ -158,7 +172,7 @@ class _AddRendezvousPageState extends State<AddRendezvousPage> {
                   ),
                   const SizedBox(height: 20),
                   const Text(
-                    'Ajouter un Rendez-vous',
+                    'Add Appointment',
                     style: TextStyle(
                       fontSize: 28,
                       fontWeight: FontWeight.bold,
@@ -179,8 +193,7 @@ class _AddRendezvousPageState extends State<AddRendezvousPage> {
                         _selectedAnimal = animal;
                       });
                     },
-                    decoration:
-                        const InputDecoration(labelText: 'Nom de l\'animal'),
+                    decoration: const InputDecoration(labelText: 'Animal name'),
                   ),
                   const SizedBox(height: 16),
                   DropdownButtonFormField<Veterinaire>(
@@ -188,26 +201,30 @@ class _AddRendezvousPageState extends State<AddRendezvousPage> {
                     items: _veterinaires
                         .map((vet) => DropdownMenuItem(
                               value: vet,
-                              child: Text((vet.firstName.isNotEmpty &&
-                                      vet.lastName.isNotEmpty)
-                                  ? '${vet.firstName} ${vet.lastName}'
-                                  : vet.username),
+                              child: Text(
+                                (vet.firstName.isNotEmpty &&
+                                        vet.lastName.isNotEmpty)
+                                    ? '${vet.firstName} ${vet.lastName}'
+                                    : vet.username,
+                              ),
                             ))
                         .toList(),
                     onChanged: (vet) {
                       setState(() {
                         _selectedVeterinaire = vet;
+                        print(
+                            'Selected Veterinaire ID: ${vet?.id}'); // Debugging output
                       });
                     },
                     decoration:
-                        const InputDecoration(labelText: 'Nom du vétérinaire'),
+                        const InputDecoration(labelText: 'Veterinary Name'),
                   ),
                   const SizedBox(height: 16),
                   TextFormField(
                     controller: _dateController,
                     readOnly: true,
                     decoration: const InputDecoration(
-                      labelText: 'Date et heure',
+                      labelText: 'Date and Time',
                       suffixIcon: Icon(Icons.calendar_today),
                     ),
                     onTap: _selectDateTime,
@@ -215,7 +232,7 @@ class _AddRendezvousPageState extends State<AddRendezvousPage> {
                   const SizedBox(height: 20),
                   ElevatedButton(
                     onPressed: _addRendezvous,
-                    child: const Text('Enregistrer'),
+                    child: const Text('Save'),
                   ),
                 ],
               ),

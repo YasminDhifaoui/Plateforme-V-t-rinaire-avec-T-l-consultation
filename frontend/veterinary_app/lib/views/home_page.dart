@@ -46,12 +46,18 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
-    _fetchAnimalCount();
-    _fetchRendezvousCount();
-    _fetchClientsCount();
-    _fetchConsultationsCount();
-    _fetchVaccinationsCount();
-    _fetchProductCount();
+    _fetchDataCounts();
+  }
+
+  Future<void> _fetchDataCounts() async {
+    await Future.wait([
+      _fetchAnimalCount(),
+      _fetchRendezvousCount(),
+      _fetchClientsCount(),
+      _fetchConsultationsCount(),
+      _fetchVaccinationsCount(),
+      _fetchProductCount(),
+    ]);
   }
 
   Future<void> _fetchAnimalCount() async {
@@ -128,17 +134,14 @@ class _HomePageState extends State<HomePage> {
   Future<void> _fetchProductCount() async {
     try {
       final products = await _productService.getAllProducts(widget.token);
-      print("Fetched products count: ${products.length}");
       setState(() {
         productCount = products.length;
       });
     } catch (e) {
-      print("Error fetching products: $e");
       setState(() {
         productCount = 0;
       });
     }
-    print("products count; $productCount");
   }
 
   @override
@@ -180,9 +183,9 @@ class _HomePageState extends State<HomePage> {
                         MaterialPageRoute(
                           builder:
                               (context) => AnimalsListPage(
-                                token: widget.token,
-                                username: widget.username,
-                              ),
+                            token: widget.token,
+                            username: widget.username,
+                          ),
                         ),
                       );
                     },
@@ -201,9 +204,9 @@ class _HomePageState extends State<HomePage> {
                         MaterialPageRoute(
                           builder:
                               (context) => RendezVousListPage(
-                                token: widget.token,
-                                username: widget.username,
-                              ),
+                            token: widget.token,
+                            username: widget.username,
+                          ),
                         ),
                       );
                     },
@@ -222,9 +225,9 @@ class _HomePageState extends State<HomePage> {
                         MaterialPageRoute(
                           builder:
                               (context) => ClientsListPage(
-                                token: widget.token,
-                                username: widget.username,
-                              ),
+                            token: widget.token,
+                            username: widget.username,
+                          ),
                         ),
                       );
                     },
@@ -243,9 +246,9 @@ class _HomePageState extends State<HomePage> {
                         MaterialPageRoute(
                           builder:
                               (context) => ConsultationListPage(
-                                token: widget.token,
-                                username: widget.username,
-                              ),
+                            token: widget.token,
+                            username: widget.username,
+                          ),
                         ),
                       );
                     },
@@ -264,9 +267,9 @@ class _HomePageState extends State<HomePage> {
                         MaterialPageRoute(
                           builder:
                               (context) => VaccinationListPage(
-                                token: widget.token,
-                                username: widget.username,
-                              ),
+                            token: widget.token,
+                            username: widget.username,
+                          ),
                         ),
                       );
                     },
@@ -285,9 +288,9 @@ class _HomePageState extends State<HomePage> {
                         MaterialPageRoute(
                           builder:
                               (context) => ProductsListPage(
-                                token: widget.token,
-                                username: widget.username,
-                              ),
+                            token: widget.token,
+                            username: widget.username,
+                          ),
                         ),
                       );
                     },
@@ -308,15 +311,15 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget _buildHomeCard(
-    BuildContext context, {
-    required IconData icon,
-    required String label,
-    required VoidCallback onTap,
-    required TextStyle textStyle,
-    required Color iconColor,
-    int? count,
-    Color? cardColor,
-  }) {
+      BuildContext context, {
+        required IconData icon,
+        required String label,
+        required VoidCallback onTap,
+        required TextStyle textStyle,
+        required Color iconColor,
+        int? count,
+        Color? cardColor,
+      }) {
     return Card(
       elevation: 6,
       color: cardColor ?? Colors.white,

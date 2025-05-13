@@ -18,6 +18,7 @@ namespace backend.Repo.ClientRepo.VetRepo
                  .Where(user => user.Role == "Veterinaire")
                  .Select(user => new VetCDto
                  {
+                     Id = user.Id,
                      Username = user.UserName,
                      Address = user.Address,
                      PhoneNumber = user.PhoneNumber,

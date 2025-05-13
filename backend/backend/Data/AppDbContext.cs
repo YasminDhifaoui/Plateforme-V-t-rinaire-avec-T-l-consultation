@@ -27,6 +27,7 @@ namespace backend.Data
         public DbSet<Paiement> Paiements { get; set; }
         public DbSet<Produit> Produits { get; set; }
         public DbSet<RendezVous> RendezVous { get; set; }
+        public DbSet<ChatMessage> ChatMessages { get; set; }
 
 
         protected override void OnModelCreating(ModelBuilder builder)
