@@ -3,21 +3,21 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:veterinary_app/models/client_models/client_model.dart';
 import 'package:veterinary_app/services/client_services/client_service.dart';
 import '../../services/auth_services/token_service.dart';
+import '../ChatPage.dart';
 import '../components/home_navbar.dart';
 import '../video_call_page.dart';
 
 Future<void> _requestPermissions() async {
-  // Request camera and microphone permissions
   await Permission.camera.request();
   await Permission.microphone.request();
 
-  // Check if all permissions are granted
   if (await Permission.camera.isGranted && await Permission.microphone.isGranted) {
     print("Permissions granted");
   } else {
     print("Permissions denied");
   }
 }
+
 class ClientsListPage extends StatefulWidget {
   final String token;
   final String username;
@@ -41,7 +41,6 @@ class _ClientsListPageState extends State<ClientsListPage> {
     super.initState();
     _clientsFuture = _clientService.getAllClients(widget.token);
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -92,22 +91,23 @@ class _ClientsListPageState extends State<ClientsListPage> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text('Email: ${client.email}'),
-                              SizedBox(height: 4),
+                              const SizedBox(height: 4),
                               Text('Phone: ${client.phoneNumber}'),
-                              SizedBox(height: 4),
+                              const SizedBox(height: 4),
                               Text('Address: ${client.address}'),
-                              SizedBox(height: 8),
-                              ElevatedButton.icon(
+                            ],
+                          ),
+                          trailing: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              IconButton(
+                                icon: const Icon(Icons.chat, color: Colors.blue),
+                                tooltip: 'Chat',
                                 onPressed: () async {
-                                  // Request camera/mic permissions
-                                  await _requestPermissions();
-
                                   final token = await TokenService.getToken();
-                                  final userId = await TokenService.getUserId();
-
-                                  if (token == null || userId == null) {
+                                  if (token == null) {
                                     ScaffoldMessenger.of(context).showSnackBar(
-                                      const SnackBar(content: Text('User info missing')),
+                                      const SnackBar(content: Text('Token not available')),
                                     );
                                     return;
                                   }
@@ -115,24 +115,41 @@ class _ClientsListPageState extends State<ClientsListPage> {
                                   Navigator.push(
                                     context,
                                     MaterialPageRoute(
-                                      builder: (context) => VideoPage(
-                                        jwtToken: token,
-                                        userId: userId,
-                                        peerId: client.id.toString(), // Using client.id here
+                                      builder: (_) => ChatPage(
+                                        token: token,
+                                        receiverId: client.id.toString(),
                                       ),
                                     ),
                                   );
                                 },
-                                icon: const Icon(Icons.video_call),
-                                label: const Text('Start Video Call'),
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: Colors.green,
-                                ),
                               ),
+                              IconButton(
+                                icon: const Icon(Icons.video_call, color: Colors.green),
+                                tooltip: 'Video Call',
+                                onPressed: () async {
+                                  await _requestPermissions();
 
+                                  final token = await TokenService.getToken();
+                                  if (token == null) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(content: Text('Token not available')),
+                                    );
+                                    return;
+                                  }
+
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => VideoCallPageVet(
+                                        jwtToken: token,
+                                        peerId: client.id.toString(),
+                                      ),
+                                    ),
+                                  );
+                                },
+                              ),
                             ],
                           ),
-                          trailing: Icon(Icons.person),
                         ),
                       );
                     },

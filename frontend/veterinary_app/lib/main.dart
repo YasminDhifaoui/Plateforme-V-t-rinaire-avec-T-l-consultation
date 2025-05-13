@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'views/Auth_pages/vet_login_page.dart';
 import 'views/Auth_pages/vet_register_page.dart';
 // import your AddConsultationPage
+final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
 void main() {
   runApp(const MyApp());
@@ -13,6 +14,8 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      navigatorKey: navigatorKey,
+
       title: 'Veterinary Services',
       theme: ThemeData(
         primarySwatch: Colors.green,

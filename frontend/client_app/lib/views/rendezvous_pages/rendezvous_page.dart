@@ -7,6 +7,8 @@ import 'package:client_app/services/rendezvous_services/delete_rendezvous.dart';
 import 'package:client_app/views/components/home_navbar.dart';
 import 'package:client_app/utils/logout_helper.dart';
 
+import '../vet_pages/veterinary_page.dart';
+
 class RendezvousPage extends StatefulWidget {
   final String username;
 
@@ -136,14 +138,7 @@ class _RendezvousPageState extends State<RendezvousPage> {
         username: widget.username,
         onLogout: () => LogoutHelper.handleLogout(context),
       ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () {
-          Navigator.pushNamed(context, '/add-rendezvous');
-        },
-        icon: const Icon(Icons.add),
-        label: const Text('Make an appointment'),
-        backgroundColor: Colors.blueAccent,
-      ),
+
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -162,16 +157,52 @@ class _RendezvousPageState extends State<RendezvousPage> {
               ),
             ),
           ),
-          const Padding(
-            padding: EdgeInsets.symmetric(horizontal: 20.0, vertical: 12.0),
-            child: Text(
-              'Mes Rendez-vous',
-              style: TextStyle(
-                  fontSize: 30,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.blueAccent),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 12.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'My appointments  ',
+                  style: TextStyle(
+                    fontSize: 30,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.blueAccent,
+                  ),
+                ),
+                const SizedBox(height: 10),
+                ElevatedButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => VetListPage(username: widget.username), // Pass widget.username
+                      ),
+                    );
+
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.teal, // Button color
+                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(20), // Rounded corners
+                    ),
+                    elevation: 5,
+                  ),
+                  child: const Text(
+                    'View Vets List',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+
+              ],
             ),
           ),
+
           Expanded(
             child: RefreshIndicator(
               onRefresh: _refreshRendezvous,

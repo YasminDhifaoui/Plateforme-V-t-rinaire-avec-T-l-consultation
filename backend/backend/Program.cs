@@ -194,6 +194,21 @@ builder.Services.AddAuthentication(options =>
             return Task.CompletedTask;
         }
     };
+    options.Events = new JwtBearerEvents
+    {
+        OnMessageReceived = context =>
+        {
+            var accessToken = context.Request.Query["access_token"];
+            var path = context.HttpContext.Request.Path;
+
+            if (!string.IsNullOrEmpty(accessToken) && path.StartsWithSegments("/chathub"))
+            {
+                context.Token = accessToken;
+            }
+
+            return Task.CompletedTask;
+        }
+    };
 });
 //add authorization with role
 builder.Services.AddAuthorization(options =>
@@ -219,6 +234,8 @@ app.UseAuthentication();  // Authentication middleware comes first
 app.UseAuthorization();   // Authorization middleware should come after authentication
 
 app.MapHub<WebRTCHub>("/webrtchub");
+app.MapHub<ChatHub>("/chathub");
+
 
 
 // Configure the HTTP request pipeline.

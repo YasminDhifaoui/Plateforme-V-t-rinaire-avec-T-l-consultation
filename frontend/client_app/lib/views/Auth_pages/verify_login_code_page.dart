@@ -40,23 +40,26 @@ class _VerifyLoginCodePageState extends State<VerifyLoginCodePage> {
       print('Result: $result');
 
       if (result['success'] == true && result['data'] != null) {
-
-        final token = result['token'];
-        final userData = result['data'];
+        final data = result['data'];
+        final token = data['token'];
+        final userData = data['data']; // this is a nested map
         final userId = userData['clientId'];
         final username = userData['username'];
+
 
         print('Token: $token');
         print('User ID: $userId');
         print('Username: $username');
-
-        if (token.isEmpty || userId.isEmpty || username.isEmpty) {
+        if (token == null || token.toString().isEmpty ||
+            userId == null || userId.toString().isEmpty ||
+            username == null || username.toString().isEmpty) {
           setState(() {
             responseMessage = 'Invalid token or user data received.';
             isLoading = false;
           });
           return;
         }
+
 
         await _storeSession(token, userId);
 

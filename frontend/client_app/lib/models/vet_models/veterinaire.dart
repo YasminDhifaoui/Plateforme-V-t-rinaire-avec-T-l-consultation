@@ -1,5 +1,5 @@
 class Veterinaire {
-  final int id; // Add this line
+  final int id;
   final String username;
   final String email;
   final String phoneNumber;
@@ -8,7 +8,7 @@ class Veterinaire {
   final String lastName;
 
   Veterinaire({
-    required this.id, // Add this
+    required this.id,
     required this.username,
     required this.email,
     required this.phoneNumber,
@@ -19,13 +19,18 @@ class Veterinaire {
 
   factory Veterinaire.fromJson(Map<String, dynamic> json) {
     return Veterinaire(
-      id: int.tryParse(json['id'].toString()) ?? 0,
-      username: json['username']?? "",
-      email: json['email']?? "",
-      phoneNumber: json['phoneNumber']?? "",
-      address: json['address']?? "",
-      firstName: json['firstName'] ?? '',
-      lastName: json['lastName'] ?? '',
+      id: json['id'] is int ? json['id'] : int.tryParse(json['id'].toString()) ?? 0,
+      username: json['username']?.toString() ?? '',
+      email: json['email']?.toString() ?? '',
+      phoneNumber: json['phoneNumber']?.toString() ?? '',
+      address: json['address']?.toString() ?? '',
+      firstName: json['firstName']?.toString() ?? '',
+      lastName: json['lastName']?.toString() ?? '',
     );
+  }
+
+  @override
+  String toString() {
+    return '$firstName $lastName'; // Useful for debugging or dropdown display
   }
 }
