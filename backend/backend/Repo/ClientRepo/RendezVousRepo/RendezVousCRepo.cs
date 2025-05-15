@@ -33,14 +33,25 @@ namespace backend.Repo.ClientRepo.RendezVousRepo
 
         public async Task<string> AddRendezVous(RendezVous rendezVous)
         {
-            if (rendezVous != null)
+            if (rendezVous == null)
+            {
+                return "Failed to add rendez-vous: Invalid data.";
+            }
+
+            try
             {
                 await _context.RendezVous.AddAsync(rendezVous);
-                await SaveChanges();
+
+                await _context.SaveChangesAsync();
+
                 return "Rendez-vous added successfully";
             }
-            return "failed to add rendez-vous";
+            catch (Exception ex)
+            {
+                return $"Failed to add rendez-vous: {ex.Message}";
+            }
         }
+
         public async Task<string> DeleteRendezVous(Guid id)
         {
             var Rvous =await _context.RendezVous.FirstOrDefaultAsync(r => r.Id == id);

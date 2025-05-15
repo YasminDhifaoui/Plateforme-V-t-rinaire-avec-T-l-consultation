@@ -72,6 +72,30 @@ namespace backend.Repo.VetRepo.AnimalRepo
             await _context.SaveChangesAsync();
         }
 
+        public async Task<List<AnimalVetDto>> GetAnimalsByClientIdAndVetIdAsync(Guid vetId, Guid clientId)
+        {
+            var animalIdsWithVet = await _context.RendezVous
+                .Where(r => r.VeterinaireId == vetId && r.Animal.OwnerId == clientId)
+                .Select(r => r.AnimalId)
+                .Distinct()
+                .ToListAsync();
+
+            var animals = await _context.Animals
+                .Where(a => animalIdsWithVet.Contains(a.Id))
+                .Select(a => new AnimalVetDto
+                {
+                    Id = a.Id,
+                    Name = a.Nom,
+                    Race = a.Race,
+                    Age = a.Age,
+                    Sexe = a.Sexe,
+                    OwnerId = a.OwnerId
+                })
+                .ToListAsync();
+
+            return animals;
+        }
+
 
     }
 }

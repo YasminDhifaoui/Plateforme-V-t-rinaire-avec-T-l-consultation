@@ -1,5 +1,5 @@
 class ClientModel {
-  final int id;
+  final String id;
   final String username;
   final String email;
   final String phoneNumber;
@@ -15,7 +15,7 @@ class ClientModel {
 
   factory ClientModel.fromJson(Map<String, dynamic> json) {
     return ClientModel(
-      id: int.tryParse(json['id'].toString()) ?? 0, // Safe parsing
+      id: json['id'].toString() ?? "", // Safe parsing
       username: json['userName'] ?? json['username'] ?? "",
       email: json['email'] ?? "",
       phoneNumber: json['phoneNumber'] ?? "",

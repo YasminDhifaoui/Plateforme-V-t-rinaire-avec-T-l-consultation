@@ -3,14 +3,38 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:veterinary_app/models/client_models/client_model.dart';
 import 'package:veterinary_app/services/client_services/client_service.dart';
 import '../../services/auth_services/token_service.dart';
-import '../ChatPage.dart';
+import '../telecommunication_pages/ChatPage.dart';
+import '../animal_pages/animal_by_client_list_page.dart';
 import '../components/home_navbar.dart';
-import '../video_call_page.dart';
+import '../telecommunication_pages/video_call_page.dart';
+
+class SeeAnimalsPage extends StatelessWidget {
+  final String clientId;
+  final String clientUsername;
+
+  const SeeAnimalsPage({
+    super.key,
+    required this.clientId,
+    required this.clientUsername,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: Text('$clientUsername\'s Animals')),
+      body: Center(
+        child: Text(
+          'List of animals for $clientUsername (ID: $clientId)',
+          style: const TextStyle(fontSize: 18),
+        ),
+      ),
+    );
+  }
+}
 
 Future<void> _requestPermissions() async {
   await Permission.camera.request();
   await Permission.microphone.request();
-
   if (await Permission.camera.isGranted && await Permission.microphone.isGranted) {
     print("Permissions granted");
   } else {
@@ -41,6 +65,108 @@ class _ClientsListPageState extends State<ClientsListPage> {
     super.initState();
     _clientsFuture = _clientService.getAllClients(widget.token);
   }
+
+  void _showClientDialog(ClientModel client) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text("Client: ${client.username}"),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text("Email: ${client.email}"),
+            const SizedBox(height: 6),
+            Text("Phone: ${client.phoneNumber}"),
+            const SizedBox(height: 6),
+            Text("Address: ${client.address}"),
+            const SizedBox(height: 16),
+            const Divider(),
+            const Text("Actions", style: TextStyle(fontWeight: FontWeight.bold)),
+          ],
+        ),
+        actions: [
+          TextButton.icon(
+            icon: const Icon(Icons.pets, color: Colors.orange),
+            label: const Text("See Animals"),
+            onPressed: () {
+              // Validate clientId before navigating
+              if (client.id.isEmpty || client.id == '0') {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Invalid client ID')),
+                );
+                Navigator.pop(context);
+                return;
+              }
+
+              Navigator.pop(context);
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => AnimalByClientListPage(
+                    clientId: client.id, // No need to convert to string here, client.id is already a string
+                    token: widget.token,
+                  ),
+                ),
+              );
+            },
+          ),
+          TextButton.icon(
+            icon: const Icon(Icons.chat, color: Colors.blue),
+            label: const Text("Chat"),
+            onPressed: () async {
+              Navigator.pop(context);
+              final token = await TokenService.getToken();
+              if (token == null) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Token not available')),
+                );
+                return;
+              }
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => ChatPage(
+                    token: token,
+                    receiverId: client.id, // Same here, client.id is a string
+                  ),
+                ),
+              );
+            },
+          ),
+          TextButton.icon(
+            icon: const Icon(Icons.video_call, color: Colors.green),
+            label: const Text("Video Call"),
+            onPressed: () async {
+              Navigator.pop(context);
+              await _requestPermissions();
+              final token = await TokenService.getToken();
+              if (token == null) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Token not available')),
+                );
+                return;
+              }
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => VideoCallPageVet(
+                    jwtToken: token,
+                    peerId: client.id, // Use the client.id directly here
+                  ),
+                ),
+              );
+            },
+          ),
+          TextButton(
+            child: const Text("Cancel"),
+            onPressed: () => Navigator.pop(context),
+          ),
+        ],
+      ),
+    );
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -81,11 +207,9 @@ class _ClientsListPageState extends State<ClientsListPage> {
                     itemBuilder: (context, index) {
                       final client = clients[index];
                       return Card(
-                        margin: const EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 6,
-                        ),
+                        margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                         child: ListTile(
+                          onTap: () => _showClientDialog(client),
                           title: Text(client.username),
                           subtitle: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
@@ -95,59 +219,6 @@ class _ClientsListPageState extends State<ClientsListPage> {
                               Text('Phone: ${client.phoneNumber}'),
                               const SizedBox(height: 4),
                               Text('Address: ${client.address}'),
-                            ],
-                          ),
-                          trailing: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              IconButton(
-                                icon: const Icon(Icons.chat, color: Colors.blue),
-                                tooltip: 'Chat',
-                                onPressed: () async {
-                                  final token = await TokenService.getToken();
-                                  if (token == null) {
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      const SnackBar(content: Text('Token not available')),
-                                    );
-                                    return;
-                                  }
-
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (_) => ChatPage(
-                                        token: token,
-                                        receiverId: client.id.toString(),
-                                      ),
-                                    ),
-                                  );
-                                },
-                              ),
-                              IconButton(
-                                icon: const Icon(Icons.video_call, color: Colors.green),
-                                tooltip: 'Video Call',
-                                onPressed: () async {
-                                  await _requestPermissions();
-
-                                  final token = await TokenService.getToken();
-                                  if (token == null) {
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      const SnackBar(content: Text('Token not available')),
-                                    );
-                                    return;
-                                  }
-
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) => VideoCallPageVet(
-                                        jwtToken: token,
-                                        peerId: client.id.toString(),
-                                      ),
-                                    ),
-                                  );
-                                },
-                              ),
                             ],
                           ),
                         ),

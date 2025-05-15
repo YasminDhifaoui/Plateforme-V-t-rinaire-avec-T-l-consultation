@@ -31,7 +31,9 @@ using backend.Repo.ClientRepo.VetRepo;
 using backend.Repo.VetRepo.ClientRepo;
 using backend.Repo.AdminRepo.ProductsRepo;
 using backend.Repo.VetRepo.ProductRepo;
-using backend.Hubs;
+using Microsoft.AspNetCore.SignalR;
+using backend;
+using Microsoft.AspNetCore.Http.Connections;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -48,13 +50,13 @@ builder.WebHost.ConfigureKestrel(serverOptions =>
 });
 
 // Add services to the container.
-builder.Services.AddCors(options =>
-{
-    options.AddPolicy("AllowAll", builder =>
-    {
-        builder.AllowAnyOrigin()
-               .AllowAnyMethod()
-               .AllowAnyHeader();
+builder.Services.AddCors(options => {
+    options.AddPolicy("AllowAll", policy => {
+        policy.WithOrigins("http://localhost", "https://localhost")
+              .AllowAnyHeader()
+              .AllowAnyMethod()
+              .AllowCredentials()
+              .SetIsOriginAllowed(_ => true); // Temporary override
     });
 });
 
@@ -101,7 +103,6 @@ builder.Services.AddSwaggerGen(c =>
 
 });
 
-builder.Services.AddSignalR();
 
 
 // Email SMTP Service
@@ -163,8 +164,11 @@ builder.Services.Configure<IdentityOptions>(options =>
 });
 
 
-builder.Services.AddSignalR();
-
+builder.Services.AddSignalR(options => {
+    options.EnableDetailedErrors = true;
+}).AddJsonProtocol(options => {
+    options.PayloadSerializerOptions.PropertyNamingPolicy = null; // Preserve case
+});
 // Configure Authentication
 builder.Services.AddAuthentication(options =>
 {
@@ -186,30 +190,25 @@ builder.Services.AddAuthentication(options =>
     };
     options.Events = new JwtBearerEvents
     {
-        OnMessageReceived = context => {
-            var accessToken = context.Request.Query["access_token"];
-            var path = context.HttpContext.Request.Path;
-            if (!string.IsNullOrEmpty(accessToken) && path.StartsWithSegments("/webrtchub"))
-                context.Token = accessToken;
-            return Task.CompletedTask;
-        }
-    };
-    options.Events = new JwtBearerEvents
-    {
         OnMessageReceived = context =>
         {
             var accessToken = context.Request.Query["access_token"];
             var path = context.HttpContext.Request.Path;
 
-            if (!string.IsNullOrEmpty(accessToken) && path.StartsWithSegments("/chathub"))
+            // Case-insensitive path check
+            if (!string.IsNullOrEmpty(accessToken) &&
+                (path.StartsWithSegments("/chatHub", StringComparison.OrdinalIgnoreCase) ||
+                 path.StartsWithSegments("/webrtchub", StringComparison.OrdinalIgnoreCase)))
             {
                 context.Token = accessToken;
             }
-
             return Task.CompletedTask;
         }
     };
+
 });
+
+
 //add authorization with role
 builder.Services.AddAuthorization(options =>
 {
@@ -219,24 +218,45 @@ builder.Services.AddAuthorization(options =>
 
 });
 
+builder.Services.Configure<Microsoft.AspNetCore.Builder.WebSocketOptions>(options =>
+{
+    options.KeepAliveInterval = TimeSpan.FromSeconds(5);  
+});
+// Add to builder setup
+builder.Logging.AddConsole().SetMinimumLevel(LogLevel.Debug);
+builder.Services.AddSignalR(options => {
+    options.EnableDetailedErrors = true;
+});
+
+// For Kestrel (if using)
+builder.WebHost.ConfigureKestrel(serverOptions =>
+{
+    serverOptions.Limits.KeepAliveTimeout = TimeSpan.FromMinutes(5);
+});
+
+builder.Services.AddSingleton<IUserIdProvider, GuidUserIdProvider>();
+
+builder.Logging.AddFilter("Microsoft.AspNetCore.Http.Connections", LogLevel.Trace);
+builder.Logging.AddFilter("Microsoft.AspNetCore.SignalR", LogLevel.Trace);
+
 var app = builder.Build();
 
 
 
 
 // Enable CORS globally
-app.UseCors("AllowAll");
 
 //app.UseHttpsRedirection();
 app.UseRouting();
+app.UseCors("AllowAll");
+
 
 app.UseAuthentication();  // Authentication middleware comes first
 app.UseAuthorization();   // Authorization middleware should come after authentication
 
-app.MapHub<WebRTCHub>("/webrtchub");
-app.MapHub<ChatHub>("/chathub");
+app.MapHub<ChatHub>("/chatHub");  // Must match your URL path
 
-
+app.MapControllers();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
@@ -245,7 +265,6 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 app.UseStaticFiles();
-app.MapControllers();
 
 
 app.Run();

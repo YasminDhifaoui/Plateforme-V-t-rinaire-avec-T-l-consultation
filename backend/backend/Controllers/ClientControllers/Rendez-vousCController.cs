@@ -36,6 +36,11 @@ namespace backend.Controllers.ClientControllers
         public async Task<IActionResult> RendezVousList()
         {
             var idClaim = User.FindFirst("Id");
+            foreach (var claim in User.Claims)
+            {
+                Console.WriteLine($"Claim: {claim.Type} = {claim.Value}");
+            }
+
 
             if (idClaim == null || string.IsNullOrWhiteSpace(idClaim.Value))
             {
@@ -46,34 +51,48 @@ namespace backend.Controllers.ClientControllers
             var Rvous =await _repo.getRendezVousByClientId(clientId);
             return Ok(Rvous);
         }
-
         [HttpPost]
         [Route("add-rendez-vous")]
         public async Task<IActionResult> AddRendezVous([FromBody] AddRendezVousClientDto model)
         {
-            var idClaimValue = User.FindFirst("Id")?.Value;
-
-            if (!Guid.TryParse(idClaimValue, out var clientId))
+            if (model == null)
             {
-                throw new UnauthorizedAccessException("Invalid or missing user ID claim.");
+                return BadRequest(new { message = "Invalid data" });
             }
 
-            var client =await _clientRepo.GetClientByIdAsync(clientId);
-            if (client == null)
-                return NotFound(new { message = "Client not found." });
+            // Retrieve the ClientId from the claims
+            var idClaimValue = User.FindFirst("Id")?.Value;
+            if (string.IsNullOrEmpty(idClaimValue) || !Guid.TryParse(idClaimValue, out var clientId))
+            {
+                return Unauthorized(new { message = "Invalid or missing user ID claim." });
+            }
 
+            // Check if the client exists
+            var client = await _clientRepo.GetClientByIdAsync(clientId);
+            if (client == null)
+            {
+                return NotFound(new { message = "Client not found." });
+            }
+
+            // Check if the veterinarian exists
             var vet = await _vetRepo.GetVeterinaireById(model.VetId);
             if (vet == null)
+            {
                 return NotFound(new { message = "Veterinaire not found." });
+            }
 
+            // Check if the animal exists and belongs to the client
             var animal = await _context.Animals.FirstOrDefaultAsync(a => a.Id == model.AnimalId && a.OwnerId == clientId);
             if (animal == null)
+            {
                 return NotFound(new { message = "Animal not found." });
+            }
 
+            // Map DTO to entity
             var rendezVous = new RendezVous
             {
                 Date = model.Date.ToUniversalTime(),
-                Status = RendezVousStatus.Confirmé,
+                Status = RendezVousStatus.Confirmé, // Default status, can be modified if needed
                 VeterinaireId = model.VetId,
                 ClientId = clientId,
                 AnimalId = model.AnimalId,
@@ -81,11 +100,17 @@ namespace backend.Controllers.ClientControllers
                 UpdatedAt = DateTime.UtcNow
             };
 
-            await _repo.AddRendezVous(rendezVous);
-            await _repo.SaveChanges();
+            // Add to database via service method
+            var result = await _repo.AddRendezVous(rendezVous);
 
-            return Ok(new { message = "Rendez-vous added successfully", rendezVous });
+            if (result == "Rendez-vous added successfully")
+            {
+                return Ok(new { message = "Rendez-vous added successfully", rendezVous });
+            }
+
+            return BadRequest(new { message = result });
         }
+
 
         [HttpPut]
         [Route("update-rendez-vous/{id}")]

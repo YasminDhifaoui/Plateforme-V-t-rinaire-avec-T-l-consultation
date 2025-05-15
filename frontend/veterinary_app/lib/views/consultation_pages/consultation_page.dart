@@ -144,7 +144,7 @@ class _ConsultationListPageState extends State<ConsultationListPage> {
       (c) => c.username == clientName,
       orElse:
           () => ClientModel(
-            id:0,
+            id:'',
             username: 'Unknown',
             email: '',
             phoneNumber: '',

@@ -7,7 +7,7 @@ namespace backend.Repo.AdminRepo.VetRepo
     public interface IVetRepo
     {
         Task<IEnumerable<VetDto>> GetVeterinaires();
-        Task<VetDto> GetVeterinaireById(Guid id);
+        Task<AppUser> GetVeterinaireById(Guid id);
         Task<VetDto> GetVeterinaireByUsername(string username);
 
         Task<string> UpdateVeterinaire(Guid UserId, UpdateVetDto updatedVet);

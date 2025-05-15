@@ -18,6 +18,7 @@ namespace backend.Repo.VetRepo.ClientRepo
                                    .Any(rdv => rdv.VeterinaireId == vetId && rdv.ClientId == user.Id))
                 .Select(user => new ClientVetDto
                 {
+                    Id = user.Id,
                     Username = user.UserName,
                     Address = user.Address,
                     Email = user.Email,
