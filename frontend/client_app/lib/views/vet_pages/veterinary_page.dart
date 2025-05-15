@@ -4,6 +4,7 @@ import 'package:permission_handler/permission_handler.dart';
 import '../../services/auth_services/token_service.dart';
 import '../../services/vet_services/veterinaire_service.dart';
 import '../../models/vet_models/veterinaire.dart';
+import '../rendezvous_pages/add_rendezvous_page.dart';
 import '../telecommunication_pages/ChatPage.dart';
 import '../components/home_navbar.dart';
 import '../../utils/logout_helper.dart';
@@ -25,14 +26,14 @@ class _VetListPageState extends State<VetListPage> {
   @override
   void initState() {
     super.initState();
-    username = widget.username; // Initialize with the passed username
+    username = widget.username;
     _loadUserData();
   }
 
   Future<void> _loadUserData() async {
     final prefs = await SharedPreferences.getInstance();
     setState(() {
-      username = prefs.getString('username') ?? widget.username; // Fallback to widget.username
+      username = prefs.getString('username') ?? widget.username;
     });
   }
 
@@ -45,7 +46,7 @@ class _VetListPageState extends State<VetListPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: HomeNavbar(
-        username: username, // Use the username from the state
+        username: username,
         onLogout: () => LogoutHelper.handleLogout(context),
       ),
       body: Column(
@@ -75,80 +76,34 @@ class _VetListPageState extends State<VetListPage> {
                   itemCount: vets.length,
                   itemBuilder: (context, index) {
                     final vet = vets[index];
-                    return Card(
-                      margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                      elevation: 3,
-                      child: ListTile(
-                        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                        leading: const CircleAvatar(
-                          backgroundImage: AssetImage('assets/images/veterinary.png'),
-                          radius: 24,
-                        ),
-                        title: Text(
-                          vet.username,
-                          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
-                        ),
-                        subtitle: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            _buildInfoRow(Icons.email, vet.email),
-                            const SizedBox(height: 4),
-                            _buildInfoRow(Icons.phone, vet.phoneNumber),
-                            const SizedBox(height: 4),
-                            _buildInfoRow(Icons.location_on, vet.address),
-                          ],
-                        ),
-                        trailing: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            IconButton(
-                              icon: const Icon(Icons.message, color: Colors.blue),
-                              tooltip: 'Send Message',
-                              onPressed: () async {
-                                final token = await TokenService.getToken();
-
-                                if (token == null) {
-                                  _showSnackBar(context, 'Token missing');
-                                  return;
-                                }
-
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (_) => ChatPage(
-                                      token: token,
-                                      receiverId: vet.id.toString(),
-                                    ),
-                                  ),
-                                );
-                              },
-                            ),
-                            IconButton(
-                              icon: const Icon(Icons.video_call, color: Colors.green),
-                              tooltip: 'Start Video Call',
-                              onPressed: () async {
-                                await _requestPermissions();
-
-                                final token = await TokenService.getToken();
-                                final userId = await TokenService.getUserId();
-
-                                if (token == null || userId == null) {
-                                  _showSnackBar(context, 'User info missing');
-                                  return;
-                                }
-
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (_) => VideoCallPageClient(
-                                      jwtToken: token,
-                                      peerId: vet.id.toString(),
-                                    ),
-                                  ),
-                                );
-                              },
-                            ),
-                          ],
+                    return GestureDetector(
+                      onTap: () {
+                        print("Selected Vet ID: ${vet.id}"); // <-- Add this line
+                        _showVetOptionsDialog(context, vet);
+                      },
+                      child: Card(
+                        margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                        elevation: 3,
+                        child: ListTile(
+                          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                          leading: const CircleAvatar(
+                            backgroundImage: AssetImage('assets/images/veterinary.png'),
+                            radius: 24,
+                          ),
+                          title: Text(
+                            vet.username,
+                            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                          ),
+                          subtitle: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              _buildInfoRow(Icons.email, vet.email),
+                              const SizedBox(height: 4),
+                              _buildInfoRow(Icons.phone, vet.phoneNumber),
+                              const SizedBox(height: 4),
+                              _buildInfoRow(Icons.location_on, vet.address),
+                            ],
+                          ),
                         ),
                       ),
                     );
@@ -181,6 +136,100 @@ class _VetListPageState extends State<VetListPage> {
   void _showSnackBar(BuildContext context, String message) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text(message)),
+    );
+  }
+
+  void _showVetOptionsDialog(BuildContext context, Veterinaire vet) {
+    showDialog(
+      context: context,
+      builder: (BuildContext dialogContext) {
+        return AlertDialog(
+          title: Text('Contact ${vet.username}'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text("Email: ${vet.email}"),
+              Text("Phone: ${vet.phoneNumber}"),
+              Text("Address: ${vet.address}"),
+              const SizedBox(height: 16),
+              ElevatedButton.icon(
+                icon: const Icon(Icons.message),
+                label: const Text('Send Message'),
+                onPressed: () async {
+                  Navigator.pop(dialogContext);
+                  final token = await TokenService.getToken();
+                  if (token == null) {
+                    _showSnackBar(context, 'Token missing');
+                    return;
+                  }
+
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => ChatPage(
+                        token: token,
+                        receiverId: vet.id.toString(),
+                      ),
+                    ),
+                  );
+                },
+              ),
+              const SizedBox(height: 10),
+              ElevatedButton.icon(
+                icon: const Icon(Icons.video_call),
+                label: const Text('Start Video Call'),
+                onPressed: () async {
+                  Navigator.pop(dialogContext);
+                  await _requestPermissions();
+
+                  final token = await TokenService.getToken();
+                  final userId = await TokenService.getUserId();
+
+                  if (token == null || userId == null) {
+                    _showSnackBar(context, 'User info missing');
+                    return;
+                  }
+
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => VideoCallPageClient(
+                        jwtToken: token,
+                        peerId: vet.id.toString(),
+                      ),
+                    ),
+                  );
+                },
+              ),
+              const SizedBox(height: 10),
+              ElevatedButton.icon(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => AddRendezvousPage(vet: vet),
+                    ),
+                  );
+                },
+                icon: Icon(Icons.calendar_today),
+                label: Text('Make Appointment'),
+                style: ElevatedButton.styleFrom(
+                  padding: EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                  textStyle: TextStyle(fontSize: 16),
+                ),
+              ),
+
+            ],
+          ),
+          actions: [
+            TextButton(
+              child: const Text('Close'),
+              onPressed: () => Navigator.pop(dialogContext),
+            ),
+          ],
+        );
+      },
     );
   }
 }

@@ -1,5 +1,5 @@
 class Veterinaire {
-  final int id;
+  final String id;
   final String username;
   final String email;
   final String phoneNumber;
@@ -19,7 +19,7 @@ class Veterinaire {
 
   factory Veterinaire.fromJson(Map<String, dynamic> json) {
     return Veterinaire(
-      id: json['id'] is int ? json['id'] : int.tryParse(json['id'].toString()) ?? 0,
+      id: json['id'].toString(), // 👈 convert to String safely
       username: json['username']?.toString() ?? '',
       email: json['email']?.toString() ?? '',
       phoneNumber: json['phoneNumber']?.toString() ?? '',

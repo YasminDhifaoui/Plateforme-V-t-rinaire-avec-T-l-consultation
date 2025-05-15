@@ -14,9 +14,6 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(primarySwatch: Colors.teal),
       home: const HomePage(),
       debugShowCheckedModeBanner: false,
-      routes: {
-        '/add-rendezvous': (context) => const AddRendezvousPage(),
-      },
     );
   }
 }

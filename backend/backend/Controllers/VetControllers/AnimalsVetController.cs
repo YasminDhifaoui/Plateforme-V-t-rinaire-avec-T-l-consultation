@@ -34,6 +34,20 @@ public class AnimalsVetController : ControllerBase
         return Ok(animals);
     }
 
+    [HttpGet("client/{clientId}")]
+    public async Task<IActionResult> GetAnimalsByClientId(Guid clientId)
+    {
+        var vetId = Guid.Parse(User.FindFirst("Id")?.Value);
+
+        var animals = await _animalRepo.GetAnimalsByClientIdAndVetIdAsync(vetId, clientId);
+
+        if (animals == null || !animals.Any())
+            return NotFound(new { message = "No animals found for this client under your care." });
+
+        return Ok(animals);
+    }
+
+
 
     [HttpPut]
     [Route("update-animal/{id}")]

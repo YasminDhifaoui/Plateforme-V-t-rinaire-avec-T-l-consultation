@@ -41,32 +41,11 @@ namespace backend.Repo.AdminRepo.VetRepo
             return veterinaires;
         }
         //get vet by id
-        public async Task<VetDto> GetVeterinaireById(Guid id)
+        public async Task<AppUser> GetVeterinaireById(Guid id)
         {
-            var vet = await _context.Users
-                .Where(user => user.Id == id)
-                .Select(user => new VetDto
-                {
-                    Id = user.Id,
-                    Username = user.UserName,
-                    Email = user.Email,
-                    Role = user.Role,
-                    PhoneNumber = user.PhoneNumber,
-
-                    CreatedAt = user.CreatedAt,
-                    UpdatedAt = user.UpdatedAt,
-                    TwoFactorEnabled = user.TwoFactorEnabled,
-                    LockoutEnabled = user.LockoutEnabled,
-                    LockoutEnd = (DateTimeOffset)user.LockoutEnd,
-
-
-                    EmailConfirmed = user.EmailConfirmed,
-                    PhoneConfirmed = user.PhoneNumberConfirmed,
-
-                    AccessFailedCount = user.AccessFailedCount
-                }).FirstOrDefaultAsync();
-            return vet;
+            return await _context.Users.FirstOrDefaultAsync(u => u.Id == id);
         }
+
         //get vet by username
         public async Task<VetDto> GetVeterinaireByUsername(string username)
         {

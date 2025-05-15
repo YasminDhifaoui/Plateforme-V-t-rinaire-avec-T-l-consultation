@@ -5,22 +5,17 @@ class ChatMessage {
   final String text;
   final bool isSender;
 
-  ChatMessage({
-    required this.senderName,
-    required this.text,
-    required this.isSender,
-  });
+  ChatMessage({required this.senderName, required this.text, required this.isSender});
 
-  factory ChatMessage.fromJson(Map<String, dynamic> json) {
-    return ChatMessage(
-      senderName: json['senderName'],
-      text: json['text'],
-      isSender: json['isSender'],
-    );
-  }
+  static List<ChatMessage> chatMessagesFromJson(String jsonData, String currentUserId) {
+    final data = json.decode(jsonData) as List;
 
-  static List<ChatMessage> chatMessagesFromJson(String jsonStr) {
-    final jsonData = json.decode(jsonStr) as List;
-    return jsonData.map((message) => ChatMessage.fromJson(message)).toList();
+    return data.map((msg) {
+      return ChatMessage(
+        senderName: msg['senderName'],
+        text: msg['message'],
+        isSender: msg['senderId'] == currentUserId,
+      );
+    }).toList();
   }
 }
