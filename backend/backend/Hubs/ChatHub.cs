@@ -6,17 +6,6 @@ using System.Security.Claims;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Mvc;
 
-[ApiController]
-[Route("api/test")]
-public class TestController : ControllerBase
-{
-    [HttpGet("log")]
-    public IActionResult TestLog()
-    {
-        Console.WriteLine("TEST CONSOLE OUTPUT");
-        return Ok("Check server console");
-    }
-}
 [Authorize]
 public class ChatHub : Hub
 {

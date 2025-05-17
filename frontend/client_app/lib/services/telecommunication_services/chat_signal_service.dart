@@ -20,12 +20,16 @@ class SignalService {
         .build();
 
     // Handle server-to-client messages
-    _connection?.on('ReceiveMessage', (args) {
-      final message = args?.first;
-      final senderId = message?['SenderId'] ?? '';
-      final msgText = message?['Message'] ?? '';
+    _connection?.on("ReceiveMessage", (arguments) {
+      final Map<String, dynamic> data = Map<String, dynamic>.from(arguments?[0]);
+
+      final senderId = data['SenderId'];
+      final senderUsername = data['SenderUsername']; // ✅
+      final message = data['Message'];
+      final sentAt = data['SentAt'];
+
       if (onMessageReceived != null) {
-        onMessageReceived!(senderId, msgText);
+        onMessageReceived!(senderUsername, message); // ✅ use username
       }
     });
 

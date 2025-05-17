@@ -6,7 +6,6 @@ import '../../services/auth_services/token_service.dart';
 import '../telecommunication_pages/ChatPage.dart';
 import '../animal_pages/animal_by_client_list_page.dart';
 import '../components/home_navbar.dart';
-import '../telecommunication_pages/video_call_page.dart';
 
 class SeeAnimalsPage extends StatelessWidget {
   final String clientId;
@@ -128,10 +127,12 @@ class _ClientsListPageState extends State<ClientsListPage> {
                 MaterialPageRoute(
                   builder: (_) => ChatPage(
                     token: token,
-                    receiverId: client.id, // Same here, client.id is a string
+                    receiverId: client.id,
+                    receiverUsername: client.username, // ✅ Pass username here
                   ),
                 ),
               );
+
             },
           ),
           TextButton.icon(
@@ -147,15 +148,7 @@ class _ClientsListPageState extends State<ClientsListPage> {
                 );
                 return;
               }
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => VideoCallPageVet(
-                    jwtToken: token,
-                    peerId: client.id, // Use the client.id directly here
-                  ),
-                ),
-              );
+
             },
           ),
           TextButton(

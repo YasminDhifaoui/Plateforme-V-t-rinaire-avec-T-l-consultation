@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:client_app/views/profile_pages/profile_page.dart';
-import 'package:client_app/services/auth_services/token_service.dart'; // Import your TokenService
+import 'package:client_app/services/auth_services/token_service.dart';
+
+import '../conv_pages/conv_page.dart'; // Import your TokenService
 
 class HomeNavbar extends StatefulWidget implements PreferredSizeWidget {
   final String username;
@@ -48,6 +50,26 @@ class _HomeNavbarState extends State<HomeNavbar> {
       ),
       title: const Text(''),
       actions: [
+        IconButton(
+          icon: const Icon(Icons.chat_bubble_outline),
+          tooltip: 'Messages',
+          onPressed: () {
+            if (_jwtToken != null) {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => ConversationsPage(token: _jwtToken!),
+                ),
+              );
+            } else {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Token not available')),
+              );
+            }
+          },
+
+        ),
+
         Center(
           child: Padding(
             padding: const EdgeInsets.only(right: 16.0),

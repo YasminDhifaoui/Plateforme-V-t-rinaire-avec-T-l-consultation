@@ -215,6 +215,9 @@ builder.Services.AddAuthorization(options =>
     options.AddPolicy("Admin", policy => policy.RequireRole("Admin"));
     options.AddPolicy("Client", policy => policy.RequireRole("Client"));
     options.AddPolicy("Veterinaire", policy => policy.RequireRole("Veterinaire"));
+    options.AddPolicy("ClientOrVeterinaire", policy =>
+       policy.RequireAssertion(context =>
+           context.User.IsInRole("Client") || context.User.IsInRole("Veterinaire")));
 
 });
 
