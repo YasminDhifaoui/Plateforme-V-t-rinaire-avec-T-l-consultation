@@ -7,7 +7,8 @@ import { Observable } from 'rxjs';
 })
 export class ClientService {
 
-  url = 'https://localhost:7000/api/admin/Clients'
+  url = 'http://localhost:5000/api/admin/Clients'
+  urls='http://localhost:5000/api/admin/Animals'
   constructor(private http: HttpClient) { }
 
   getAllClients(){
@@ -19,11 +20,32 @@ export class ClientService {
   DeleteClient(id: any) :Observable<any>{
     return this.http.delete(this.url + '/delete-client/' +id)
   }
-  UpdateClient(client: any , id: any) :Observable<any>{
-    return this.http.put(this.url + '/update-client/' + id , client)
+  UpdateClient(client: any, id: any): Observable<any> {
+    const token = localStorage.getItem('token');
+    const headers = {
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json'
+    };
+    
+    // Add required fields with default values if not provided
+    const payload = {
+      ...client,
+      role: client.role || 'Client', // Default role
+      phoneNumber: client.phoneNumber || '',
+      twoFactorEnabled: client.twoFactorEnabled || false,
+      lockoutEnabled: client.lockoutEnabled || false,
+      emailConfirmed: client.emailConfirmed || false,
+      phoneConfirmed: client.phoneConfirmed || false
+    };
+    
+    return this.http.put(this.url + '/update-client/' + id, payload, { headers });
   }
   getClientById (id: any) :Observable<any> {
     return this.http.get(this.url + '/get-client-by-id/' +id)
   }
+  getAnimalByOwner (id: any) :Observable<any> {
+    return this.http.get(this.urls + '/get-animals-by-owner-id/' +id)
+  }
+ 
   
 }

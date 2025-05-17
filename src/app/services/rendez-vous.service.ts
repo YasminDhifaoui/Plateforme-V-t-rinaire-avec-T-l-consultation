@@ -6,11 +6,15 @@ import { HttpClient } from '@angular/common/http';
 })
 export class RendezVousService {
 
-  url = 'https://localhost:7000/api/admin/Rendez_vous'
+  url = 'http://localhost:5000/api/admin/Rendez_vous'
   constructor(private http: HttpClient) { }
 
   getAllrendezvous(){
    return this.http.get(this.url+ '/get-all-rendez-vous');
+  }
+
+  getUrgentRendezvousToday() {
+    return this.http.get(this.url + '/get-urgent-rendezvous-today');
   }
   Addrendezvous(client: any) :Observable<any> {
     return this.http.post(this.url + '/add-rendez-vous' , client)

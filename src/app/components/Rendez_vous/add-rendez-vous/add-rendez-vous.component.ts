@@ -51,8 +51,8 @@ export class AddRendezVousComponent {
     private animalService: AnimalService
   ) {
     this.rendezVousForm = this.fb.group({
-      vetId: ['', Validators.required],
-      clientId: ['', [Validators.required]],
+      vetId:['', [Validators.required]],
+      clientId:['', [Validators.required]],
       animalId: ['', [Validators.required]],
       date: ['', [Validators.required]],
       status: ['', [Validators.required]],
@@ -138,7 +138,8 @@ export class AddRendezVousComponent {
     this.dialogRef.close(false);
   }
  
-}
 
+
+}
 
 

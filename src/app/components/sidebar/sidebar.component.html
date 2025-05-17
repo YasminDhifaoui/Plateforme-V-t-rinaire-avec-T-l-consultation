@@ -1,7 +1,7 @@
 <div class="sidenav" [ngClass]="{'sidenav-collapsed': collapsed}">
     <div class="logo-container">
-        <button class="logo" (click)="toggleCollapse()"><i class=""></i></button>
-        <div class="logo-text" *ngIf="collapsed">Home</div>
+        
+        <div class="logo-text" *ngIf="collapsed"></div>
         <button class="btn-close" *ngIf="collapsed" (click)="colseSidenav()">
             <i class="fas fa-times close-icon"></i>
         </button>
@@ -15,6 +15,7 @@
         </li>
     </ul>
    
-      
+    
+
   </div>
   

@@ -1,8 +1,8 @@
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatDialogRef } from '@angular/material/dialog';
-import { MatFormFieldModule, MatLabel } from '@angular/material/form-field';
+import { MatFormFieldModule } from '@angular/material/form-field';
 import { Router } from '@angular/router';
 import { MatInputModule } from '@angular/material/input';
 import Swal from 'sweetalert2';
@@ -16,10 +16,11 @@ import { MatIconModule } from '@angular/material/icon';
 import { AnimalService } from '../../../animal.service';
 import { VaccinationService } from '../../../services/vaccination.service';
 
-
 @Component({
   selector: 'app-add-vaccination',
-  imports: [ CommonModule,
+  standalone: true,
+  imports: [
+    CommonModule,
     ReactiveFormsModule,
     FormsModule,
     MatFormFieldModule,
@@ -29,20 +30,21 @@ import { VaccinationService } from '../../../services/vaccination.service';
     MatDatepickerModule,
     MatNativeDateModule,
     MatButtonModule,
-    MatIconModule],
+    MatIconModule
+  ],
   templateUrl: './add-vaccination.component.html',
-  styleUrl: './add-vaccination.component.css'
+  styleUrls: ['./add-vaccination.component.css']
 })
-export class AddVaccinationComponent {
+export class AddVaccinationComponent implements OnInit {
   vaccinationForm: FormGroup;
-  animal: any[] = [];
+  animals: any[] = [];
 
   constructor(
+    public dialogRef: MatDialogRef<AddVaccinationComponent>,
     private fb: FormBuilder,
     private router: Router,
-    private vaccinationService: VaccinationService,
     private animalService: AnimalService,
-    private dialogRef: MatDialogRef<AddVaccinationComponent>   // <-- ajout ici
+    private vaccinationService: VaccinationService
   ) {
     this.vaccinationForm = this.fb.group({
       name: ['', Validators.required],
@@ -58,10 +60,10 @@ export class AddVaccinationComponent {
   loadAnimal(): void {
     this.animalService.getAllAnimals().subscribe({
       next: (data) => {
-        console.log('animals récupérés:', data);
-        this.animal = data as any[];
+        console.log('Animaux récupérés:', data);
+        this.animals = data as any[];
       },
-      error: (err) => console.log(err)
+      error: (err) => console.error('Erreur chargement animaux:', err)
     });
   }
 
@@ -74,38 +76,28 @@ export class AddVaccinationComponent {
       });
       return;
     }
-
     try {
-      const formData = this.vaccinationForm.value;
+      const formData = { ...this.vaccinationForm.value };
+      formData.date = new Date(formData.date).toISOString();
       console.log('Form Data:', formData);
 
       const response = await firstValueFrom(this.vaccinationService.Addvaccination(formData));
-      console.log('Vaccination ajouté avec succès !', response);
+      console.log('Vaccination ajoutée avec succès !', response);
 
       await Swal.fire({
         title: 'Succès',
-        text: response?.message || 'Vaccination ajouté avec succès.',
+        text: response?.message || 'Vaccination ajoutée avec succès.',
         icon: 'success'
       });
 
-      this.dialogRef.close(true);  // <-- utilise bien dialogRef ici
+      this.dialogRef.close(true); 
     } catch (error: any) {
-      console.error('Erreur lors de l’ajout du vaccination:', error);
+      console.error('Erreur lors de lajout de la vaccination :', error);
 
-      const errorMessage =
-        error?.error?.message || 'Une erreur est survenue lors de l’ajout du vaccination.';
-
-      await Swal.fire({
-        title: 'Erreur',
-        text: errorMessage,
-        icon: 'error'
-      });
     }
   }
 
   close(): void {
-    this.dialogRef.close(false);  
+    this.dialogRef.close(false);
   }
 }
-
-

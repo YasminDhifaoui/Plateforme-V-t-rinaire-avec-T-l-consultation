@@ -1,0 +1,48 @@
+.page-title {
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 1.5rem;
+  color: #2c3e50;
+  text-align: center;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.consultations-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  max-width: 700px;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+.consultation-card {
+  background-color: #f9f9f9;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 1rem 1.5rem;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  transition: box-shadow 0.3s ease;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.consultation-card:hover {
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.consultation-date,
+.consultation-diagnostic,
+.consultation-animal {
+  margin-bottom: 0.5rem;
+  color: #34495e;
+  font-size: 1rem;
+}
+
+.no-consultations-message {
+  text-align: center;
+  font-size: 1.2rem;
+  color: #7f8c8d;
+  font-style: italic;
+  margin-top: 2rem;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}

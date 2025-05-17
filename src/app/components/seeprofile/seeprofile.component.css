@@ -1,30 +1,99 @@
-
-.profile-container {
-  max-width: 600px;
+.profile-card {
+  max-width: 700px;
   margin: 2rem auto;
   padding: 2rem;
-  background-color: #f5f5f5;
+  background: #fff;
   border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  box-shadow: 0 8px 16px rgba(0,0,0,0.1);
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
-h2 {
-  color: #343a40;
-  text-align: center;
-  margin-bottom: 1.5rem;
+.profile-header {
+  display: flex;
+  align-items: center;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 1rem;
 }
 
-.profile-info p {
-  font-size: 1.1rem;
-  margin: 0.5rem 0;
+.avatar {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  margin-right: 1.5rem;
+  object-fit: cover;
+}
+
+.user-info h2 {
+  margin: 0;
+  font-size: 1.8rem;
+  color: #333;
+}
+
+.email {
+  color: #007bff;
+  margin: 0.25rem 0;
+}
+
+.role {
+  color: #6c757d;
+  font-size: 0.9rem;
+}
+
+.upload-area {
+  margin: 1.5rem 0;
+}
+
+.upload-box {
+  border: 2px dashed #ccc;
+  text-align: center;
+  padding: 1rem;
+  border-radius: 8px;
+  background-color: #f8f9fa;
+  color: #6c757d;
+}
+
+.clickable {
+  color: #007bff;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.account-section h3 {
+  margin-top: 2rem;
+  margin-bottom: 1rem;
+  color: #343a40;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.form-group label {
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+.form-group input,
+.form-group select {
+  padding: 0.5rem;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 1rem;
 }
 
 .update-button {
   display: block;
   margin: 2rem auto 0 auto;
-  padding: 0.75rem 1.5rem;
+  padding: 0.75rem 2rem;
   font-size: 1rem;
+  border-radius: 6px;
 }
 
 .loading {

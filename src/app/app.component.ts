@@ -20,7 +20,7 @@ export class AppComponent implements OnInit {
   showSidebar = true;
 
   // Liste des routes où la navbar et sidebar ne doivent PAS s'afficher
-  private hiddenRoutes: string[] = ['/login', '/register', '/verif-code'];
+  private hiddenRoutes: string[] = ['/login', '/register', '/verif-code','/verif-admin-email'];
 
   constructor(private router: Router, private renderer: Renderer2) {
     this.router.events.subscribe(() => {

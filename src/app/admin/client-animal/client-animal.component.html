@@ -1,0 +1,12 @@
+<h2>Liste des animaux du client {{ clientName }}</h2>
+
+
+<div *ngIf="animals.length === 0">
+  Aucun animal trouvé.
+</div>
+
+<ul *ngIf="animals.length > 0">
+  <li *ngFor="let animal of animals">
+    {{ animal.name }} - {{ animal.species }}
+  </li>
+</ul>

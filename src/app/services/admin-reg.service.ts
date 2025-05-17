@@ -7,7 +7,7 @@ import { Observable } from 'rxjs';
 })
 export class AdminRegService {
 
-  private baseUrl = 'https://localhost:7000/api/AdminAuthentification';
+  private baseUrl = 'http://localhost:5000/api/AdminAuthentification';
 
   constructor(private http: HttpClient) { }
   

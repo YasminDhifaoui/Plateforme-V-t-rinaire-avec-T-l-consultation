@@ -31,7 +31,7 @@ export class RegisterComponent {
 
     this.registerService.register(data).subscribe(
       res => {
-        console.log(res);
+        console.log(res ,"deriger vers ceirf");
         this.router.navigate(['/verif-admin-email'])
       },
       err => {

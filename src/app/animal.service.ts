@@ -7,7 +7,7 @@ import { Observable } from 'rxjs';
 })
 export class AnimalService {
 
-  url = 'https://localhost:7000/api/admin/Animals';
+  url = 'http://localhost:5000/api/admin/Animals';
 
   constructor(private http: HttpClient) {}
 
@@ -30,7 +30,11 @@ export class AnimalService {
   }
 
   UpdateAnimal(animal: any, id: any): Observable<any> {
-    return this.http.put(this.url + '/update-animal/' + id, animal);
+    const token = localStorage.getItem('token');
+    const headers = {
+      'Authorization': `Bearer ${token}`
+    };
+    return this.http.put(this.url + '/update-animal/' + id, animal, { headers });
   }
 
   getAnimalById(id: any): Observable<any> {

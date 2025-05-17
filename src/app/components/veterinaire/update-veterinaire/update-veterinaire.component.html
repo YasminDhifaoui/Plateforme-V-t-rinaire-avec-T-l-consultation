@@ -1,5 +1,5 @@
 <h2>update un veterinaire</h2>
-<form [formGroup]="veterinaireForm" (ngSubmit)="onSubmit()">
+<form [formGroup]="veterinaireForm" >
   <mat-form-field class="full-width">
     <mat-label>Nom</mat-label>
     <input matInput formControlName="username" name="name" />
@@ -25,7 +25,7 @@
   </mat-form-field>
 
   <div class="actions">
-    <button mat-button (click)="close()">Annuler</button>
+    <button mat-button (click)="annuler()">Annuler</button>
     <button mat-raised-button color="primary">Enregistrer</button>
   </div>
 </form>

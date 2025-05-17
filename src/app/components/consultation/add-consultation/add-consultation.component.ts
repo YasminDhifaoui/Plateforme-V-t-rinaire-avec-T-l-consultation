@@ -87,7 +87,9 @@ export class AddConsultationComponent implements OnInit {
       const formValues = this.consultationForm.value;
       console.log('Form Values:', formValues);
   
-      formData.append('date', formValues.date);
+      const formattedDate = new Date(formValues.date).toISOString(); // ISO format (UTC)
+formData.append('date', formattedDate);
+
       formData.append('Diagnostic', formValues.Diagnostic);
       formData.append('Treatment', formValues.Treatment);
       formData.append('Prescription', formValues.Prescription);

@@ -105,7 +105,7 @@
 }
 
 .sidenav-nav .sidenav-nav-link:hover {
-    background-color: #007bff;
+    background-color: #8BC53F;
     color: white;
 }
 
@@ -115,7 +115,7 @@
     min-width: 2.5rem;
     margin-right: 1rem;
     text-align: center;
-    color: #007bff;
+    color: #8BC53F;
     transition: color 0.3s ease;
 }
 
@@ -127,4 +127,61 @@
     flex-grow: 1;
     white-space: nowrap;
     user-select: none;
+}
+.sidenav {
+    background: #f8f9fa;
+    box-shadow: 2px 0 12px rgba(0, 0, 0, 0.1);
+    transition: width 0.4s ease, box-shadow 0.4s ease;
+    position: fixed;
+    z-index: 1000; /* Higher than navbar */
+    top: 0;
+    left: 0; /* Changed from default to explicitly set */
+    width: 5rem;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding-top: 1rem;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+.navbar {
+    position: fixed;
+    top: 0;
+    left: 5rem; /* Match initial sidebar width */
+    right: 0;
+    z-index: 999; /* Lower than sidebar */
+    background: linear-gradient(135deg, #acafbb, #c0bbc6);
+    color: white;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    height: 60px;
+    padding: 0 24px;
+    box-shadow: 0 4px 12px rgba(187, 182, 192, 0.4);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    transition: all 0.3s ease;
+}
+
+/* When sidebar is expanded */
+.sidenav-collapsed {
+    width: 16.5625rem;
+    box-shadow: 2px 0 20px rgba(0, 0, 0, 0.15);
+}
+.sidenav-collapsed + .navbar {
+    left: 16.5625rem; /* Match expanded sidebar width */
+    transition: left 0.4s ease; /* Sync with sidebar animation */
+}
+
+/* Body adjustment */
+body {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    padding-top: 60px; /* Navbar height */
+    padding-left: 5rem; /* Initial sidebar width */
+    transition: padding-left 0.4s ease; /* Sync with sidebar animation */
+}
+
+body.sidebar-expanded {
+    padding-left: 16.5625rem; /* Expanded sidebar width */
 }

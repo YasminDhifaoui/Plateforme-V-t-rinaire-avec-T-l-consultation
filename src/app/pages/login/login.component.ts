@@ -19,6 +19,8 @@ export class LoginComponent {
     const user = { email: this.email, password: this.password };
     this.authService.login(user).subscribe({
       next: (res) => {
+        console.log(res);
+        
         this.router.navigate(['/verif-code']);
       },
       error: (err) => {

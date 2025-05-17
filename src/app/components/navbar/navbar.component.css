@@ -1,23 +1,24 @@
 .navbar {
     position: fixed;
     top: 0;
-    left: 5rem; /* shifted right to avoid covering sidebar */
+    left: 5rem; /* valeur par défaut */
     right: 0;
-    z-index: 1100;
-    background: linear-gradient(135deg, #667eea, #764ba2);
-    color: white;
+    z-index: 998;
+    height: 60px;
+    background: linear-gradient(135deg, #8BC53F, #8BC53F);
     display: flex;
-    justify-content: space-between;
     align-items: center;
-    height: 64px;
     padding: 0 24px;
-    box-shadow: 0 4px 12px rgba(118, 75, 162, 0.4);
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    transition: background-color 0.3s ease;
-}
+    transition: left 0.4s ease;
+  }
+  
+  body.sidebar-expanded .navbar {
+    left: 16.5625rem; /* décale la navbar quand sidebar est élargie */
+  }
+  
 
 .navbar:hover {
-    background: linear-gradient(135deg, #764ba2, #667eea);
+    background: linear-gradient(135deg, #8BC53F, #8BC53F);
 }
 
 .app-name {
@@ -55,4 +56,9 @@ mat-menu {
     font-size: 1rem;
     user-select: none;
     color: #e0e0e0;
+}
+body {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
 }

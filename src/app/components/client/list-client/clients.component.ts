@@ -54,19 +54,32 @@ export class ClientsComponent implements OnInit{
     dialogRef.afterClosed().subscribe(result => {
       if (result) {
         console.log('Nouveau client:', result);
+        this.ngOnInit()
       }
     });
   }
+  goToAnimals(vetId: string) {
+    this.router.navigate(['/client-animal', vetId]);
+  }
+  
   UpdateClientDialog(client: any) {
     const dialogRef = this.dialog.open(UpdateClientComponent, {
       width: '400px',
       ariaDescribedBy: 'update-client-description',
-      data: client   // ici tu envoies tout l'objet
+      data: client
     });
   
     dialogRef.afterClosed().subscribe(result => {
       if (result) {
-        console.log('Client modifié avec succès:', result);
+        // Refresh the client list
+        this.clientService.getAllClients().subscribe(
+          (res: any) => {
+            if (Array.isArray(res)) {
+              this.dataSource.data = res as Client[];
+              this.ngOnInit()
+            }
+          }
+        );
       }
     });
   }

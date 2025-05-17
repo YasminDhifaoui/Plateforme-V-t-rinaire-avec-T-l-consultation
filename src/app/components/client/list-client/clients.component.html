@@ -5,9 +5,9 @@
   <input type="text" class="simple-input" matInput (keyup)="applyFilter($event)" placeholder="Rechercher...">
   <div class="buttons-container">
     <button class="styled-add" (click)="AddClientDialog()">
-      Ajouter un Client
-      <mat-icon>add_circle_outline</mat-icon>
+      Ajouter un Client <mat-icon>add_circle_outline</mat-icon>
     </button>
+    
   </div>
 </div>
 <div class="mat-elevation-z8">
@@ -33,6 +33,11 @@
     <ng-container matColumnDef="actions">
       <th mat-header-cell *matHeaderCellDef> Action </th>
       <td mat-cell *matCellDef="let element">
+        <!-- Bouton Détails -->
+<button mat-icon-button color="accent" (click)="goToAnimals(element.id)">
+  <mat-icon>visibility</mat-icon>
+</button>
+
         <!-- Bouton Edit -->
         <button mat-icon-button color="primary" class="edit"
         (click)="UpdateClientDialog(element)"

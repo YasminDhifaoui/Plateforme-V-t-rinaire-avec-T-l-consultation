@@ -81,6 +81,7 @@ displayedColumns: string[] = ['rendezVousId', 'veterinaireName', 'animalId', 'da
     dialogRef.afterClosed().subscribe(result => {
       if (result) {
         console.log('Nouveau consultation:', result);
+        this.ngOnInit()
       }
     });
   }
@@ -94,6 +95,7 @@ displayedColumns: string[] = ['rendezVousId', 'veterinaireName', 'animalId', 'da
     dialogRef.afterClosed().subscribe(result => {
       if (result) {
         console.log('consultation modifié avec succès:', result);
+        this.ngOnInit()
       }
     });
   }

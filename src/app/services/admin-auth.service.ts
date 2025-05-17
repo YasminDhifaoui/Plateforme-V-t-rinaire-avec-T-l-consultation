@@ -8,7 +8,7 @@ import { Observable } from 'rxjs';
   providedIn: 'root'
 })
 export class AdminAuthService {
-  private baseUrl = 'https://localhost:7000/api/AdminAuthentification';
+  private baseUrl = 'http://localhost:5000/api/AdminAuthentification';
 
   constructor(private http: HttpClient) { }
   login(data: any): Observable<any> {
@@ -22,8 +22,12 @@ export class AdminAuthService {
     return this.http.post(`${this.baseUrl}/verify-login-code`, data);
   }
   verifyAdminCode(data: any): Observable<any> {
-    return this.http.post(`${this.baseUrl}/confirm-admin-email`, data);
+    return this.http.post(
+      `${this.baseUrl}/confirm-admin-email?email=${encodeURIComponent(data.email)}&code=${encodeURIComponent(data.code)}`,
+      null 
+    );
   }
+  
   logout() {
     localStorage.removeItem('authToken');
   }

@@ -29,18 +29,8 @@ export class ListAdminComponent {
   @ViewChild(MatPaginator) paginator!: MatPaginator;
 
   ngOnInit(): void {
-    this.AdminService.getAlladmins().subscribe(
-      (res: any) => {
-        console.log(res);
-        
-        if (Array.isArray(res)) {
-          this.dataSource.data = res as Admin[];
-        } else {
-          console.error('Unexpected data format:', res);
-        }
-      }
-    );
-  }
+    this.loadAdmins();
+}
   ngAfterViewInit() {
     this.dataSource.paginator = this.paginator;
   }
@@ -57,6 +47,7 @@ export class ListAdminComponent {
     dialogRef.afterClosed().subscribe(result => {
       if (result) {
         console.log('Nouveau admin:', result);
+        this.ngOnInit()
       }
     });
   }
@@ -70,6 +61,7 @@ export class ListAdminComponent {
     dialogRef.afterClosed().subscribe(result => {
       if (result) {
         console.log('Admin modifié avec succès:', result);
+        this.ngOnInit()
       }
     });
   }
@@ -95,7 +87,11 @@ export class ListAdminComponent {
               text: 'La Admin a été supprimé avec succès.',
               icon: 'success',
               confirmButtonText: 'OK'
-            })
+              
+            }).then(() => {
+              this.router.navigate(['/admins']); 
+              this.ngOnInit()
+            });
           },
           err => {
             console.log('Erreur lors de la suppression du Admin', err);
@@ -110,8 +106,20 @@ export class ListAdminComponent {
       }
     });
   }
-}
 
+loadAdmins(): void {
+  this.AdminService.getAlladmins().subscribe(
+    (res: any) => {
+      console.log(res);
+      
+      if (Array.isArray(res)) {
+        this.dataSource.data = res as Admin[];
+      } else {
+        console.error('Unexpected data format:', res);
+      }
+    }
+  );
+}}
 export interface Admin {
   id: string;
   username: string;

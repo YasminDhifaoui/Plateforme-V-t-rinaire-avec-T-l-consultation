@@ -13,18 +13,32 @@ import { CommonModule } from '@angular/common';
 })
 export class SidebarComponent {
   constructor( private router: Router){}
+  
   userCourant! : string;
   collapsed = false ;
   navData = navbarData  
   
 
-
-  toggleCollapse(){
-    this.collapsed = !this.collapsed
-    // lorsque il est ouvert le contenu chnage 
-    // this.sharedStateService.changeSidebarState(this.collapsed);
-    }
+  
+  
     colseSidenav(){
     this.collapsed = false
     }
+    ngOnInit() {
+      this.updateBodyClass();
+    }
+    
+    toggleCollapse() {
+      this.collapsed = !this.collapsed;
+      this.updateBodyClass();
+    }
+    
+    updateBodyClass() {
+      if (this.collapsed) {
+        document.body.classList.add('sidebar-expanded');
+      } else {
+        document.body.classList.remove('sidebar-expanded');
+      }
+    }
+    
 }

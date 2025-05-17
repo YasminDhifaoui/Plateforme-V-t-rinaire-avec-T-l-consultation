@@ -11,42 +11,58 @@ import { Router, RouterModule } from '@angular/router';
 import { AddRendezVousComponent } from '../add-rendez-vous/add-rendez-vous.component';
 import { UpdateRendezVousComponent } from '../update-rendez-vous/update-rendez-vous.component';
 import { VeterinaireService } from '../../../services/veterinaire.service';
-import { error } from 'console';
 
 @Component({
   selector: 'app-list-rendez-vous',
-  imports: [MatTableModule,MatPaginatorModule,CommonModule,MatIconModule,FormsModule,CommonModule,RouterModule],
+  standalone: true,
+  imports: [
+    MatTableModule,
+    MatPaginatorModule,
+    CommonModule,
+    MatIconModule,
+    FormsModule,
+    RouterModule
+  ],
   templateUrl: './list-rendez-vous.component.html',
   styleUrl: './list-rendez-vous.component.css'
 })
-export class ListRendezVousComponent implements OnInit{
-  constructor(private dialog: MatDialog,private RendezVousService: RendezVousService,private router: Router,private verterinareServcie: VeterinaireService) {}
-veterinare: any[]= []; 
-  displayedColumns: string[] = ['vetId', 'clientId','date','status','actions'];
-  dataSource = new MatTableDataSource<RendezVous>();
+export class ListRendezVousComponent implements OnInit {
+  constructor(
+    private dialog: MatDialog,
+    private RendezVousService: RendezVousService,
+    private router: Router,
+    private verterinareServcie: VeterinaireService
+  ) {}
+
   statusFilter: string = '';
+  displayedColumns: string[] = ['vetId', 'clientId', 'date', 'status', 'actions'];
+  dataSource = new MatTableDataSource<RendezVous>();
+
   @ViewChild(MatPaginator) paginator!: MatPaginator;
 
   ngOnInit(): void {
     this.RendezVousService.getAllrendezvous().subscribe(
       (res: any) => {
-        console.log(res);
-        
         if (Array.isArray(res)) {
           this.dataSource.data = res as RendezVous[];
+          this.setStatusFilterPredicate(); // initialiser le filtre
+          this.applyStatusFilter(); // appliquer le filtre initial
         } else {
           console.error('Unexpected data format:', res);
         }
       }
     );
   }
+
   ngAfterViewInit() {
     this.dataSource.paginator = this.paginator;
   }
+
   applyFilter(event: Event) {
     const filterValue = (event.target as HTMLInputElement).value;
     this.dataSource.filter = filterValue.trim().toLowerCase();
   }
+
   AddRendezVousDialog() {
     const dialogRef = this.dialog.open(AddRendezVousComponent, {
       width: '400px',
@@ -55,29 +71,25 @@ veterinare: any[]= [];
 
     dialogRef.afterClosed().subscribe(result => {
       if (result) {
-        console.log('Nouveau RendezVous:', result);
-      }
-    });
-  }
-  UpdateRendezVousDialog(client: any) {
-    const dialogRef = this.dialog.open(UpdateRendezVousComponent, {
-      width: '400px',
-      ariaDescribedBy: 'update-RendezVous-description',
-      data: client   // ici tu envoies tout l'objet
-    });
-  
-    dialogRef.afterClosed().subscribe(result => {
-      if (result) {
-        console.log('RendezVous modifié avec succès:', result);
+        this.ngOnInit();
       }
     });
   }
 
-  applyStatusFilter() {
-    console.log('Filter applied!');
-    // Ici tu pourras ajouter la logique pour filtrer ta liste de rendez-vous
+  UpdateRendezVousDialog(client: any) {
+    const dialogRef = this.dialog.open(UpdateRendezVousComponent, {
+      width: '400px',
+      ariaDescribedBy: 'update-RendezVous-description',
+      data: client
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        this.ngOnInit();
+      }
+    });
   }
-  
+
   deleteRendezVous(id: any) {
     Swal.fire({
       title: 'Êtes-vous sûr ?',
@@ -92,20 +104,17 @@ veterinare: any[]= [];
       if (result.isConfirmed) {
         this.RendezVousService.Deleterendezvous(id).subscribe(
           res => {
-            console.log('RendezVous supprimé avec succès', res);
             Swal.fire({
               title: 'Supprimé !',
               text: 'Le RendezVous a été supprimé avec succès.',
               icon: 'success',
               confirmButtonText: 'OK'
             }).then(() => {
-              this.router.navigate(['/RendezVous']); 
-              this.ngOnInit()
+              this.ngOnInit();
             });
           },
           err => {
-            console.log('Erreur lors de la suppression du RendezVous', err);
-              Swal.fire({
+            Swal.fire({
               title: 'Erreur',
               text: 'Une erreur est survenue lors de la suppression du RendezVous.',
               icon: 'error',
@@ -116,6 +125,16 @@ veterinare: any[]= [];
       }
     });
   }
+
+  setStatusFilterPredicate() {
+    this.dataSource.filterPredicate = (data: RendezVous, filter: string) => {
+      return filter === '' || data.status == filter;
+    };
+  }
+
+  applyStatusFilter() {
+    this.dataSource.filter = this.statusFilter;
+  }
 }
 
 export interface RendezVous {
@@ -123,12 +142,5 @@ export interface RendezVous {
   clientId: string;
   animalId: string;
   date: Date;
- status: string;
-
+  status: string;
 }
-
-
-
-
-
-

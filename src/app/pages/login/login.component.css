@@ -1,9 +1,137 @@
-.text-center {
-    text-align: "center";
-    }
+@import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css');
 
-h1 {
-    text-align: center ;
-    font-family: 'Poppins', sans-serif;
-    font-weight: bold;
-}    
+body {
+  margin: 0;
+  padding: 0;
+  font-family: 'Poppins', sans-serif;
+  background: #f1f3f6;
+}
+
+.login-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
+
+.login-card {
+  display: flex;
+  width: 800px;
+  height: 500px;
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.left-panel,
+.right-panel {
+  width: 50%;
+  padding: 40px;
+}
+
+.left-panel {
+  background: #fff;
+}
+
+
+.right-panel {
+    background: #ffffff;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  
+  .logo {
+    max-width: 80%;
+    height: auto;
+  }
+  
+
+.subtitle {
+  margin-bottom: 30px;
+  color: #777;
+}
+
+.input-group {
+  position: relative;
+  margin-bottom: 20px;
+}
+
+.input-group input {
+  width: 100%;
+  padding: 10px 40px;
+  border-radius: 30px;
+  border: 1px solid #ccc;
+  outline: none;
+  font-size: 14px;
+}
+
+.input-group .icon {
+  position: absolute;
+  left: 15px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #888;
+}
+
+.options {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 14px;
+  margin-bottom: 20px;
+}
+
+.forgot-password {
+  color: #8BC53F;
+  text-decoration: none;
+}
+
+.btn-signin {
+  width: 100%;
+  padding: 12px;
+  border: none;
+  border-radius: 30px;
+  background: #8BC53F;
+  color: white;
+  font-weight: bold;
+  font-size: 16px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.btn-signin:hover {
+    background: #8BC53F;
+}
+
+.register-link {
+  text-align: center;
+  margin-top: 20px;
+  font-size: 14px;
+}
+
+.register-link a {
+  color: #8BC53F;
+  text-decoration: none;
+}
+.quote-panel {
+    background: linear-gradient(rgba(162, 164, 173, 0.85), rgba(232, 234, 229, 0.85)),
+                url('https://images.unsplash.com/photo-1601758123927-1964f82c47a6') no-repeat center center / cover;
+    color: white;
+    text-align: center;
+    font-size: 20px;
+    font-weight: 500;
+    line-height: 1.5;
+    padding: 40px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  
+  .quote-panel blockquote {
+    margin: 0;
+    font-style: italic;
+    max-width: 300px;
+  }
+  
+  

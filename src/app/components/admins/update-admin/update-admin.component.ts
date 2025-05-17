@@ -8,6 +8,7 @@ import { CommonModule } from '@angular/common';
 import { MatInputModule } from '@angular/material/input';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { AdminService } from '../../../services/admin.service';
+import { Router, RouterModule } from '@angular/router';
 
 @Component({
   selector: 'app-update-admin',
@@ -15,7 +16,7 @@ import { AdminService } from '../../../services/admin.service';
     FormsModule,
     ReactiveFormsModule,
     MatInputModule,
-    MatFormFieldModule,],
+    MatFormFieldModule,RouterModule],
   templateUrl: './update-admin.component.html',
   styleUrl: './update-admin.component.css'
 })
@@ -27,7 +28,8 @@ export class UpdateAdminComponent {
     public dialogRef: MatDialogRef<UpdateAdminComponent>,
     @Inject(MAT_DIALOG_DATA) public data: any,
     private fb: FormBuilder,
-    private adminService: AdminService
+    private adminService: AdminService,
+    private router: Router
   ) {
     this.adminForm = this.fb.group({
       username: [''],
@@ -49,7 +51,7 @@ export class UpdateAdminComponent {
     }
   }
 
-  async onSubmit(): Promise<void> {
+  async valider(): Promise<void> {
     if (this.adminForm.invalid) {
       await Swal.fire({
         title: 'Erreur',
@@ -60,16 +62,14 @@ export class UpdateAdminComponent {
     }
   
     try {
-      const payload = {
-        updatedAdmin: this.adminForm.value
-      };
+      const payload = this.adminForm.value;
   
       const response = await firstValueFrom(
         this.adminService.Updateadmin(payload, this.adminId)
       );
   
       console.log('admin modifié avec succès !', response);
-  
+   
       await Swal.fire({
         title: 'Succès',
         text: 'admin modifié avec succès.',
@@ -91,9 +91,8 @@ export class UpdateAdminComponent {
     }
   }
   
-
-  close(): void {
-    this.dialogRef.close();
+  annuler(): void {
+    this.dialogRef.close()
   }
 }
 

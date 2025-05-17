@@ -7,7 +7,7 @@ import { Observable } from 'rxjs';
 })
 export class ProfileService {
 
-  url = 'https://localhost:7000/api/admin/profile'
+  url = 'http://localhost:5000/api/admin/profile'
   constructor(private http: HttpClient) { }
 
   seeprofile() {

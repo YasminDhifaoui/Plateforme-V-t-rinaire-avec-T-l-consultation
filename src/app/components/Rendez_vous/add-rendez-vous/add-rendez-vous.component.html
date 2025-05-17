@@ -5,8 +5,8 @@
   <mat-form-field class="full-width">
     <mat-label>Vétérinaire</mat-label>
     <mat-select formControlName="vetId">
-      <mat-option *ngFor="let vet of veterinare" [value]="vet.vetId">
-        {{ vet.userName }}
+      <mat-option *ngFor="let vet of veterinare" [value]="vet.id">
+        {{ vet.username }}
       </mat-option>
     </mat-select>
   </mat-form-field>
@@ -16,7 +16,7 @@
     <mat-label>Client</mat-label>
     <mat-select formControlName="clientId">
       <mat-option *ngFor="let cli of clients" [value]="cli.id">
-        (ID: {{ cli.id }})
+         {{ cli.username }}
       </mat-option>
     </mat-select>
   </mat-form-field>
@@ -25,7 +25,7 @@
     <mat-label>Animal</mat-label>
     <mat-select formControlName="animalId">
       <mat-option *ngFor="let An of animal" [value]="An.id">
-        {{ An.id }}
+        {{ An.username }}
       </mat-option>
     </mat-select>
   </mat-form-field>

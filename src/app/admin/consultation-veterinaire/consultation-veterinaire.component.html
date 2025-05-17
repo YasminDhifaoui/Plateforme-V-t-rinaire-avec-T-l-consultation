@@ -1,0 +1,19 @@
+<h2 class="page-title">Consultations du vétérinaire</h2>
+
+<div *ngIf="consultations && consultations.length > 0; else noConsultations" class="consultations-list">
+  <div *ngFor="let consultation of consultations" class="consultation-card">
+    <div class="consultation-date">
+      <strong>Date:</strong> {{ consultation.date | date:'fullDate' }} à {{ consultation.date | date:'shortTime' }}
+    </div>
+    <div class="consultation-diagnostic">
+      <strong>Diagnostic:</strong> {{ consultation.diagnostic }}
+    </div>
+    <div class="consultation-animal">
+      <strong>Animal:</strong> {{ consultation.animal?.nom || 'Inconnu' }}
+    </div>
+  </div>
+</div>
+
+<ng-template #noConsultations>
+  <p class="no-consultations-message">Aucune consultation trouvée pour ce vétérinaire.</p>
+</ng-template>

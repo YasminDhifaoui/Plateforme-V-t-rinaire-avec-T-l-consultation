@@ -1,19 +1,19 @@
-
 .admin-list-card {
-  max-width: 900px;
+  max-width: 1200px;
   margin: 40px auto;
-  background: #fff;
+  background: #ffffff;
   border-radius: 12px;
   box-shadow: 0 8px 24px rgba(0,0,0,0.1);
-  padding: 20px 30px;
+  padding: 30px 40px;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  
 }
 
 .admin-list-card .header h2 {
   margin: 0 0 20px 0;
   font-weight: 700;
-  color: #2c3e50;
-  font-size: 28px;
+  color: #111411;
+  font-size: 30px;
   letter-spacing: 0.5px;
 }
 
@@ -28,38 +28,38 @@
 
 .search-input {
   flex-grow: 1;
-  max-width: 300px;
-  height: 40px;
+  max-width: 350px;
+  height: 42px;
   padding: 0 15px;
-  border: 1.5px solid #ddd;
+  border: 1.5px solid #ccc;
   border-radius: 8px;
   font-size: 16px;
-  transition: border-color 0.3s ease;
 }
 
 .search-input:focus {
   outline: none;
-  border-color: #3f51b5;
-  box-shadow: 0 0 8px rgba(63,81,181,0.3);
+  border-color: #8BC34A;
+  box-shadow: 0 0 8px rgba(139,195,74,0.4);
 }
 
 .add-button {
-  background-color: #3f51b5;
-  color: white;
+  background-color: #5aa03d;
+color: white;
+border-radius: 6px;
+padding: 8px 16px;
+transition: background-color 0.3s ease;
   border: none;
-  border-radius: 8px;
-  padding: 10px 18px;
   font-size: 16px;
   font-weight: 600;
   cursor: pointer;
   display: flex;
   align-items: center;
   gap: 8px;
-  transition: background-color 0.3s ease;
+ 
 }
 
 .add-button:hover {
-  background-color: #303f9f;
+  background-color: #7CB342;
 }
 
 .table-container {
@@ -77,21 +77,22 @@
   text-align: left;
   padding: 12px 15px;
   font-weight: 600;
-  color: #34495e;
-  border-bottom: 2px solid #ecf0f1;
+  color: #0c0e0c;
+  border-bottom: 2px solid #c8e6c9;
+  background-color: #f1f8e9;
 }
 
 .admin-table td {
   padding: 15px;
   background: #f9f9f9;
-  color: #555;
-  border-bottom: 1px solid #e0e0e0;
+  color: #333;
+  border-bottom: 1px solid #ddd;
   vertical-align: middle;
   border-radius: 8px;
 }
 
 .table-row:hover td {
-  background-color: #e8f0fe;
+  background-color: #e8f5e9;
   cursor: pointer;
   transition: background-color 0.3s ease;
 }
@@ -103,30 +104,27 @@
 }
 
 .edit {
-  background-color: #4caf50;
+  background-color: #66BB6A;
   color: white;
   width: 40px;
   height: 40px;
   border-radius: 8px;
   border: none;
-  transition: background-color 0.3s ease;
 }
 
 .edit:hover {
-  background-color: #388e3c;
+  background-color: #43A047;
 }
 
 .delete {
-  background-color: #f44336;
+  background-color: #EF5350;
   color: white;
   width: 40px;
   height: 40px;
   border-radius: 8px;
   border: none;
-  transition: background-color 0.3s ease;
 }
 
 .delete:hover {
-  background-color: #d32f2f;
+  background-color: #D32F2F;
 }
-  

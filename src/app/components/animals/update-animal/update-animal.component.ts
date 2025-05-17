@@ -74,47 +74,54 @@ export class UpdateAnimalComponent {
       return;
     }
   
-    try {
-      const payload = {
-        updatedanimal: this.animalForm.value
-      };
-      console.log('Sending payload:', payload);
+    // Send the form value directly without wrapping in "updatedanimal"
+    const payload = this.animalForm.value;
+    console.log('Sending payload:', payload);
   
-      const response = this.animalService.UpdateAnimal(payload, this.onimalId)
+    this.animalService.UpdateAnimal(payload, this.onimalId).subscribe({
+      next: async (response) => {
+        console.log('Response from server:', response);
+        
+        // Check if the response contains an error message
+        if (response?.message && response.message.includes('not found')) {
+          await Swal.fire({
+            title: 'Erreur',
+            text: response.message,
+            icon: 'error'
+          });
+          return;
+        }
   
+        await Swal.fire({
+          title: 'Succès',
+          text: 'Animal modifié avec succès.',
+          icon: 'success'
+        });
   
-      console.log('Animal modifié avec succès !', response);
+        this.dialogRef.close(true);
+      },
+      error: async (error) => {
+        console.error('Erreur lors de la modification de l\'animal:', error);
+        
+        let errorMessage = 'Une erreur est survenue lors de la modification.';
+        if (error?.error?.message) {
+          errorMessage = error.error.message;
+        } else if (error?.message) {
+          errorMessage = error.message;
+        }
   
-      await Swal.fire({
-        title: 'Succès',
-        text: 'Animal modifié avec succès.',
-        icon: 'success'
-      });
-  
-      this.dialogRef.close(true);
-    } catch (error: any) {
-      console.error('Erreur lors de la modification de l\'animal:', error);
-  
-      let errorMessage = 'Une erreur est survenue lors de la modification.';
-      
-      // Handle different error formats
-      if (error?.error?.message) {
-        errorMessage = error.error.message;
-      } else if (error?.message) {
-        errorMessage = error.message;
+        await Swal.fire({
+          title: 'Erreur',
+          text: errorMessage,
+          icon: 'error'
+        });
       }
-  
-      await Swal.fire({
-        title: 'Erreur',
-        text: errorMessage,
-        icon: 'error'
-      });
-    }
+    });
   }
   
 
-  close(): void {
-    this.dialogRef.close();
+  annuler(): void {
+    this.dialogRef.close()
   }
 }
 

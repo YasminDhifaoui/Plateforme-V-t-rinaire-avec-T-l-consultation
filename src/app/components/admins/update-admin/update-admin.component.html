@@ -1,5 +1,5 @@
 <h2>Update admin</h2>
-<form [formGroup]="adminForm" (ngSubmit)="onSubmit()">
+<form [formGroup]="adminForm">
   <mat-form-field class="full-width">
     <mat-label>Nom</mat-label>
     <input matInput formControlName="username" name="name" />
@@ -15,7 +15,7 @@
   </mat-form-field>
 
   <div class="actions">
-    <button mat-button (click)="close()">Annuler</button>
-    <button mat-raised-button color="primary" >Modifer</button>
+    <button mat-button (click)="annuler()">Annuler</button>
+    <button mat-raised-button color="primary" (click)="valider()" >Modifer</button>
   </div>
 </form>

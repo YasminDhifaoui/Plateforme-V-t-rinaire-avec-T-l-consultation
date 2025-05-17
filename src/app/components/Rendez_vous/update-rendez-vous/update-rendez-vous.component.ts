@@ -150,8 +150,8 @@ export class UpdateRendezVousComponent {
   }
   
 
-  close(): void {
-    this.dialogRef.close();
+  annuler(): void {
+    this.dialogRef.close()
   }
 }
 

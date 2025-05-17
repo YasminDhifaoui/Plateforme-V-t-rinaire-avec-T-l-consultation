@@ -7,7 +7,7 @@ import { Observable } from 'rxjs';
 })
 export class AdminService {
 
-  url = 'https://localhost:7000/api/Admins'
+  url = 'http://localhost:5000/api/Admins'
   constructor(private http: HttpClient) { }
 
   getAlladmins(){
@@ -19,8 +19,8 @@ export class AdminService {
   Deleteadmin(id: any) :Observable<any>{
     return this.http.delete(this.url + '/delete-admin/' +id)
   }
-  Updateadmin(client: any , id: any) :Observable<any>{
-    return this.http.put(this.url + '/update-admin/' + id , client)
+  Updateadmin(payload: any , id: any) :Observable<any>{
+    return this.http.put(this.url + '/update-admin/' + id , payload)
   }
   getadminById (id: any) :Observable<any> {
     return this.http.get(this.url + '/get-admin-by-id/' +id)

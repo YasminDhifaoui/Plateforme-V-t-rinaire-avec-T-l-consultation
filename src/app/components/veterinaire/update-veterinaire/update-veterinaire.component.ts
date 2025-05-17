@@ -101,7 +101,7 @@ export class UpdateVeterinaireComponent {
   
   
 
-  close(): void {
-    this.dialogRef.close();
+  annuler(): void {
+    this.dialogRef.close()
   }
 }

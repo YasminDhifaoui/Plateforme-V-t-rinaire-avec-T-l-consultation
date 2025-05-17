@@ -1,21 +1,31 @@
 <h2>Update client</h2>
-<form [formGroup]="clientForm" (ngSubmit)="onSubmit()">
+<form [formGroup]="clientForm" >
   <mat-form-field class="full-width">
     <mat-label>Nom</mat-label>
-    <input matInput formControlName="username" name="name" />
+    <input matInput formControlName="username" required>
   </mat-form-field>
 
   <mat-form-field class="full-width">
     <mat-label>Email</mat-label>
-    <input matInput type="text" formControlName="email" name="age" />
-  </mat-form-field>
-  <mat-form-field class="full-width">
-    <mat-label>Password</mat-label>
-    <input matInput type="text" formControlName="password" name="age" />
+    <input matInput type="email" formControlName="email" required>
   </mat-form-field>
 
+  <mat-form-field class="full-width">
+    <mat-label>Password</mat-label>
+    <input matInput type="password" formControlName="password">
+  </mat-form-field>
+
+  <!-- Add other fields as needed, possibly hidden -->
+  <input type="hidden" formControlName="role">
+  <input type="hidden" formControlName="twoFactorEnabled">
+  <input type="hidden" formControlName="lockoutEnabled">
+  <input type="hidden" formControlName="emailConfirmed">
+  <input type="hidden" formControlName="phoneConfirmed">
+
   <div class="actions">
-    <button mat-button (click)="close()">Annuler</button>
-    <button mat-raised-button color="primary" >Modifer</button>
+    <button mat-button (click)="annuler()">Annuler</button>
+    <button mat-raised-button color="primary" type="submit" (click)="valider()"[disabled]="clientForm.invalid">
+      Modifier
+    </button>
   </div>
 </form>

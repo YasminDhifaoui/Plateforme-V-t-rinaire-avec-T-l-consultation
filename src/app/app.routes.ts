@@ -16,6 +16,8 @@ import { ListConsultationComponent } from './components/consultation/list-consul
 import { AddVaccinationComponent } from './components/vaccination/add-vaccination/add-vaccination.component';
 import { ListVaccinationComponent } from './components/vaccination/list-vaccination/list-vaccination.component';
 import { VeridAdminEmailComponent } from './verid-admin-email/verid-admin-email.component';
+import { ConsultationVeterinaireComponent } from './admin/consultation-veterinaire/consultation-veterinaire.component';
+import { ClientAnimalComponent } from './admin/client-animal/client-animal.component';
 export const routes: Routes = [
     {path: 'sidebar' , component: SidebarComponent , canActivate: [authGuard]},
     {path: 'navbar' , component: NavbarComponent ,canActivate: [authGuard]},
@@ -25,14 +27,15 @@ export const routes: Routes = [
     { path: '', redirectTo: 'login', pathMatch: 'full' },
     { path: 'login', component: LoginComponent },
     { path: 'register', component: RegisterComponent },
-    { path: 'register', component: RegisterComponent },
     { path: 'verif-code', component: CodeVerificationComponent },
     { path: 'animals', component: ListAnimalComponent ,canActivate: [authGuard]},
     { path: 'RendezVous', component: ListRendezVousComponent ,canActivate: [authGuard]},
     { path: 'consultation', component: ListConsultationComponent,canActivate: [authGuard] },
     { path: 'vaccination', component: ListVaccinationComponent ,canActivate: [authGuard]},
     { path: 'profile', component: SeeprofileComponent ,canActivate: [authGuard]},
-    { path: 'verif-admin-email', component: VeridAdminEmailComponent ,canActivate: [authGuard] },
-    { path: 'admin-dashboard', component: AdminDashboardComponent ,canActivate: [authGuard]}
+    { path: 'verif-admin-email', component: VeridAdminEmailComponent  },
+    { path: 'admin-dashboard', component: AdminDashboardComponent ,canActivate: [authGuard]},
+    { path: 'consultations-veterinaire/:id', component: ConsultationVeterinaireComponent ,canActivate: [authGuard]},
+    { path: 'client-animal/:id', component: ClientAnimalComponent ,canActivate: [authGuard]}
   
 ];

@@ -9,7 +9,8 @@ import { Observable } from 'rxjs';
 })
 export class VeterinaireService {
 
-  url = 'https://localhost:7000/api/admin/Veterinaires';
+  url = 'http://localhost:5000/api/admin/Veterinaires';
+  urlv='http://localhost:5000/api/admin/Consultation';
 
   constructor(private http: HttpClient) {}
 
@@ -31,6 +32,9 @@ export class VeterinaireService {
 
   getVeterinaireById(id: any): Observable<any> {
     return this.http.get(this.url + '/get-vet-by-id/' + id);
+  }
+  getconsultationByVet (idvet: any) :Observable<any> {
+    return this.http.get(this.urlv + '/get-consultations-by-veterinaire/' +idvet)
   }
 
 }

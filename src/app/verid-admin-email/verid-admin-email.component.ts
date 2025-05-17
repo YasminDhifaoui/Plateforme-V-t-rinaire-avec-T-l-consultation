@@ -24,7 +24,7 @@ export class VeridAdminEmailComponent {
       next: (res) => {
         // Stocke le token
         localStorage.setItem('authToken', res.token);
-        this.router.navigate(['/sidebar']);
+        this.router.navigate(['/login']);
       },
       error: (err) => {
         this.errorMessage = err.error?.message || 'Code ou email incorrect.';

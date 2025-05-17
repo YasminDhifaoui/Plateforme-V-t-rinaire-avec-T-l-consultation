@@ -57,6 +57,7 @@ veterinare: any[]= [];
     dialogRef.afterClosed().subscribe(result => {
       if (result) {
         console.log('Nouveau vaccination:', result);
+        this.ngOnInit()
       }
     });
   }
@@ -70,6 +71,7 @@ veterinare: any[]= [];
     dialogRef.afterClosed().subscribe(result => {
       if (result) {
         console.log('vaccination modifié avec succès:', result);
+        this.ngOnInit()
       }
     });
   }
@@ -97,7 +99,7 @@ veterinare: any[]= [];
               confirmButtonText: 'OK'
             }).then(() => {
               this.router.navigate(['/vaccination']); 
-              this.ngOnInit()
+             this.ngOnInit();
             });
           },
           err => {

@@ -5,7 +5,7 @@ import { Injectable } from '@angular/core';
   providedIn: 'root'
 })
 export class RegisterService {
-  private baseUrl = 'https://localhost:7000/api/AdminAuthentification';
+  private baseUrl = 'https://localhost:5000/api/AdminAuthentification';
 
   constructor(private http: HttpClient) { }
 

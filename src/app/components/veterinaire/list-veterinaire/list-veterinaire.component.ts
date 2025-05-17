@@ -81,9 +81,15 @@ export class ListVeterinaireComponent implements OnInit {
         console.log('Nouveau vétérinaire:', result);
         // Ajouter le nouveau vétérinaire à la table sans recharger
         this.dataSource.data = [...this.dataSource.data, result];
+        this.ngOnInit()
       }
     });
   }
+  goToConsultations(vetId: string) {
+    this.router.navigate(['/consultations-veterinaire', vetId]);
+  }
+  
+  
   
   UpdateVeterinareDialog(veterinaire: any) {
    const dialogRef = this.dialog.open(UpdateVeterinaireComponent, {
@@ -123,7 +129,7 @@ export class ListVeterinaireComponent implements OnInit {
                 icon: 'success',
                 confirmButtonText: 'OK'
               }).then(() => {
-                this.router.navigate(['/clients']); 
+                this.router.navigate(['/veterinaires']); 
                 this.ngOnInit()
               });
             },

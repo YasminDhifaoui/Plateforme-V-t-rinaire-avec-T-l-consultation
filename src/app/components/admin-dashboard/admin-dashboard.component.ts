@@ -6,9 +6,12 @@ import { AnimalService } from '../../animal.service';
 import { ConsultationService } from '../../services/consultation.service';
 import { VaccinationService } from '../../services/vaccination.service';
 import { RendezVousService } from '../../services/rendez-vous.service';
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-admin-dashboard',
+  standalone: true,
+  imports: [CommonModule],
   templateUrl: './admin-dashboard.component.html',
   styleUrls: ['./admin-dashboard.component.css']
 })
@@ -21,6 +24,11 @@ export class AdminDashboardComponent implements OnInit {
   vaccinationsCount: number = 0;
   rendezVousCount: number = 0;
 
+  urgentRendezvous: any[] = [];
+  vaccinationsDueToday: any[] = [];
+  consultationsToday: any[] = [];
+
+  
   constructor(
     private router: Router,
     private clientService: ClientService,
@@ -65,6 +73,24 @@ export class AdminDashboardComponent implements OnInit {
     this.rendezVousService.getAllrendezvous().subscribe((res: any) => {
       if (Array.isArray(res)) {
         this.rendezVousCount = res.length;
+      }
+    });
+
+    this.rendezVousService.getUrgentRendezvousToday().subscribe((res: any) => {
+      if (Array.isArray(res)) {
+        this.urgentRendezvous = res;
+      }
+    });
+
+    this.consultationService.getConsultationsToday().subscribe((res: any) => {
+      if (Array.isArray(res)) {
+        this.consultationsToday = res;
+      }
+    });
+
+    this.vaccinationService.getVaccinationsDueToday().subscribe((res: any) => {
+      if (Array.isArray(res)) {
+        this.vaccinationsDueToday = res;
       }
     });
   }
