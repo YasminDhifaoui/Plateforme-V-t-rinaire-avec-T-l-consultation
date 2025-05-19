@@ -167,9 +167,9 @@ builder.Services.Configure<IdentityOptions>(options =>
 builder.Services.AddSignalR(options => {
     options.EnableDetailedErrors = true;
 }).AddJsonProtocol(options => {
-    options.PayloadSerializerOptions.PropertyNamingPolicy = null; // Preserve case
+    options.PayloadSerializerOptions.PropertyNamingPolicy = null; 
 });
-// Configure Authentication
+
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -215,6 +215,9 @@ builder.Services.AddAuthorization(options =>
     options.AddPolicy("Admin", policy => policy.RequireRole("Admin"));
     options.AddPolicy("Client", policy => policy.RequireRole("Client"));
     options.AddPolicy("Veterinaire", policy => policy.RequireRole("Veterinaire"));
+    options.AddPolicy("ClientOrVeterinaire", policy =>
+       policy.RequireAssertion(context =>
+           context.User.IsInRole("Client") || context.User.IsInRole("Veterinaire")));
 
 });
 
@@ -255,6 +258,8 @@ app.UseAuthentication();  // Authentication middleware comes first
 app.UseAuthorization();   // Authorization middleware should come after authentication
 
 app.MapHub<ChatHub>("/chatHub");  // Must match your URL path
+app.MapHub<WebRTCHub>("/rtchub");
+
 
 app.MapControllers();
 

@@ -1,12 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:permission_handler/permission_handler.dart';
 import 'package:veterinary_app/models/client_models/client_model.dart';
 import 'package:veterinary_app/services/client_services/client_service.dart';
 import '../../services/auth_services/token_service.dart';
-import '../telecommunication_pages/ChatPage.dart';
+import '../chat_pages/ChatPage.dart';
 import '../animal_pages/animal_by_client_list_page.dart';
 import '../components/home_navbar.dart';
-import '../telecommunication_pages/video_call_page.dart';
 
 class SeeAnimalsPage extends StatelessWidget {
   final String clientId;
@@ -32,15 +30,6 @@ class SeeAnimalsPage extends StatelessWidget {
   }
 }
 
-Future<void> _requestPermissions() async {
-  await Permission.camera.request();
-  await Permission.microphone.request();
-  if (await Permission.camera.isGranted && await Permission.microphone.isGranted) {
-    print("Permissions granted");
-  } else {
-    print("Permissions denied");
-  }
-}
 
 class ClientsListPage extends StatefulWidget {
   final String token;
@@ -128,36 +117,15 @@ class _ClientsListPageState extends State<ClientsListPage> {
                 MaterialPageRoute(
                   builder: (_) => ChatPage(
                     token: token,
-                    receiverId: client.id, // Same here, client.id is a string
+                    receiverId: client.id,
+                    receiverUsername: client.username, // ✅ Pass username here
                   ),
                 ),
               );
+
             },
           ),
-          TextButton.icon(
-            icon: const Icon(Icons.video_call, color: Colors.green),
-            label: const Text("Video Call"),
-            onPressed: () async {
-              Navigator.pop(context);
-              await _requestPermissions();
-              final token = await TokenService.getToken();
-              if (token == null) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Token not available')),
-                );
-                return;
-              }
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => VideoCallPageVet(
-                    jwtToken: token,
-                    peerId: client.id, // Use the client.id directly here
-                  ),
-                ),
-              );
-            },
-          ),
+
           TextButton(
             child: const Text("Cancel"),
             onPressed: () => Navigator.pop(context),

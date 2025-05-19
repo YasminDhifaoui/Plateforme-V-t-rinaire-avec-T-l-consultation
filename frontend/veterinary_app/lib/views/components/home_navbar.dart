@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:veterinary_app/services/auth_services/token_service.dart';
 import 'package:veterinary_app/views/profile_pages/profile_page.dart';
 
+import '../../services/notification_handle/message_notifier.dart';
+import '../conv_pages/conv_page.dart';
+
 class HomeNavbar extends StatefulWidget implements PreferredSizeWidget {
   final String username;
   final VoidCallback onLogout;
@@ -23,11 +26,19 @@ class HomeNavbar extends StatefulWidget implements PreferredSizeWidget {
 
 class _HomeNavbarState extends State<HomeNavbar> {
   String? _jwtToken;
+  int _unreadMessageCount = 0;
+
 
   @override
   void initState() {
     super.initState();
     _loadJwtToken();
+    unreadMessageNotifier.addListener(() {
+      print('Navbar received update: ${unreadMessageNotifier.value}');
+      setState(() {
+        _unreadMessageCount = unreadMessageNotifier.value;
+      });
+    });
   }
 
   Future<void> _loadJwtToken() async {
@@ -35,6 +46,7 @@ class _HomeNavbarState extends State<HomeNavbar> {
     setState(() {
       _jwtToken = token;
     });
+
   }
 
   @override
@@ -47,11 +59,63 @@ class _HomeNavbarState extends State<HomeNavbar> {
         onPressed: widget.onLogout,
         tooltip: 'Logout',
       ),
-      title: const Text(
-        'Veterinary App',
-        style: TextStyle(color: Colors.white),
-      ),
+
       actions: [
+        ValueListenableBuilder<int>(
+          valueListenable: unreadMessageNotifier,
+          builder: (context, count, child) {
+            return IconButton(
+              icon: Stack(
+                children: [
+                  const Icon(Icons.chat_bubble_outline),
+                  if (count > 0)
+                    Positioned(
+                      right: 0,
+                      top: 0,
+                      child: Container(
+                        padding: const EdgeInsets.all(2),
+                        decoration: BoxDecoration(
+                          color: Colors.red,
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        constraints: const BoxConstraints(
+                          minWidth: 16,
+                          minHeight: 16,
+                        ),
+                        child: Text(
+                          '$count',
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 10,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+              tooltip: 'Messages',
+              onPressed: () {
+                if (_jwtToken != null) {
+                  unreadMessageNotifier.value = 0;
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => ConversationsPage(token: _jwtToken!),
+                    ),
+                  );
+                } else {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Token not available')),
+                  );
+                }
+              },
+            );
+          },
+        )
+,
+
+
         Center(
           child: Padding(
             padding: const EdgeInsets.only(right: 16.0),

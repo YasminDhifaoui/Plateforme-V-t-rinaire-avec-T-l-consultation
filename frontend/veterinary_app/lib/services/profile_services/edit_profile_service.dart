@@ -6,7 +6,7 @@ class EditProfileService {
 
   EditProfileService({required this.editProfileUrl});
 
-  Future<Map<String, dynamic>> updateProfile(String token, Map<String, dynamic> data) async {
+  Future<bool> updateProfile(String token, Map<String, dynamic> data) async {
     final response = await http.put(
       Uri.parse(editProfileUrl),
       headers: {
@@ -20,18 +20,9 @@ class EditProfileService {
     print('Update profile response body: ${response.body}');
 
     if (response.statusCode == 200) {
-      return {'success': true};
+      return true;
     } else {
-      String errorMessage = 'Failed to update profile. Please try again.';
-      try {
-        final responseBody = json.decode(response.body);
-        if (responseBody is Map<String, dynamic> && responseBody.containsKey('message')) {
-          errorMessage = responseBody['message'];
-        }
-      } catch (e) {
-        // ignore JSON parse errors
-      }
-      return {'success': false, 'error': errorMessage};
+      return false;
     }
   }
 }
