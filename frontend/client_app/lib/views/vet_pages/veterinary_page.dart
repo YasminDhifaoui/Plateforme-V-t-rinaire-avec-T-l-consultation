@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:permission_handler/permission_handler.dart';
 import '../../services/auth_services/token_service.dart';
 import '../../services/vet_services/veterinaire_service.dart';
 import '../../models/vet_models/veterinaire.dart';
+import '../chat_pages/ChatPage.dart';
 import '../rendezvous_pages/add_rendezvous_page.dart';
-import '../telecommunication_pages/ChatPage.dart';
 import '../components/home_navbar.dart';
 import '../../utils/logout_helper.dart';
 
@@ -36,10 +35,6 @@ class _VetListPageState extends State<VetListPage> {
     });
   }
 
-  Future<void> _requestPermissions() async {
-    await Permission.camera.request();
-    await Permission.microphone.request();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -176,25 +171,7 @@ class _VetListPageState extends State<VetListPage> {
 
                 },
               ),
-              const SizedBox(height: 10),
-              ElevatedButton.icon(
-                icon: const Icon(Icons.video_call),
-                label: const Text('Start Video Call'),
-                onPressed: () async {
-                  Navigator.pop(dialogContext);
-                  await _requestPermissions();
 
-                  final token = await TokenService.getToken();
-                  final userId = await TokenService.getUserId();
-
-                  if (token == null || userId == null) {
-                    _showSnackBar(context, 'User info missing');
-                    return;
-                  }
-
-
-                },
-              ),
               const SizedBox(height: 10),
               ElevatedButton.icon(
                 onPressed: () {

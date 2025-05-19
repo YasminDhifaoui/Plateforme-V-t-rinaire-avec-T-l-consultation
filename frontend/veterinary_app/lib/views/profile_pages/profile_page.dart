@@ -18,7 +18,11 @@ class _VetProfilePageState extends State<VetProfilePage> {
   String errorMessage = '';
   String? jwtToken;
 
-  late ProfileService vetProfileService;
+  late final ProfileService vetProfileService;
+
+  final Color primaryGreen = const Color(0xFF2e7d32);
+  final Color accentGreen = const Color(0xFF81c784);
+  final Color backgroundColor = Colors.white;
 
   @override
   void initState() {
@@ -26,24 +30,28 @@ class _VetProfilePageState extends State<VetProfilePage> {
     vetProfileService = ProfileService(
       profileUrl: "http://10.0.2.2:5000/api/veterinaire/profile/see-profile",
     );
-    _initialize();
+    _loadProfile();
   }
 
-  Future<void> _initialize() async {
+  Future<void> _loadProfile() async {
+    setState(() {
+      isLoading = true;
+      errorMessage = '';
+    });
+
     try {
       jwtToken = await TokenService.getToken();
-      if (jwtToken != null) {
-        final profile = await vetProfileService.fetchProfile(jwtToken!);
-        setState(() {
-          _vetProfile = profile;
-          isLoading = false;
-        });
-      } else {
-        throw Exception('Token not found');
-      }
+      if (jwtToken == null) throw Exception('Authentication token missing');
+
+      final profile = await vetProfileService.fetchProfile(jwtToken!);
+
+      setState(() {
+        _vetProfile = profile;
+        isLoading = false;
+      });
     } catch (e) {
       setState(() {
-        errorMessage = 'Failed to load profile: $e';
+        errorMessage = 'Error loading profile: $e';
         isLoading = false;
       });
     }
@@ -52,171 +60,223 @@ class _VetProfilePageState extends State<VetProfilePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: backgroundColor,
       appBar: AppBar(
-        backgroundColor: Colors.green,
-        title: const Text('Profile', style: TextStyle(color: Colors.white)),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
-          onPressed: () => Navigator.pop(context),
+        title: const Text('My Profile'),
+        backgroundColor: primaryGreen,
+        elevation: 2,
+        centerTitle: true,
+      ),
+      body: isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : errorMessage.isNotEmpty
+          ? Center(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 24),
+          child: Text(
+            errorMessage,
+            style: const TextStyle(color: Colors.redAccent, fontSize: 16),
+            textAlign: TextAlign.center,
+          ),
         ),
-        actions: [
-          Center(
-            child: Padding(
-              padding: const EdgeInsets.only(right: 8.0),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
+      )
+          : _vetProfile == null
+          ? const Center(
+        child: Text(
+          'No profile data available.',
+          style: TextStyle(fontSize: 16, color: Colors.black54),
+        ),
+      )
+          : _buildProfileContent(),
+      bottomNavigationBar: _vetProfile != null
+          ? Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+        child: ElevatedButton.icon(
+          style: ElevatedButton.styleFrom(
+            backgroundColor: primaryGreen,
+            padding: const EdgeInsets.symmetric(vertical: 16),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+          ),
+          icon: const Icon(Icons.edit),
+          label: const Text(
+            'Edit Profile',
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          ),
+          onPressed: () {
+            if (jwtToken != null && _vetProfile != null) {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => ProfileEditPage(
+                    profile: _vetProfile!,
+                    jwtToken: jwtToken!,
+                  ),
+                ),
+              ).then((_) => _loadProfile());
+            }
+          },
+        ),
+      )
+          : null,
+    );
+  }
+
+  Widget _buildProfileContent() {
+    return SingleChildScrollView(
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
+      child: Column(
+        children: [
+          _buildProfileHeader(),
+          const SizedBox(height: 32),
+          _buildInfoCard(),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildProfileHeader() {
+    return Row(
+      children: [
+        Container(
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            boxShadow: [
+              BoxShadow(
+                color: primaryGreen.withOpacity(0.15),
+                blurRadius: 10,
+                offset: const Offset(0, 5),
+              ),
+            ],
+          ),
+          child: CircleAvatar(
+            radius: 50,
+            backgroundColor: Colors.white,
+            backgroundImage: const AssetImage('assets/images/doctor.png'),
+          ),
+        ),
+        const SizedBox(width: 24),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                _vetProfile!.userName,
+                style: TextStyle(
+                  fontSize: 26,
+                  fontWeight: FontWeight.bold,
+                  color: primaryGreen,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Row(
                 children: [
-                  if (_vetProfile != null)
-                    Text(
-                      _vetProfile!.userName,
-                      style: const TextStyle(fontSize: 16, color: Colors.white),
-                    ),
-                  const SizedBox(width: 8),
-                  Container(
-                    width: 36,
-                    height: 36,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      border: Border.all(color: Colors.white, width: 2),
-                    ),
-                    child: ClipOval(
-                      child: Image.asset(
-                        'assets/images/doctor.png',
-                        fit: BoxFit.cover,
+                  Icon(Icons.email_outlined, size: 18, color: primaryGreen.withOpacity(0.7)),
+                  const SizedBox(width: 6),
+                  Expanded(
+                    child: Text(
+                      _vetProfile!.email,
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: primaryGreen.withOpacity(0.7),
+                        letterSpacing: 0.3,
                       ),
+                      overflow: TextOverflow.ellipsis,
                     ),
                   ),
                 ],
               ),
-            ),
-          ),
-        ],
-      ),
-      body:
-          isLoading
-              ? const Center(child: CircularProgressIndicator())
-              : errorMessage.isNotEmpty
-              ? Center(
-                child: Text(
-                  errorMessage,
-                  style: const TextStyle(color: Colors.red),
-                ),
-              )
-              : _vetProfile == null
-              ? const Center(child: Text('No profile data found'))
-              : SingleChildScrollView(
-                padding: const EdgeInsets.all(24.0),
-                child: Card(
-                  color: Colors.green.shade50,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  elevation: 6,
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                      vertical: 32,
-                      horizontal: 24,
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Veterinarian Information',
-                          style: TextStyle(
-                            fontSize: 28,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.green[800],
-                          ),
-                        ),
-                        const SizedBox(height: 24),
-                        _infoRow(
-                          Icons.person,
-                          'Username',
-                          _vetProfile!.userName,
-                        ),
-                        _infoRow(Icons.email, 'Email', _vetProfile!.email),
-                        _infoRow(
-                          Icons.phone,
-                          'Phone Number',
-                          _vetProfile!.phoneNumber,
-                        ),
-                        _infoRow(
-                          Icons.account_circle,
-                          'First Name',
-                          _vetProfile!.firstName,
-                        ),
-                        const SizedBox(height: 16),
-                        _infoRow(
-                          Icons.account_circle_outlined,
-                          'Last Name',
-                          _vetProfile!.lastName,
-                        ),
-                        const SizedBox(height: 16),
-                        _infoRow(
-                          Icons.cake,
-                          'Birth Date (YYYY-MM-DD)',
-                          formatDate(_vetProfile!.birthDate),
-                        ),
-                        const SizedBox(height: 16),
-                        _infoRow(Icons.home, 'Address', _vetProfile!.address),
-                        const SizedBox(height: 16),
-                        _infoRow(
-                          Icons.location_pin,
-                          'Zip Code',
-                          _vetProfile!.zipCode,
-                        ),
-                        const SizedBox(height: 16),
-                      ],
+              const SizedBox(height: 4),
+              Row(
+                children: [
+                  Icon(Icons.phone_outlined, size: 18, color: primaryGreen.withOpacity(0.7)),
+                  const SizedBox(width: 6),
+                  Text(
+                    _vetProfile!.phoneNumber,
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: primaryGreen.withOpacity(0.7),
+                      letterSpacing: 0.3,
                     ),
                   ),
-                ),
+                ],
               ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => EditProfilePage()),
-          ).then((_) => _initialize());
-        },
-        backgroundColor: Colors.green,
-        child: const Icon(Icons.edit),
+            ],
+          ),
+        )
+      ],
+    );
+  }
+
+  Widget _buildInfoCard() {
+    return Card(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      elevation: 6,
+      color: Colors.white,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 28),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Personal Details',
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.w700,
+                color: primaryGreen,
+              ),
+            ),
+            const SizedBox(height: 20),
+            _infoRow(Icons.person_outline, 'First Name', _vetProfile!.firstName),
+            const Divider(height: 32, thickness: 1, color: Color(0xffe0e0e0)),
+            _infoRow(Icons.person_outline, 'Last Name', _vetProfile!.lastName),
+            const Divider(height: 32, thickness: 1, color: Color(0xffe0e0e0)),
+            _infoRow(Icons.cake_outlined, 'Date of Birth', _formatDate(_vetProfile!.birthDate)),
+            const Divider(height: 32, thickness: 1, color: Color(0xffe0e0e0)),
+            _infoRow(Icons.home_outlined, 'Address', _vetProfile!.address),
+            const Divider(height: 32, thickness: 1, color: Color(0xffe0e0e0)),
+            _infoRow(Icons.markunread_mailbox_outlined, 'Zip Code', _vetProfile!.zipCode),
+          ],
+        ),
       ),
     );
   }
 
   Widget _infoRow(IconData icon, String label, String value) {
-    value = value.isEmpty ? 'Not provided' : value;
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 10.0),
-      child: Row(
-        children: [
-          Icon(icon, color: Colors.green[700]),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  label,
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    color: Colors.green[700],
-                  ),
-                ),
-                Text(value, style: const TextStyle(fontSize: 16)),
-              ],
+    return Row(
+      children: [
+        Icon(icon, size: 20, color: primaryGreen),
+        const SizedBox(width: 10),
+        Expanded(
+          flex: 3,
+          child: Text(
+            label,
+            style: TextStyle(
+              fontSize: 16,
+              color: primaryGreen,
+              fontWeight: FontWeight.w600,
             ),
           ),
-        ],
-      ),
+        ),
+        Expanded(
+          flex: 5,
+          child: Text(
+            value.isEmpty ? 'Not provided' : value,
+            style: const TextStyle(
+              fontSize: 16,
+              color: Colors.black87,
+            ),
+          ),
+        ),
+      ],
     );
   }
 
-  String formatDate(String isoDate) {
+  String _formatDate(String isoDate) {
     try {
       final date = DateTime.parse(isoDate);
-      return DateFormat('dd/MM/yyyy').format(date);
+      return DateFormat('dd MMM yyyy').format(date);
     } catch (_) {
       return 'Invalid date';
     }

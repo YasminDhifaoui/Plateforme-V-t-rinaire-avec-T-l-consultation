@@ -167,9 +167,9 @@ builder.Services.Configure<IdentityOptions>(options =>
 builder.Services.AddSignalR(options => {
     options.EnableDetailedErrors = true;
 }).AddJsonProtocol(options => {
-    options.PayloadSerializerOptions.PropertyNamingPolicy = null; // Preserve case
+    options.PayloadSerializerOptions.PropertyNamingPolicy = null; 
 });
-// Configure Authentication
+
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -258,6 +258,8 @@ app.UseAuthentication();  // Authentication middleware comes first
 app.UseAuthorization();   // Authorization middleware should come after authentication
 
 app.MapHub<ChatHub>("/chatHub");  // Must match your URL path
+app.MapHub<WebRTCHub>("/rtchub");
+
 
 app.MapControllers();
 

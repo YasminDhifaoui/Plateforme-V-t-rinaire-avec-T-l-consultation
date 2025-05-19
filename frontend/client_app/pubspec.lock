@@ -205,7 +205,7 @@ packages:
     description:
       path: "."
       ref: main
-      resolved-ref: dfead5d869f4e1a5a5e59b3a0372b533a835b121
+      resolved-ref: "86dac0ceed5632e5f2ae996db34f1950e869c681"
       url: "https://github.com/flutter-webrtc/flutter-webrtc.git"
     source: git
     version: "0.14.0"

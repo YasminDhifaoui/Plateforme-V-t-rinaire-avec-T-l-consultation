@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../models/conv_models/conv_model.dart';
 import '../../services/conv_services/conv_service.dart';
-import '../telecommunication_pages/ChatPage.dart';
+import '../chat_pages/ChatPage.dart';
 
 class ConversationsPage extends StatelessWidget {
   final String token;
