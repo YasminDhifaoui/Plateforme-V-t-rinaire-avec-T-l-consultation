@@ -1,3 +1,4 @@
+import 'package:veterinary_app/utils/base_url.dart';
 import 'package:veterinary_app/utils/logout_helper.dart';
 import 'package:veterinary_app/views/components/home_navbar.dart';
 import 'package:veterinary_app/views/product_pages/full_screen_image_page.dart';
@@ -24,7 +25,7 @@ class _ProductsListPageState extends State<ProductsListPage> {
   late ProductService _productService;
   late Future<List<Product>> _productsFuture;
 
-  final String _baseUrl = 'http://10.0.2.2:5000';
+  final String _baseUrl = '${BaseUrl.api}';
 
   @override
   void initState() {

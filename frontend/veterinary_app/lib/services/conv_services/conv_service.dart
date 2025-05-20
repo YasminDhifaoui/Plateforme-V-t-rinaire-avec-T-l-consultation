@@ -2,11 +2,12 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:veterinary_app/services/auth_services/token_service.dart';
+import 'package:veterinary_app/utils/base_url.dart';
 
 import '../../models/conv_models/conv_model.dart';
 
 class ConvService {
-  final String baseUrl = 'http://10.0.2.2:5000/api/conv';
+  final String baseUrl = '${BaseUrl.api}/api/conv';
 
   Future<List<Conversation>> getConversations() async {
     final token = await TokenService.getToken();

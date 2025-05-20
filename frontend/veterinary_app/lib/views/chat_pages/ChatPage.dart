@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
+import 'package:veterinary_app/utils/base_url.dart';
 import '../../models/chat_models/chat_model.dart';
 import '../../services/notification_handle/message_notifier.dart';
 import '../../services/chat_services/chat_signal_service.dart';
@@ -40,19 +41,22 @@ class _ChatPageState extends State<ChatPage> {
     _signalService.connect(widget.token);
 
     _signalService.onMessageReceived = (from, message) {
-      if (from.trim().toLowerCase() == _currentUsername?.trim().toLowerCase()) return;
+      if (from.trim().toLowerCase() == _currentUsername?.trim().toLowerCase())
+        return;
 
       setState(() {
-        _messages.add(ChatMessage(
-          senderName: _getDisplayName(from),
-          text: message,
-          isSender: false,
-          sentAt: DateTime.now(),
-        ));
+        _messages.add(
+          ChatMessage(
+            senderName: _getDisplayName(from),
+            text: message,
+            isSender: false,
+            sentAt: DateTime.now(),
+          ),
+        );
       });
 
       _scrollToBottom();
-};
+    };
 
     _fetchMessages();
   }
@@ -75,13 +79,18 @@ class _ChatPageState extends State<ChatPage> {
 
   Future<void> _fetchMessages() async {
     final response = await http.get(
-      Uri.parse('http://10.0.2.2:5000/api/chat/history/$_currentUserId/${widget.receiverId}'),
+      Uri.parse(
+        '${BaseUrl.api}/api/chat/history/$_currentUserId/${widget.receiverId}',
+      ),
       headers: {'Authorization': 'Bearer ${widget.token}'},
     );
 
     if (response.statusCode == 200) {
       setState(() {
-        _messages = ChatMessage.chatMessagesFromJson(response.body, _currentUserId ?? '');
+        _messages = ChatMessage.chatMessagesFromJson(
+          response.body,
+          _currentUserId ?? '',
+        );
       });
 
       _scrollToBottom();
@@ -91,7 +100,8 @@ class _ChatPageState extends State<ChatPage> {
   }
 
   String _getDisplayName(String senderId) {
-    return (senderId.trim().toLowerCase() == _currentUserId?.trim().toLowerCase())
+    return (senderId.trim().toLowerCase() ==
+            _currentUserId?.trim().toLowerCase())
         ? "${_currentUsername ?? "Me"} (me)"
         : senderId;
   }
@@ -102,12 +112,14 @@ class _ChatPageState extends State<ChatPage> {
     _signalService.sendMessage(_currentUserId!, widget.receiverId, message);
 
     setState(() {
-      _messages.add(ChatMessage(
-        senderName: "${_currentUsername ?? "Me"} (me)",
-        text: message,
-        isSender: true,
-        sentAt: DateTime.now(),
-      ));
+      _messages.add(
+        ChatMessage(
+          senderName: "${_currentUsername ?? "Me"} (me)",
+          text: message,
+          isSender: true,
+          sentAt: DateTime.now(),
+        ),
+      );
     });
 
     _controller.clear();
@@ -136,24 +148,27 @@ class _ChatPageState extends State<ChatPage> {
   }
 
   Widget _buildMessageBubble(ChatMessage message) {
-    final alignment = message.isSender ? Alignment.centerRight : Alignment.centerLeft;
+    final alignment =
+        message.isSender ? Alignment.centerRight : Alignment.centerLeft;
     final color = message.isSender ? Colors.green[400] : Colors.green[100];
-    final radius = message.isSender
-        ? BorderRadius.only(
-      topLeft: Radius.circular(16),
-      topRight: Radius.circular(16),
-      bottomLeft: Radius.circular(16),
-    )
-        : BorderRadius.only(
-      topLeft: Radius.circular(16),
-      topRight: Radius.circular(16),
-      bottomRight: Radius.circular(16),
-    );
+    final radius =
+        message.isSender
+            ? BorderRadius.only(
+              topLeft: Radius.circular(16),
+              topRight: Radius.circular(16),
+              bottomLeft: Radius.circular(16),
+            )
+            : BorderRadius.only(
+              topLeft: Radius.circular(16),
+              topRight: Radius.circular(16),
+              bottomRight: Radius.circular(16),
+            );
 
     final formattedTime = DateFormat('hh:mm a').format(message.sentAt);
 
     return Column(
-      crossAxisAlignment: message.isSender ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+      crossAxisAlignment:
+          message.isSender ? CrossAxisAlignment.end : CrossAxisAlignment.start,
       children: [
         Align(
           alignment: alignment,
@@ -173,18 +188,20 @@ class _ChatPageState extends State<ChatPage> {
             ),
             child: Column(
               crossAxisAlignment:
-              message.isSender ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+                  message.isSender
+                      ? CrossAxisAlignment.end
+                      : CrossAxisAlignment.start,
               children: [
                 Text(
                   message.senderName,
                   style: TextStyle(
-                      fontSize: 12, fontWeight: FontWeight.w600, color: Colors.black87),
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.black87,
+                  ),
                 ),
                 SizedBox(height: 4),
-                Text(
-                  message.text,
-                  style: TextStyle(fontSize: 15),
-                ),
+                Text(message.text, style: TextStyle(fontSize: 15)),
               ],
             ),
           ),
@@ -221,7 +238,10 @@ class _ChatPageState extends State<ChatPage> {
                   hintText: 'Type a message...',
                   filled: true,
                   fillColor: Colors.green[50],
-                  contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  contentPadding: EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 12,
+                  ),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(24),
                     borderSide: BorderSide.none,
@@ -244,7 +264,7 @@ class _ChatPageState extends State<ChatPage> {
                   }
                 },
               ),
-            )
+            ),
           ],
         ),
       ),
@@ -277,18 +297,22 @@ class _ChatPageState extends State<ChatPage> {
               borderRadius: BorderRadius.circular(30),
               onTap: () {
                 Navigator.push(
-                context,
-                MaterialPageRoute(
-                builder: (context) => VideoCallScreen(
-                targetUserId: "123", // Replace with dynamic user ID
-                ),
-                ),
+                  context,
+                  MaterialPageRoute(
+                    builder:
+                        (context) => VideoCallScreen(
+                          targetUserId: "123", // Replace with dynamic user ID
+                        ),
+                  ),
                 );
                 print('Video call button pressed');
               },
               child: Container(
                 decoration: BoxDecoration(
-                  color: Colors.lightGreenAccent.shade700, // greenish color for video call
+                  color:
+                      Colors
+                          .lightGreenAccent
+                          .shade700, // greenish color for video call
                   shape: BoxShape.circle,
                   boxShadow: [
                     BoxShadow(
@@ -299,11 +323,7 @@ class _ChatPageState extends State<ChatPage> {
                   ],
                 ),
                 padding: EdgeInsets.all(8),
-                child: Icon(
-                  Icons.video_call,
-                  color: Colors.white,
-                  size: 28,
-                ),
+                child: Icon(Icons.video_call, color: Colors.white, size: 28),
               ),
             ),
           ),
@@ -316,7 +336,8 @@ class _ChatPageState extends State<ChatPage> {
               controller: _scrollController,
               padding: EdgeInsets.symmetric(vertical: 10),
               itemCount: _messages.length,
-              itemBuilder: (context, index) => _buildMessageBubble(_messages[index]),
+              itemBuilder:
+                  (context, index) => _buildMessageBubble(_messages[index]),
             ),
           ),
           _buildMessageInput(),

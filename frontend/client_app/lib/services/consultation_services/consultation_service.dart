@@ -1,10 +1,11 @@
 import 'dart:convert';
+import 'package:client_app/utils/base_url.dart';
 import 'package:http/http.dart' as http;
 import '../../models/consultation_models/consultation.dart';
 import '../auth_services/token_service.dart';
 
 class ConsultationService {
-  final String baseUrl = 'http://10.0.2.2:5000/api/client/ConsultationsC';
+  final String baseUrl = '${BaseUrl.api}/api/client/ConsultationsC';
 
   Future<List<Consultation>> getConsultationsList() async {
     final token = await TokenService.getToken();

@@ -1,10 +1,10 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:veterinary_app/models/animal_models/animal_model.dart';
+import 'package:veterinary_app/utils/base_url.dart';
 
 class AnimalsVetService {
-  static const String baseUrl =
-      "http://10.0.2.2:5000/api/veterinaire/AnimalsVet";
+  static final String baseUrl = "${BaseUrl.api}/api/veterinaire/AnimalsVet";
 
   // Existing method
   Future<List<AnimalModel>> getAnimalsList(String token) async {
@@ -34,7 +34,10 @@ class AnimalsVetService {
   }
 
   // ✅ New method for getting animals by client ID
-  Future<List<AnimalModel>> getAnimalsByClientId(String token, String clientId) async {
+  Future<List<AnimalModel>> getAnimalsByClientId(
+    String token,
+    String clientId,
+  ) async {
     final url = Uri.parse("$baseUrl/client/$clientId");
 
     final response = await http.get(

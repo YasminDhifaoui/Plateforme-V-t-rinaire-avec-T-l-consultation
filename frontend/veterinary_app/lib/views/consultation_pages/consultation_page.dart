@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:veterinary_app/models/consultation_models/consulattion_model.dart';
 import 'package:veterinary_app/services/consultation_services/consultation_service.dart';
+import 'package:veterinary_app/utils/base_url.dart';
 import 'package:veterinary_app/views/components/home_navbar.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:veterinary_app/views/consultation_pages/add_consultation_page.dart';
@@ -144,7 +145,7 @@ class _ConsultationListPageState extends State<ConsultationListPage> {
       (c) => c.username == clientName,
       orElse:
           () => ClientModel(
-            id:'',
+            id: '',
             username: 'Unknown',
             email: '',
             phoneNumber: '',
@@ -192,7 +193,7 @@ class _ConsultationListPageState extends State<ConsultationListPage> {
   }
 
   Future<void> _downloadDocument(String urlString) async {
-    final Uri url = Uri.parse("http://10.0.2.2:5000/$urlString");
+    final Uri url = Uri.parse("${BaseUrl.api}/$urlString");
 
     if (await canLaunchUrl(url)) {
       await launchUrl(url, mode: LaunchMode.externalApplication);
@@ -318,7 +319,7 @@ class _ConsultationListPageState extends State<ConsultationListPage> {
                                     onPressed: () async {
                                       try {
                                         final Uri uri = Uri.parse(
-                                          'http://10.0.2.2:5000/${consult.documentPath}',
+                                          '${BaseUrl.api}/${consult.documentPath}',
                                         );
                                         if (!await launchUrl(
                                           uri,

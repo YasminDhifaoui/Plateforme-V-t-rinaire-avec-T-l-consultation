@@ -2,10 +2,11 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'package:veterinary_app/models/consultation_models/consulattion_model.dart';
+import 'package:veterinary_app/utils/base_url.dart';
 
 class ConsultationService {
-  static const String _baseUrl = 'http://10.0.2.2:5000';
-  static const String _getEndpoint =
+  static final String _baseUrl = '${BaseUrl.api}';
+  static final String _getEndpoint =
       '$_baseUrl/api/vet/consultationsvet/get-consultations';
 
   // Headers used in all requests
@@ -36,7 +37,7 @@ class ConsultationService {
     required File file,
     required String token,
   }) async {
-    final uri = Uri.parse('https://your-api-url/consultations');
+    final uri = Uri.parse('$_baseUrl/consultations');
 
     var request =
         http.MultipartRequest('POST', uri)

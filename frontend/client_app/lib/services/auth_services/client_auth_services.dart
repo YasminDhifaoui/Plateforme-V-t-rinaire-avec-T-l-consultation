@@ -1,14 +1,14 @@
 import 'dart:convert';
 import 'package:client_app/models/auth_models/client_confirm_email.dart';
 import 'package:client_app/models/auth_models/client_forget_password.dart';
+import 'package:client_app/utils/base_url.dart';
 import 'package:http/http.dart' as http;
 import '../../models/auth_models/client_register.dart';
 import '../../models/auth_models/client_login.dart';
 import '../../models/auth_models/client_verify_login.dart';
 
 class ApiService {
-  static const String baseUrl =
-      "http://10.0.2.2:5000/api/ClientAuthentification";
+  static final String baseUrl = "${BaseUrl.api}/api/ClientAuthentification";
 
   /// Register a new client
   Future<Map<String, dynamic>> registerClient(ClientRegister client) async {

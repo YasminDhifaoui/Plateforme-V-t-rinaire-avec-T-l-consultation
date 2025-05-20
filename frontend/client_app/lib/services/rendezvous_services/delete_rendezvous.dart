@@ -1,8 +1,9 @@
 import 'package:client_app/services/auth_services/token_service.dart';
+import 'package:client_app/utils/base_url.dart';
 import 'package:http/http.dart' as http;
 
 class DeleteRendezvousService {
-  final String baseUrl = "http://10.0.2.2:5000/api/client/rendez_vousc";
+  final String baseUrl = "${BaseUrl.api}/api/client/rendez_vousc";
 
   Future<void> deleteRendezvous(String id) async {
     final token = await TokenService.getToken();

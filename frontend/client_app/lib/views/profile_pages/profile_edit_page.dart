@@ -1,4 +1,5 @@
 import 'package:client_app/models/profile_models/profile_model.dart';
+import 'package:client_app/utils/base_url.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../../services/profile_services/edit_profile_service.dart';
@@ -36,13 +37,15 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
   void initState() {
     super.initState();
     profileService = EditProfileService(
-      editProfileUrl: "http://10.0.2.2:5000/api/client/profile/update-profile",
+      editProfileUrl: "${BaseUrl.api}/api/client/profile/update-profile",
     );
 
     _userNameController = TextEditingController(text: widget.profile.userName);
-    _firstNameController = TextEditingController(text: widget.profile.firstName);
+    _firstNameController =
+        TextEditingController(text: widget.profile.firstName);
     _lastNameController = TextEditingController(text: widget.profile.lastName);
-    _phoneNumberController = TextEditingController(text: widget.profile.phoneNumber);
+    _phoneNumberController =
+        TextEditingController(text: widget.profile.phoneNumber);
 
     try {
       _selectedBirthDate = DateTime.parse(widget.profile.birthDate);
@@ -91,8 +94,10 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
                 ),
                 const SizedBox(height: 16),
                 _buildTextField(_userNameController, "Username", Icons.person),
-                _buildTextField(_firstNameController, "First Name", Icons.person_outline),
-                _buildTextField(_lastNameController, "Last Name", Icons.person_outline),
+                _buildTextField(
+                    _firstNameController, "First Name", Icons.person_outline),
+                _buildTextField(
+                    _lastNameController, "Last Name", Icons.person_outline),
 
                 // Gender Dropdown
                 DropdownButtonFormField<String>(
@@ -114,8 +119,9 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
                       _gender = value!;
                     });
                   },
-                  validator: (value) =>
-                  (value == null || value.isEmpty) ? 'Gender is required' : null,
+                  validator: (value) => (value == null || value.isEmpty)
+                      ? 'Gender is required'
+                      : null,
                 ),
                 const SizedBox(height: 16),
 
@@ -167,10 +173,13 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
                 const SizedBox(height: 16),
 
                 // Email (read-only)
-                _buildTextField(_emailController, "Email", Icons.email, readOnly: true),
-                _buildTextField(_phoneNumberController, "Phone Number", Icons.phone),
+                _buildTextField(_emailController, "Email", Icons.email,
+                    readOnly: true),
+                _buildTextField(
+                    _phoneNumberController, "Phone Number", Icons.phone),
                 _buildTextField(_addressController, "Address", Icons.home),
-                _buildTextField(_zipCodeController, "Zip Code", Icons.location_pin),
+                _buildTextField(
+                    _zipCodeController, "Zip Code", Icons.location_pin),
 
                 const SizedBox(height: 32),
 
@@ -192,7 +201,8 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
                     },
                     child: const Text(
                       'Update Profile',
-                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                      style:
+                          TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                     ),
                   ),
                 ),
@@ -206,11 +216,11 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
 
   // Reusable text field builder with icons & style
   Widget _buildTextField(
-      TextEditingController controller,
-      String label,
-      IconData icon, {
-        bool readOnly = false,
-      }) {
+    TextEditingController controller,
+    String label,
+    IconData icon, {
+    bool readOnly = false,
+  }) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 16),
       child: TextFormField(

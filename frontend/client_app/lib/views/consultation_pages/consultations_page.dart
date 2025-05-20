@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:client_app/models/consultation_models/consultation.dart';
+import 'package:client_app/utils/base_url.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:dio/dio.dart';
@@ -251,7 +252,7 @@ class _ConsultationsPageState extends State<ConsultationsPage> {
                                       onPressed: () async {
                                         try {
                                           final Uri uri = Uri.parse(
-                                              'http://10.0.2.2:5000/${consultation.documentPath}');
+                                              '${BaseUrl.api}/${consultation.documentPath}');
                                           if (!await launchUrl(uri,
                                               mode: LaunchMode
                                                   .externalApplication)) {
