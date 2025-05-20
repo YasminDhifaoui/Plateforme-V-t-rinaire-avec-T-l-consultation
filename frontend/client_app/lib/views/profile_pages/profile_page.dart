@@ -1,4 +1,5 @@
 import 'package:client_app/models/profile_models/profile_model.dart';
+import 'package:client_app/utils/base_url.dart';
 import 'package:client_app/views/profile_pages/profile_edit_page.dart';
 import 'package:flutter/material.dart';
 import 'package:client_app/services/profile_services/profile_service.dart';
@@ -24,7 +25,7 @@ class _ProfilePageState extends State<ProfilePage> {
   void initState() {
     super.initState();
     profileService = ProfileService(
-      profileUrl: "http://10.0.2.2:5000/api/client/profile/see-profile",
+      profileUrl: "${BaseUrl.api}/api/client/profile/see-profile",
     );
     _fetchProfile();
   }
@@ -65,174 +66,208 @@ class _ProfilePageState extends State<ProfilePage> {
       body: isLoading
           ? const Center(child: CircularProgressIndicator())
           : errorMessage.isNotEmpty
-          ? Center(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(
-                errorMessage,
-                textAlign: TextAlign.center,
-                style: const TextStyle(color: Colors.red, fontSize: 16),
-              ),
-              const SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: _fetchProfile, // Retry fetching the profile
-                child: const Text('Retry'),
-              ),
-            ],
-          ),
-        ),
-      )
-          : _profile == null
-          ? const Center(child: Text('No profile data available'))
-          : SingleChildScrollView(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Card(
-              elevation: 8,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(18),
-              ),
-              color: Colors.blue.shade50,
-              child: Padding(
-                padding: const EdgeInsets.all(24),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Profile header: picture + username + email + phone
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.center,
+              ? Center(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Container(
-                          width: 80,
-                          height: 80,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            border: Border.all(color: primaryColor, width: 2),
-                            image: const DecorationImage(
-                              image: AssetImage('assets/images/pet_owner.png'),
-                              fit: BoxFit.cover,
-                            ),
-                          ),
+                        Text(
+                          errorMessage,
+                          textAlign: TextAlign.center,
+                          style:
+                              const TextStyle(color: Colors.red, fontSize: 16),
                         ),
-                        const SizedBox(width: 20),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Text(
-                                _profile!.userName,
-                                style: TextStyle(
-                                  fontSize: 22,
-                                  fontWeight: FontWeight.bold,
-                                  color: primaryColor,
-                                ),
-                              ),
-                              const SizedBox(height: 6),
-                              Row(
-                                children: [
-                                  Icon(Icons.email_outlined,
-                                      size: 18, color: primaryColor.withOpacity(0.8)),
-                                  const SizedBox(width: 6),
-                                  Flexible(
-                                    child: Text(
-                                      _profile!.email,
-                                      style: TextStyle(
-                                        fontSize: 16,
-                                        color: primaryColor.withOpacity(0.85),
-                                      ),
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: 4),
-                              Row(
-                                children: [
-                                  Icon(Icons.phone_outlined,
-                                      size: 18, color: primaryColor.withOpacity(0.8)),
-                                  const SizedBox(width: 6),
-                                  Text(
-                                    _profile!.phoneNumber,
-                                    style: TextStyle(
-                                      fontSize: 16,
-                                      color: primaryColor.withOpacity(0.85),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
+                        const SizedBox(height: 20),
+                        ElevatedButton(
+                          onPressed:
+                              _fetchProfile, // Retry fetching the profile
+                          child: const Text('Retry'),
                         ),
                       ],
                     ),
-
-                    const SizedBox(height: 30),
-
-                    const Text(
-                      'Personal Information',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.black87,
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-
-                    _infoRow(Icons.person_outline, 'First Name', _profile!.firstName),
-                    const Divider(height: 32, thickness: 1, color: Color(0xffe0e0e0)),
-                    _infoRow(Icons.person_outline, 'Last Name', _profile!.lastName),
-                    const Divider(height: 32, thickness: 1, color: Color(0xffe0e0e0)),
-                    _infoRow(Icons.transgender, 'Gender', _profile!.gender),
-                    const Divider(height: 32, thickness: 1, color: Color(0xffe0e0e0)),
-                    _infoRow(Icons.cake_outlined, 'Date of Birth', _profile!.birthDate),
-                    const Divider(height: 32, thickness: 1, color: Color(0xffe0e0e0)),
-                    _infoRow(Icons.home_outlined, 'Address', _profile!.address),
-                    const Divider(height: 32, thickness: 1, color: Color(0xffe0e0e0)),
-                    _infoRow(Icons.markunread_mailbox_outlined, 'Zip Code', _profile!.zipCode),
-                  ],
-                ),
-              ),
-            ),
-
-            const SizedBox(height: 40),
-
-            Center(
-              child: ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: primaryColor,
-                  padding: const EdgeInsets.symmetric(horizontal: 48, vertical: 16),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
                   ),
-                  elevation: 5,
-                  shadowColor: primaryColor.withOpacity(0.5),
-                ),
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => ProfileEditPage(
-                        profile: _profile!,
-                        jwtToken: widget.jwtToken,
+                )
+              : _profile == null
+                  ? const Center(child: Text('No profile data available'))
+                  : SingleChildScrollView(
+                      padding: const EdgeInsets.all(24),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          Card(
+                            elevation: 8,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(18),
+                            ),
+                            color: Colors.blue.shade50,
+                            child: Padding(
+                              padding: const EdgeInsets.all(24),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  // Profile header: picture + username + email + phone
+                                  Row(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.center,
+                                    children: [
+                                      Container(
+                                        width: 80,
+                                        height: 80,
+                                        decoration: BoxDecoration(
+                                          shape: BoxShape.circle,
+                                          border: Border.all(
+                                              color: primaryColor, width: 2),
+                                          image: const DecorationImage(
+                                            image: AssetImage(
+                                                'assets/images/pet_owner.png'),
+                                            fit: BoxFit.cover,
+                                          ),
+                                        ),
+                                      ),
+                                      const SizedBox(width: 20),
+                                      Expanded(
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            Text(
+                                              _profile!.userName,
+                                              style: TextStyle(
+                                                fontSize: 22,
+                                                fontWeight: FontWeight.bold,
+                                                color: primaryColor,
+                                              ),
+                                            ),
+                                            const SizedBox(height: 6),
+                                            Row(
+                                              children: [
+                                                Icon(Icons.email_outlined,
+                                                    size: 18,
+                                                    color: primaryColor
+                                                        .withOpacity(0.8)),
+                                                const SizedBox(width: 6),
+                                                Flexible(
+                                                  child: Text(
+                                                    _profile!.email,
+                                                    style: TextStyle(
+                                                      fontSize: 16,
+                                                      color: primaryColor
+                                                          .withOpacity(0.85),
+                                                    ),
+                                                    overflow:
+                                                        TextOverflow.ellipsis,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                            const SizedBox(height: 4),
+                                            Row(
+                                              children: [
+                                                Icon(Icons.phone_outlined,
+                                                    size: 18,
+                                                    color: primaryColor
+                                                        .withOpacity(0.8)),
+                                                const SizedBox(width: 6),
+                                                Text(
+                                                  _profile!.phoneNumber,
+                                                  style: TextStyle(
+                                                    fontSize: 16,
+                                                    color: primaryColor
+                                                        .withOpacity(0.85),
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+
+                                  const SizedBox(height: 30),
+
+                                  const Text(
+                                    'Personal Information',
+                                    style: TextStyle(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.w600,
+                                      color: Colors.black87,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 16),
+
+                                  _infoRow(Icons.person_outline, 'First Name',
+                                      _profile!.firstName),
+                                  const Divider(
+                                      height: 32,
+                                      thickness: 1,
+                                      color: Color(0xffe0e0e0)),
+                                  _infoRow(Icons.person_outline, 'Last Name',
+                                      _profile!.lastName),
+                                  const Divider(
+                                      height: 32,
+                                      thickness: 1,
+                                      color: Color(0xffe0e0e0)),
+                                  _infoRow(Icons.transgender, 'Gender',
+                                      _profile!.gender),
+                                  const Divider(
+                                      height: 32,
+                                      thickness: 1,
+                                      color: Color(0xffe0e0e0)),
+                                  _infoRow(Icons.cake_outlined, 'Date of Birth',
+                                      _profile!.birthDate),
+                                  const Divider(
+                                      height: 32,
+                                      thickness: 1,
+                                      color: Color(0xffe0e0e0)),
+                                  _infoRow(Icons.home_outlined, 'Address',
+                                      _profile!.address),
+                                  const Divider(
+                                      height: 32,
+                                      thickness: 1,
+                                      color: Color(0xffe0e0e0)),
+                                  _infoRow(Icons.markunread_mailbox_outlined,
+                                      'Zip Code', _profile!.zipCode),
+                                ],
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 40),
+                          Center(
+                            child: ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: primaryColor,
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 48, vertical: 16),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                elevation: 5,
+                                shadowColor: primaryColor.withOpacity(0.5),
+                              ),
+                              onPressed: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => ProfileEditPage(
+                                      profile: _profile!,
+                                      jwtToken: widget.jwtToken,
+                                    ),
+                                  ),
+                                ).then((_) => _fetchProfile());
+                              },
+                              child: const Text(
+                                'Edit Profile',
+                                style: TextStyle(
+                                    fontSize: 20, color: Colors.white),
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-                  ).then((_) => _fetchProfile());
-                },
-                child: const Text(
-                  'Edit Profile',
-                  style: TextStyle(fontSize: 20, color: Colors.white),
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
     );
   }
 

@@ -1,10 +1,11 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:veterinary_app/models/vaccination_models/vaccination_model.dart';
+import 'package:veterinary_app/utils/base_url.dart';
 
 class VaccinationService {
-  static const String baseUrl =
-      "http://10.0.2.2:5000/api/veterinaire/VaccinationsVet";
+  static final String baseUrl =
+      "${BaseUrl.api}/api/veterinaire/VaccinationsVet";
 
   Future<List<VaccinationModel>> getAllVaccinations(String token) async {
     final url = Uri.parse("$baseUrl/get-all-vaccinations");

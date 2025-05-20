@@ -1,9 +1,10 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:veterinary_app/models/rendezvous_models/rendezvous_model.dart';
+import 'package:veterinary_app/utils/base_url.dart';
 
 class RendezVousService {
-  final String baseUrl = 'http://10.0.2.2:5000/api/veterinaire/RendezVousVet';
+  final String baseUrl = '${BaseUrl.api}/api/veterinaire/RendezVousVet';
 
   Future<List<RendezVousModel>> getRendezVousList(String token) async {
     final response = await http.get(

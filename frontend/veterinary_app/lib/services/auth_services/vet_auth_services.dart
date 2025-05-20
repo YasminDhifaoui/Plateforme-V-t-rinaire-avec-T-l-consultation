@@ -3,12 +3,13 @@ import 'package:http/http.dart' as http;
 import 'package:veterinary_app/models/auth_models/vet_confirm_email.dart';
 import 'package:veterinary_app/models/auth_models/vet_forget_password.dart';
 import 'package:veterinary_app/models/auth_models/vet_verify_login.dart';
+import 'package:veterinary_app/utils/base_url.dart';
 
 import '../../models/auth_models/vet_register.dart';
 import '../../models/auth_models/vet_login.dart';
 
 class ApiService {
-  static const String baseUrl = "http://10.0.2.2:5000/api/VetAuthentification";
+  static final String baseUrl = "${BaseUrl.api}/api/VetAuthentification";
 
   /// Register a new client
   Future<Map<String, dynamic>> registerClient(VetRegister vet) async {

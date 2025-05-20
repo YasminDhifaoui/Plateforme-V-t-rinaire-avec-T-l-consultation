@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:client_app/utils/base_url.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
@@ -38,7 +39,8 @@ class _ChatPageState extends State<ChatPage> {
     _signalService.connect(widget.token);
 
     _signalService.onMessageReceived = (from, message) {
-      if (from.trim().toLowerCase() == _currentUsername?.trim().toLowerCase()) return;
+      if (from.trim().toLowerCase() == _currentUsername?.trim().toLowerCase())
+        return;
 
       setState(() {
         _messages.add(ChatMessage(
@@ -46,8 +48,6 @@ class _ChatPageState extends State<ChatPage> {
           text: message,
           isSender: false,
           sentAt: DateTime.now(), // ✅ ADD THIS
-
-
         ));
         _scrollToBottom();
       });
@@ -74,13 +74,15 @@ class _ChatPageState extends State<ChatPage> {
 
   Future<void> _fetchMessages() async {
     final response = await http.get(
-      Uri.parse('http://10.0.2.2:5000/api/chat/history/$_currentUserId/${widget.receiverId}'),
+      Uri.parse(
+          '${BaseUrl.api}/api/chat/history/$_currentUserId/${widget.receiverId}'),
       headers: {'Authorization': 'Bearer ${widget.token}'},
     );
 
     if (response.statusCode == 200) {
       setState(() {
-        _messages = ChatMessage.chatMessagesFromJson(response.body, _currentUserId ?? '');
+        _messages = ChatMessage.chatMessagesFromJson(
+            response.body, _currentUserId ?? '');
         _scrollToBottom();
       });
     } else {
@@ -107,7 +109,6 @@ class _ChatPageState extends State<ChatPage> {
         text: message,
         isSender: true,
         sentAt: DateTime.now(), // ✅ ADD THIS
-
       ));
       _scrollToBottom();
     });
@@ -135,25 +136,29 @@ class _ChatPageState extends State<ChatPage> {
     _scrollController.dispose();
     super.dispose();
   }
+
   Widget _buildMessageBubble(ChatMessage message) {
-    final alignment = message.isSender ? Alignment.centerRight : Alignment.centerLeft;
+    final alignment =
+        message.isSender ? Alignment.centerRight : Alignment.centerLeft;
     final color = message.isSender ? Colors.lightBlueAccent : Colors.grey[200];
     final radius = message.isSender
         ? BorderRadius.only(
-      topLeft: Radius.circular(16),
-      topRight: Radius.circular(16),
-      bottomLeft: Radius.circular(16),
-    )
+            topLeft: Radius.circular(16),
+            topRight: Radius.circular(16),
+            bottomLeft: Radius.circular(16),
+          )
         : BorderRadius.only(
-      topLeft: Radius.circular(16),
-      topRight: Radius.circular(16),
-      bottomRight: Radius.circular(16),
-    );
+            topLeft: Radius.circular(16),
+            topRight: Radius.circular(16),
+            bottomRight: Radius.circular(16),
+          );
 
     return Align(
       alignment: alignment,
       child: Column(
-        crossAxisAlignment: message.isSender ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+        crossAxisAlignment: message.isSender
+            ? CrossAxisAlignment.end
+            : CrossAxisAlignment.start,
         children: [
           Container(
             margin: EdgeInsets.symmetric(vertical: 4, horizontal: 10),
@@ -170,12 +175,16 @@ class _ChatPageState extends State<ChatPage> {
               ],
             ),
             child: Column(
-              crossAxisAlignment:
-              message.isSender ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+              crossAxisAlignment: message.isSender
+                  ? CrossAxisAlignment.end
+                  : CrossAxisAlignment.start,
               children: [
                 Text(
                   message.senderName,
-                  style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Colors.black87),
+                  style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.black87),
                 ),
                 SizedBox(height: 4),
                 Text(
@@ -217,7 +226,8 @@ class _ChatPageState extends State<ChatPage> {
                   hintText: 'Type a message...',
                   filled: true,
                   fillColor: Colors.grey[100],
-                  contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  contentPadding:
+                      EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(24),
                     borderSide: BorderSide.none,
@@ -273,7 +283,8 @@ class _ChatPageState extends State<ChatPage> {
               },
               child: Container(
                 decoration: BoxDecoration(
-                  color: Colors.blueGrey.shade700, // greenish color for video call
+                  color:
+                      Colors.blueGrey.shade700, // greenish color for video call
                   shape: BoxShape.circle,
                   boxShadow: [
                     BoxShadow(
@@ -294,8 +305,6 @@ class _ChatPageState extends State<ChatPage> {
           ),
         ],
       ),
-
-
       body: Column(
         children: [
           Expanded(
@@ -303,7 +312,8 @@ class _ChatPageState extends State<ChatPage> {
               controller: _scrollController,
               padding: EdgeInsets.symmetric(vertical: 10),
               itemCount: _messages.length,
-              itemBuilder: (context, index) => _buildMessageBubble(_messages[index]),
+              itemBuilder: (context, index) =>
+                  _buildMessageBubble(_messages[index]),
             ),
           ),
           _buildMessageInput(),

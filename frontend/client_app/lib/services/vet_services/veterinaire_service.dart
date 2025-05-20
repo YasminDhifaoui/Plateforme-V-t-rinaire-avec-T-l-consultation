@@ -1,10 +1,11 @@
 import 'dart:convert';
 import 'package:client_app/models/vet_models/veterinaire.dart';
 import 'package:client_app/services/auth_services/token_service.dart';
+import 'package:client_app/utils/base_url.dart';
 import 'package:http/http.dart' as http;
 
 class VeterinaireService {
-  final String baseUrl = "http://10.0.2.2:5000/api/client/vetsc/get-all-veterinaires";
+  final String baseUrl = "${BaseUrl.api}/api/client/vetsc/get-all-veterinaires";
 
   Future<List<Veterinaire>> getAllVeterinaires() async {
     final token = await TokenService.getToken();

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:veterinary_app/utils/base_url.dart';
 import 'package:veterinary_app/utils/logout_helper.dart';
 import 'package:veterinary_app/views/consultation_pages/consultation_page.dart';
 import 'package:veterinary_app/views/product_pages/products_list_page.dart';
@@ -33,7 +34,7 @@ class _HomePageState extends State<HomePage> {
   final VaccinationService _vaccinationService = VaccinationService();
 
   final ProductService _productService = ProductService(
-    baseUrl: "http://10.0.2.2:5000/api/vet",
+    baseUrl: "${BaseUrl.api}/api/vet",
   );
 
   int animalCount = 0;
@@ -183,9 +184,9 @@ class _HomePageState extends State<HomePage> {
                         MaterialPageRoute(
                           builder:
                               (context) => AnimalsListPage(
-                            token: widget.token,
-                            username: widget.username,
-                          ),
+                                token: widget.token,
+                                username: widget.username,
+                              ),
                         ),
                       );
                     },
@@ -204,9 +205,9 @@ class _HomePageState extends State<HomePage> {
                         MaterialPageRoute(
                           builder:
                               (context) => RendezVousListPage(
-                            token: widget.token,
-                            username: widget.username,
-                          ),
+                                token: widget.token,
+                                username: widget.username,
+                              ),
                         ),
                       );
                     },
@@ -225,9 +226,9 @@ class _HomePageState extends State<HomePage> {
                         MaterialPageRoute(
                           builder:
                               (context) => ClientsListPage(
-                            token: widget.token,
-                            username: widget.username,
-                          ),
+                                token: widget.token,
+                                username: widget.username,
+                              ),
                         ),
                       );
                     },
@@ -246,9 +247,9 @@ class _HomePageState extends State<HomePage> {
                         MaterialPageRoute(
                           builder:
                               (context) => ConsultationListPage(
-                            token: widget.token,
-                            username: widget.username,
-                          ),
+                                token: widget.token,
+                                username: widget.username,
+                              ),
                         ),
                       );
                     },
@@ -267,9 +268,9 @@ class _HomePageState extends State<HomePage> {
                         MaterialPageRoute(
                           builder:
                               (context) => VaccinationListPage(
-                            token: widget.token,
-                            username: widget.username,
-                          ),
+                                token: widget.token,
+                                username: widget.username,
+                              ),
                         ),
                       );
                     },
@@ -288,9 +289,9 @@ class _HomePageState extends State<HomePage> {
                         MaterialPageRoute(
                           builder:
                               (context) => ProductsListPage(
-                            token: widget.token,
-                            username: widget.username,
-                          ),
+                                token: widget.token,
+                                username: widget.username,
+                              ),
                         ),
                       );
                     },
@@ -311,15 +312,15 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget _buildHomeCard(
-      BuildContext context, {
-        required IconData icon,
-        required String label,
-        required VoidCallback onTap,
-        required TextStyle textStyle,
-        required Color iconColor,
-        int? count,
-        Color? cardColor,
-      }) {
+    BuildContext context, {
+    required IconData icon,
+    required String label,
+    required VoidCallback onTap,
+    required TextStyle textStyle,
+    required Color iconColor,
+    int? count,
+    Color? cardColor,
+  }) {
     return Card(
       elevation: 6,
       color: cardColor ?? Colors.white,

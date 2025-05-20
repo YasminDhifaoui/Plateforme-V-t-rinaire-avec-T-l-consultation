@@ -1,6 +1,7 @@
 import 'package:flutter_webrtc/flutter_webrtc.dart';
 import 'package:signalr_core/signalr_core.dart';
 import 'package:veterinary_app/services/video_call_services/rtc_peer_service.dart';
+import 'package:veterinary_app/utils/base_url.dart';
 
 class SignalRTCService {
   static late HubConnection connection;
@@ -8,12 +9,15 @@ class SignalRTCService {
   static String? targetUserId;
 
   static Future<void> init(String token) async {
-    connection = HubConnectionBuilder()
-        .withUrl(
-      'https://10.0.2.2:5000/rtchub',
-      HttpConnectionOptions(accessTokenFactory: () => Future.value(token)),
-    )
-        .build();
+    connection =
+        HubConnectionBuilder()
+            .withUrl(
+              '${BaseUrl.api}/rtchub',
+              HttpConnectionOptions(
+                accessTokenFactory: () => Future.value(token),
+              ),
+            )
+            .build();
 
     await connection.start();
 
@@ -32,8 +36,14 @@ class SignalRTCService {
     SignalRTCService.callerUserId = callerUserId;
   }
 
-  static Future<void> sendIceCandidate(String targetUserId, dynamic candidate) async {
-    await connection.invoke('SendIceCandidate', args: [targetUserId, candidate]);
+  static Future<void> sendIceCandidate(
+    String targetUserId,
+    dynamic candidate,
+  ) async {
+    await connection.invoke(
+      'SendIceCandidate',
+      args: [targetUserId, candidate],
+    );
   }
 
   static void _handleOffer(List<dynamic>? message) {

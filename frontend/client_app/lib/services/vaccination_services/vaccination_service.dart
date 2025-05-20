@@ -1,10 +1,11 @@
 import 'dart:convert';
 import 'package:client_app/models/vaccination_models/vaccination.dart';
+import 'package:client_app/utils/base_url.dart';
 import 'package:http/http.dart' as http;
 import 'package:client_app/services/auth_services/token_service.dart';
 
 class VaccinationService {
-  final String baseUrl = 'http://10.0.2.2:5000/api/client/VaccinationC';
+  final String baseUrl = '${BaseUrl.api}/api/client/VaccinationC';
 
   Future<List<Vaccination>> getVaccinationsForAnimal(String animalId) async {
     final token = await TokenService.getToken();

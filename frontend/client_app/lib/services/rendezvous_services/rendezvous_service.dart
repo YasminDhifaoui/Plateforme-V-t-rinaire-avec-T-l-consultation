@@ -1,10 +1,11 @@
 import 'dart:convert';
+import 'package:client_app/utils/base_url.dart';
 import 'package:http/http.dart' as http;
 import 'package:client_app/models/rendezvous_models/rendezvous.dart';
 import 'package:client_app/services/auth_services/token_service.dart';
 
 class RendezvousService {
-  static const String _baseUrl = 'http://10.0.2.2:5000/api/client/rendez_vousC';
+  static final String _baseUrl = '${BaseUrl.api}/api/client/rendez_vousC';
 
   /// Fetches a list of rendezvous (appointments) for the current client.
   Future<List<Rendezvous>> getRendezvousList() async {
