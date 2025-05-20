@@ -1,1 +1,23 @@
-<p>update-vaccination works!</p>
+<h2>Modifier la vaccination</h2>
+
+<form [formGroup]="vaccinationForm">
+  <div>
+    <label for="name">Nom</label>
+    <input type="text" id="name" formControlName="name" />
+  </div>
+
+  <div>
+    <label for="date">Date</label>
+    <input type="datetime-local" id="date" formControlName="date" />
+  </div>
+
+  <div>
+    <label for="animalId">ID de l'animal</label>
+    <input type="text" id="animalId" formControlName="animalId" />
+  </div>
+
+  <div class="actions">
+    <button type="button" (click)="valider()">Mettre à jour</button>
+    <button type="button" (click)="annuler()">Annuler</button>
+  </div>
+</form>

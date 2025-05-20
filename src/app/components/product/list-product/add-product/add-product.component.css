@@ -1,0 +1,50 @@
+.product-form {
+  width: 100%;
+  padding: 20px;
+}
+
+mat-form-field {
+  width: 100%;
+  margin-bottom: 15px;
+}
+
+.form-row {
+  display: flex;
+  gap: 20px;
+}
+
+.form-row mat-form-field {
+  flex: 1;
+}
+
+.file-upload {
+  margin: 20px 0;
+}
+
+.file-upload label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 500;
+}
+
+.file-upload input[type="file"] {
+  width: 100%;
+  padding: 8px 0;
+}
+
+.file-upload .invalid {
+  border: 1px solid red;
+}
+
+mat-error {
+  font-size: 12px;
+  color: #f44336; /* Matches Material error color */
+}
+
+mat-dialog-actions {
+  margin-top: 20px;
+  padding: 20px 0 0 0;
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}

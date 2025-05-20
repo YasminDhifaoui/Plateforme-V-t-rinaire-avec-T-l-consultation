@@ -1,54 +1,107 @@
-<div class="profile-card" *ngIf="profileData && !isLoading">
+<div class="profile-card" *ngIf="profileData && !isLoading && !isEditing">
   <div class="profile-header">
     <img src="https://www.gravatar.com/avatar?d=mp&s=100" alt="Profile Photo" class="avatar" />
     <div class="user-info">
-      <h2>{{ profileData.name }}</h2>
+      <h2>{{ profileData.firstName }} {{ profileData.lastName }}</h2>
       <p class="email">{{ profileData.email }}</p>
       <span class="role">Administrator</span>
     </div>
   </div>
 
-  <div class="upload-area">
-    <div class="upload-box">
-      <p>Drop your files here or <span class="clickable">click in this area</span></p>
-    </div>
-  </div>
-
   <div class="account-section">
-    <h3>Account</h3>
+    <h3>Account Information</h3>
     <div class="form-grid">
       <div class="form-group">
         <label>Username</label>
-        <input type="text" value="{{ profileData.username }}" disabled />
+        <input type="text" [value]="profileData.userName" disabled />
       </div>
       <div class="form-group">
-        <label>Email *</label>
-        <input type="email" value="{{ profileData.email }}" disabled />
+        <label>Email</label>
+        <input type="email" [value]="profileData.email" disabled />
       </div>
       <div class="form-group">
-        <label>Password</label>
-        <input type="password" value="********" disabled />
+        <label>Phone Number</label>
+        <input type="text" [value]="profileData.phoneNumber" disabled />
       </div>
       <div class="form-group">
-        <label>Full Name *</label>
-        <input type="text" value="{{ profileData.name }}" disabled />
+        <label>First Name</label>
+        <input type="text" [value]="profileData.firstName" disabled />
       </div>
       <div class="form-group">
-        <label>Title</label>
-        <input type="text" value="Administrator" disabled />
+        <label>Last Name</label>
+        <input type="text" [value]="profileData.lastName" disabled />
       </div>
       <div class="form-group">
-        <label>Language</label>
-        <select disabled>
-          <option selected>English</option>
-        </select>
+        <label>Birth Date</label>
+        <input type="text" [value]="profileData.birthDate | date: 'yyyy-MM-dd'" disabled />
+      </div>
+      <div class="form-group">
+        <label>Address</label>
+        <input type="text" [value]="profileData.address" disabled />
+      </div>
+      <div class="form-group">
+        <label>Zip Code</label>
+        <input type="text" [value]="profileData.zipCode" disabled />
+      </div>
+      <div class="form-group">
+        <label>Gender</label>
+        <input type="text" [value]="profileData.gender" disabled />
       </div>
     </div>
   </div>
 
-  <button mat-raised-button color="primary" class="update-button">
+  <button mat-raised-button color="primary" class="update-button" (click)="toggleEdit()">
     Update your profile
   </button>
+</div>
+
+<!-- ✅ FORMULAIRE D'ÉDITION -->
+<div *ngIf="isEditing" class="edit-form">
+  <form [formGroup]="profileForm" (ngSubmit)="onSubmit()">
+    <div class="form-grid">
+      <div class="form-group">
+        <label>Username</label>
+        <input type="text" formControlName="userName" />
+      </div>
+      <div class="form-group">
+        <label>Email</label>
+        <input type="email" formControlName="email" />
+      </div>
+      <div class="form-group">
+        <label>Phone Number</label>
+        <input type="text" formControlName="phoneNumber" />
+      </div>
+      <div class="form-group">
+        <label>First Name</label>
+        <input type="text" formControlName="firstName" />
+      </div>
+      <div class="form-group">
+        <label>Last Name</label>
+        <input type="text" formControlName="lastName" />
+      </div>
+      <div class="form-group">
+        <label>Birth Date</label>
+        <input type="date" formControlName="birthDate" />
+      </div>
+      <div class="form-group">
+        <label>Address</label>
+        <input type="text" formControlName="address" />
+      </div>
+      <div class="form-group">
+        <label>Zip Code</label>
+        <input type="text" formControlName="zipCode" />
+      </div>
+      <div class="form-group">
+        <label>Gender</label>
+        <input type="text" formControlName="gender" />
+      </div>
+    </div>
+
+    <button mat-raised-button color="primary" type="submit" [disabled]="isSubmitting">
+      Save Changes
+    </button>
+    <button mat-button type="button" (click)="toggleEdit()">Cancel</button>
+  </form>
 </div>
 
 <div *ngIf="isLoading" class="loading">

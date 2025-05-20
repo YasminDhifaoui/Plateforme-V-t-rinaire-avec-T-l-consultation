@@ -89,6 +89,28 @@ export class ListRendezVousComponent implements OnInit {
       }
     });
   }
+  getClientStats(rendezvousList: RendezVous[]) {
+  const clientCount: { [key: string]: number } = {};
+
+  rendezvousList.forEach(rdv => {
+    if (!clientCount[rdv.clientId]) {
+      clientCount[rdv.clientId] = 1;
+    } else {
+      clientCount[rdv.clientId]++;
+    }
+  });
+
+  let newClients = 0;
+  let returningClients = 0;
+
+  Object.values(clientCount).forEach(count => {
+    if (count === 1) newClients++;
+    else returningClients++;
+  });
+
+  return { newClients, returningClients };
+}
+
 
   deleteRendezVous(id: any) {
     Swal.fire({

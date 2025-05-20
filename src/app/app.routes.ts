@@ -18,6 +18,7 @@ import { ListVaccinationComponent } from './components/vaccination/list-vaccinat
 import { VeridAdminEmailComponent } from './verid-admin-email/verid-admin-email.component';
 import { ConsultationVeterinaireComponent } from './admin/consultation-veterinaire/consultation-veterinaire.component';
 import { ClientAnimalComponent } from './admin/client-animal/client-animal.component';
+import { ListProductComponent } from './components/product/list-product/list-product.component';
 export const routes: Routes = [
     {path: 'sidebar' , component: SidebarComponent , canActivate: [authGuard]},
     {path: 'navbar' , component: NavbarComponent ,canActivate: [authGuard]},
@@ -36,6 +37,7 @@ export const routes: Routes = [
     { path: 'verif-admin-email', component: VeridAdminEmailComponent  },
     { path: 'admin-dashboard', component: AdminDashboardComponent ,canActivate: [authGuard]},
     { path: 'consultations-veterinaire/:id', component: ConsultationVeterinaireComponent ,canActivate: [authGuard]},
-    { path: 'client-animal/:id', component: ClientAnimalComponent ,canActivate: [authGuard]}
+    { path: 'client-animal/:id', component: ClientAnimalComponent ,canActivate: [authGuard]},
+     { path: 'products', component: ListProductComponent ,canActivate: [authGuard]}
   
 ];

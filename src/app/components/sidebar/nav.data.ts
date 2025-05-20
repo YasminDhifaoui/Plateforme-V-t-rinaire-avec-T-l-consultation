@@ -7,5 +7,6 @@ export const navbarData = [
     { routeLink: '/RendezVous', icon: 'fa fa-calendar', label: 'Liste de RendezVous ' },
     { routeLink: '/consultation', icon: 'fa fa-stethoscope', label: 'Liste de consultation ' },
     { routeLink: '/vaccination', icon: 'fas fa-syringe', label: 'Liste des vaccination ' },
+    { routeLink: '/products', icon: 'fas fa-pills', label: 'Liste des products ' },
 
 ]

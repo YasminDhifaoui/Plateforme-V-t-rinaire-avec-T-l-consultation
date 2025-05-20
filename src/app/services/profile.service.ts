@@ -18,16 +18,20 @@ export class ProfileService {
   }
   
   updateprofile(client: any): Observable<any> {
-    const headers = new HttpHeaders({
-      'Authorization': `Bearer ${localStorage.getItem('authToken')}`,
-      'Content-Type': 'application/json'
-    });
-    
-    return this.http.put(
-      `${this.url}/update-profile`,
-      client,
-      { headers }
-    );
-  }
+  const headers = new HttpHeaders({
+    'Authorization': `Bearer ${localStorage.getItem('authToken')}`,
+    'Content-Type': 'application/json'
+  });
+
+  return this.http.put(
+    `${this.url}/update-profile`,
+    client,
+    {
+      headers,
+      responseType: 'json' // ✅ très important pour éviter l’erreur que tu as
+    }
+  );
+}
+
   
 }

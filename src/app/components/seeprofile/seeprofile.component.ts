@@ -17,27 +17,28 @@ import { CommonModule } from '@angular/common';
   styleUrls: ['./seeprofile.component.css']
 })
 export class SeeprofileComponent implements OnInit {
-  profileForm: FormGroup;
+ profileForm: FormGroup;
   profileData: any;
   isEditing = false;
-  isLoading = false; // Ajout de la propriété isLoading
-  isSubmitting = false; // Ajout de la propriété isSubmitting
-  errorMessage: string | null = null; // Ajout de la propriété errorMessage
+  isLoading = false;
+  isSubmitting = false;
+  errorMessage: string | null = null;
 
   constructor(
     private profileService: ProfileService,
     private fb: FormBuilder,
-    private snackBar: MatSnackBar // Ajout du MatSnackBar
+    private snackBar: MatSnackBar
   ) {
     this.profileForm = this.fb.group({
+      userName: [''],
       email: ['', [Validators.required, Validators.email]],
-      name: [''],
       phoneNumber: [''],
       firstName: [''],
       lastName: [''],
       birthDate: [''],
       address: [''],
-      zipCode: ['']
+      zipCode: [''],
+      gender: ['']
     });
   }
 
@@ -48,7 +49,7 @@ export class SeeprofileComponent implements OnInit {
   loadProfile(): void {
     this.isLoading = true;
     this.errorMessage = null;
-    
+
     this.profileService.seeprofile().subscribe({
       next: (data) => {
         this.profileData = data;

@@ -1,0 +1,134 @@
+.product-container {
+  padding: 30px;
+  max-width: 1200px;
+  margin: 0 auto;
+  background-color: #f9fafb;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30px;
+}
+
+.header h2 {
+  font-size: 28px;
+  font-weight: 600;
+  color: #1f2937;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.header button {
+  background-color: #10b981;
+  color: white;
+  font-weight: 500;
+  padding: 10px 20px;
+  border-radius: 8px;
+  transition: background-color 0.3s ease;
+}
+
+.header button:hover {
+  background-color: #059669;
+}
+
+.search-field {
+  width: 100%;
+  max-width: 500px;
+  margin-bottom: 30px;
+}
+
+.search-field mat-form-field {
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 20px;
+}
+
+.product-card {
+  background-color: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  overflow: hidden;
+}
+
+.product-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.15);
+}
+
+.product-image {
+  height: 200px;
+  object-fit: cover;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+mat-card-title {
+  font-size: 20px;
+  font-weight: 600;
+  color: #1f2937;
+  margin: 16px 0 8px;
+  padding: 0 16px;
+}
+
+mat-card-content {
+  padding: 0 16px 16px;
+}
+
+.description {
+  font-size: 14px;
+  color: #4b5563;
+  margin-bottom: 12px;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.price {
+  font-size: 16px;
+  color: #111827;
+  font-weight: 500;
+  margin-bottom: 8px;
+}
+
+.availability {
+  font-size: 14px;
+  color: #111827;
+}
+
+.badge {
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.in-stock {
+  background-color: #d1fae5;
+  color: #065f46;
+}
+
+.out-of-stock {
+  background-color: #fee2e2;
+  color: #991b1b;
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  padding: 8px 16px;
+  border-top: 1px solid #e5e7eb;
+}
+
+.actions button {
+  margin-left: 8px;
+}

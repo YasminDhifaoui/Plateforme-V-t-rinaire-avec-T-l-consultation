@@ -1,0 +1,40 @@
+<div class="product-container">
+  <div class="header">
+    <h2><i class="fas fa-pills"></i> Pharmaceutical Products</h2>
+    <button mat-raised-button color="primary" (click)="openAddProductDialog()">
+      <i class="fas fa-plus"></i> Add Product
+    </button>
+  </div>
+
+  <mat-form-field appearance="outline" class="search-field">
+    <mat-label>Search Products</mat-label>
+    <input matInput (keyup)="applyFilter($event)" placeholder="Search for a product...">
+    <mat-icon matSuffix>search</mat-icon>
+  </mat-form-field>
+
+  <div class="card-grid">
+    <mat-card class="product-card" *ngFor="let product of dataSource.filteredData">
+      <img mat-card-image [src]="'http://localhost:5000' + product.imageUrl" alt="{{ product.name }} image" class="product-image" />
+      
+      <mat-card-title>{{ product.name }}</mat-card-title>
+      <mat-card-content>
+        <p class="description">{{ product.description }}</p>
+        <p class="price"><strong>Price:</strong> ${{ product.price.toFixed(2) }}</p>
+        <p class="availability">
+          <strong>Availability:</strong> 
+          <span class="badge" [ngClass]="{'in-stock': product.available > 0, 'out-of-stock': product.available <= 0}">
+            {{ product.available > 0 ? 'In Stock' : 'Out of Stock' }}
+          </span>
+        </p>
+      </mat-card-content>
+      <mat-card-actions class="actions">
+        <button mat-icon-button color="primary" (click)="openUpdateProductDialog(product)" aria-label="Edit product">
+          <mat-icon>edit</mat-icon>
+        </button>
+        <button mat-icon-button color="warn" (click)="deleteProduct(product.id)" aria-label="Delete product">
+          <mat-icon>delete</mat-icon>
+        </button>
+      </mat-card-actions>
+    </mat-card>
+  </div>
+</div>
