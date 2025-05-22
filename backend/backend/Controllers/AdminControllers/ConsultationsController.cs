@@ -9,7 +9,7 @@ namespace backend.Controllers.AdminControllers
 {
     [Route("api/admin/[controller]")]
     [ApiController]
-    [Authorize(Policy = "Admin")]
+  //  [Authorize(Policy = "Admin")]
     public class ConsultationController : ControllerBase
     {
         private readonly IConsultationRepo _consultationRepo;
@@ -43,11 +43,13 @@ namespace backend.Controllers.AdminControllers
         [Route("add-consultation")]
         public async Task<IActionResult> AddConsultation([FromForm] AddConsultationDto dto)
         {
-            var rdv = await _context.RendezVous.FindAsync(dto.RendezVousID);
-            if (rdv == null)
-            {
-                return NotFound("Rendezvous not found !");
-            }
+            var client = await _context.Animals.FindAsync(dto.ClientId);
+            if (client == null)
+                return BadRequest("Client not found");
+            var vet = await _context.veterinaires.FirstOrDefaultAsync(vet => vet.AppUserId == dto.VetId);
+            if (vet == null)
+                return BadRequest("Vet not found");
+
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
@@ -62,6 +64,12 @@ namespace backend.Controllers.AdminControllers
         [Route("update-consultation/{id}")]
         public async Task<IActionResult> UpdateConsultation(Guid id, [FromForm] UpdateConsultationDto dto)
         {
+            var client = await _context.Animals.FindAsync(dto.ClientId);
+            if (client == null)
+                return BadRequest("Client not found");
+            var vet = await _context.veterinaires.FirstOrDefaultAsync(vet => vet.AppUserId == dto.VetId);
+            if (vet == null)
+                return BadRequest("Vet not found");
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 

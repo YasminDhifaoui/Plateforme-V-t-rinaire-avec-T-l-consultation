@@ -39,7 +39,7 @@ class _UpdateRendezvousPageState extends State<UpdateRendezvousPage> {
     super.didChangeDependencies();
     if (!_isInitialized) {
       final args =
-          ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
+      ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
       rendezvous = args['rendezvous'] as Rendezvous;
       final passedVetName = args['vetName'] as String?;
       _dateController.text =
@@ -60,11 +60,16 @@ class _UpdateRendezvousPageState extends State<UpdateRendezvousPage> {
         _isLoading = false;
 
         _selectedAnimal = animals.firstWhere(
-          (a) => a.name == rendezvous.animalName,
-          orElse: () => animals.first,
+              (a) => a.name.toLowerCase().trim() == rendezvous.animalName.toLowerCase().trim(),
+          orElse: () {
+            print('Animal not found: ${rendezvous.animalName}');
+            return animals.first;
+          },
         );
+
+
         _selectedVeterinaire = vets.firstWhere(
-          (v) => v.username == (passedVetName ?? rendezvous.vetName),
+              (v) => v.username == (passedVetName ?? rendezvous.vetName),
           orElse: () => vets.first,
         );
       });
@@ -77,11 +82,9 @@ class _UpdateRendezvousPageState extends State<UpdateRendezvousPage> {
   }
 
   Future<void> _selectDateTime() async {
-    print('Date picker tapped');
     DateTime initialDate = rendezvous.date.isBefore(DateTime.now())
         ? DateTime.now()
         : rendezvous.date;
-    print('Initial date for picker: $initialDate');
 
     final DateTime? pickedDate = await showDatePicker(
       context: context,
@@ -121,31 +124,30 @@ class _UpdateRendezvousPageState extends State<UpdateRendezvousPage> {
   }
 
   void _updateRendezvous() async {
-    String? vetNameToSend =
-        _selectedVeterinaire?.username ?? rendezvous.vetName;
-    print('Updating rendezvous with vetName: $vetNameToSend');
-
-    if (vetNameToSend.isEmpty) {
+    final vetIdToSend = _selectedVeterinaire?.id;
+    if (vetIdToSend == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Erreur: vétérinaire non sélectionné')),
+        const SnackBar(content: Text('Erreur: vétérinaire introuvable')),
       );
       return;
     }
 
     final data = {
-      "animalName": _selectedAnimal?.name ?? rendezvous.animalName,
-      "vetName": vetNameToSend,
+      "animalId": _selectedAnimal?.id, // ✅ Send the animal's ID here
+      "vetId": vetIdToSend,
       "date": DateFormat('yyyy-MM-ddTHH:mm:ss')
           .format(DateFormat('dd-MM-yyyy HH:mm').parse(_dateController.text)),
       "status": rendezvous.status.name,
     };
+
+    print('Sending data: $data');
 
     try {
       await UpdateRendezvousService().updateRendezvous(rendezvous.id, data);
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Rendez-vous mis à jour')),
       );
-      Navigator.pop(context);
+      Navigator.pop(context, true); // <- send 'true' to indicate successful update
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Erreur de mise à jour: $e')),
@@ -160,80 +162,107 @@ class _UpdateRendezvousPageState extends State<UpdateRendezvousPage> {
         username: '',
         onLogout: () => LogoutHelper.handleLogout(context),
       ),
-      body: Padding(
+      body: _isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
-        child: _isLoading
-            ? const Center(child: CircularProgressIndicator())
-            : Column(
-                children: [
-                  ElevatedButton.icon(
-                    onPressed: () => Navigator.pop(context),
-                    icon: const Icon(Icons.arrow_back),
-                    label: const Text('Retour'),
-                    style: ElevatedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 24, vertical: 14),
-                      textStyle: const TextStyle(fontSize: 18),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-                  DropdownButtonFormField<Animal>(
-                    value: _selectedAnimal,
-                    items: _animals
-                        .map((animal) => DropdownMenuItem(
-                              value: animal,
-                              child: Text(animal.name),
-                            ))
-                        .toList(),
-                    onChanged: (animal) {
-                      setState(() {
-                        _selectedAnimal = animal;
-                      });
-                    },
-                    decoration:
-                        const InputDecoration(labelText: 'Nom de l\'animal'),
-                  ),
-                  const SizedBox(height: 16),
-                  DropdownButtonFormField<Veterinaire>(
-                    value: _selectedVeterinaire,
-                    items: _veterinaires
-                        .map((vet) => DropdownMenuItem(
-                              value: vet,
-                              child: Text((vet.firstName.isNotEmpty &&
-                                      vet.lastName.isNotEmpty)
-                                  ? '${vet.firstName} ${vet.lastName}'
-                                  : vet.username),
-                            ))
-                        .toList(),
-                    onChanged: (vet) {
-                      setState(() {
-                        _selectedVeterinaire = vet;
-                      });
-                    },
-                    decoration:
-                        const InputDecoration(labelText: 'Nom du vétérinaire'),
-                  ),
-                  const SizedBox(height: 16),
-                  TextFormField(
-                    controller: _dateController,
-                    readOnly: true,
-                    decoration: const InputDecoration(
-                      labelText: 'Date et heure',
-                      suffixIcon: Icon(Icons.calendar_today),
-                    ),
-                    onTap: _selectDateTime,
-                  ),
-                  const SizedBox(height: 20),
-                  ElevatedButton(
-                    onPressed: _updateRendezvous,
-                    child: const Text('Enregistrer'),
-                  ),
-                ],
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            ElevatedButton.icon(
+              onPressed: () => Navigator.pop(context),
+              icon: const Icon(Icons.arrow_back),
+              label: const Text('Retour'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.grey[800],
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
               ),
+            ),
+            const SizedBox(height: 25),
+
+            // 🔹 Animal Dropdown
+            InputDecorator(
+              decoration: InputDecoration(
+                labelText: 'Nom de l\'animal',
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                prefixIcon: const Icon(Icons.pets),
+              ),
+              child: DropdownButtonHideUnderline(
+                child: DropdownButton<Animal>(
+                  isExpanded: true,
+                  value: _selectedAnimal,
+                  items: _animals.map((animal) {
+                    return DropdownMenuItem(
+                      value: animal,
+                      child: Text(animal.name),
+                    );
+                  }).toList(),
+                  onChanged: (animal) {
+                    setState(() {
+                      _selectedAnimal = animal;
+                    });
+                  },
+                ),
+              ),
+            ),
+
+            const SizedBox(height: 20),
+
+            // 🔹 Veterinarian Field (Read-only)
+            TextFormField(
+              initialValue: _selectedVeterinaire != null
+                  ? (_selectedVeterinaire!.firstName.isNotEmpty &&
+                  _selectedVeterinaire!.lastName.isNotEmpty
+                  ? '${_selectedVeterinaire!.firstName} ${_selectedVeterinaire!.lastName}'
+                  : _selectedVeterinaire!.username)
+                  : rendezvous.vetName,
+              readOnly: true,
+              decoration: InputDecoration(
+                labelText: 'Vétérinaire',
+                prefixIcon: const Icon(Icons.medical_services),
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+              ),
+            ),
+
+            const SizedBox(height: 20),
+
+            // 🔹 Date and Time Picker
+            TextFormField(
+              controller: _dateController,
+              readOnly: true,
+              decoration: InputDecoration(
+                labelText: 'Date et Heure',
+                prefixIcon: const Icon(Icons.calendar_today),
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+              ),
+              onTap: _selectDateTime,
+            ),
+
+            const SizedBox(height: 30),
+
+            // 🔹 Save Button
+            ElevatedButton.icon(
+              onPressed: _updateRendezvous,
+              icon: const Icon(Icons.save),
+              label: const Text('Enregistrer'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.green[600],
+                foregroundColor: Colors.white,
+                textStyle: const TextStyle(fontSize: 18),
+                padding: const EdgeInsets.symmetric(vertical: 14),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
+
     );
   }
 }

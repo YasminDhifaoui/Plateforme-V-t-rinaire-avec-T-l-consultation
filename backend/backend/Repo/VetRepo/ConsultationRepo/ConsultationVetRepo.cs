@@ -17,8 +17,8 @@ namespace backend.Repo.VetRepo.ConsultationRepo
         public async Task<IEnumerable<ConsultationVetDto>> GetConsultations(Guid vetId)
         {
             return await _context.Consultations
-                .Include(c => c.RendezVous).ThenInclude(r => r.Animal).ThenInclude(a => a.Owner)
-                .Where(c => c.VeterinaireId == vetId)
+        //.Include(c => c.Client).ThenInclude(cl => cl.AppUser)
+        .Where(c => c.VeterinaireId == vetId)
                 .Select(c => new ConsultationVetDto
                 {
                     Id = c.Id,
@@ -28,23 +28,23 @@ namespace backend.Repo.VetRepo.ConsultationRepo
                     Prescription = c.Prescriptions,
                     Notes = c.Notes,
                     DocumentPath = c.DocumentPath,
+                    ClientId = c.ClientId,
+                    ClientName = c.Client.AppUser.UserName,
                     CreatedAt = c.CreatedAt,
                     UpdatedAt = c.UpdatedAt,
-                    RendezVousID = c.RendezVousId,
-                    ClientName = c.Animal.Owner.UserName,
-                    AnimalId = c.AnimalId,
-                    AnimalName = c.Animal.Nom
-                }).ToListAsync();
+                })
+                .ToListAsync();
         }
+
+
 
         public async Task<ConsultationVetDto> AddConsultation(AddConsultationVetDto dto, Guid vetId)
         {
-            var rendezVous = await _context.RendezVous
-                .Include(rv => rv.Animal).ThenInclude(a => a.Owner)
-                .FirstOrDefaultAsync(rv => rv.Id == dto.RendezVousID && rv.VeterinaireId == vetId);
+            var client = await _context.clients
+                .FirstOrDefaultAsync(a => a.AppUserId == dto.ClientId);
 
-            if (rendezVous == null)
-                throw new UnauthorizedAccessException("Rendez-vous not found or doesn't belong to you.");
+            if (client == null)
+                throw new UnauthorizedAccessException("Client not found.");
 
             string documentPath = null;
             var now = DateTime.UtcNow;
@@ -52,7 +52,7 @@ namespace backend.Repo.VetRepo.ConsultationRepo
 
             if (dto.Document != null && dto.Document.Length > 0)
             {
-                var uploadDir = Path.Combine("wwwroot", "docs", rendezVous.AnimalId.ToString(), folderName);
+                var uploadDir = Path.Combine("wwwroot", "docs", client.AppUserId.ToString(), folderName);
                 Directory.CreateDirectory(uploadDir);
 
                 var fileName = $"{Guid.NewGuid()}_{dto.Document.FileName}";
@@ -61,13 +61,12 @@ namespace backend.Repo.VetRepo.ConsultationRepo
                 using var stream = new FileStream(filePath, FileMode.Create);
                 await dto.Document.CopyToAsync(stream);
 
-                documentPath = Path.Combine("docs", rendezVous.AnimalId.ToString(), folderName, fileName);
+                documentPath = Path.Combine("docs", client.AppUserId.ToString(), folderName, fileName);
             }
 
             var consultation = new Consultation
             {
                 Id = Guid.NewGuid(),
-                RendezVousId = dto.RendezVousID,
                 Diagnostic = dto.Diagnostic,
                 Treatment = dto.Treatment,
                 Prescriptions = dto.Prescription,
@@ -76,8 +75,8 @@ namespace backend.Repo.VetRepo.ConsultationRepo
                 CreatedAt = now,
                 UpdatedAt = now,
                 VeterinaireId = vetId,
-                AnimalId = rendezVous.AnimalId,
-                Date = dto.Date
+                ClientId = client.ClientId,
+                Date = dto.Date.ToUniversalTime()
             };
 
             await _context.Consultations.AddAsync(consultation);
@@ -86,7 +85,6 @@ namespace backend.Repo.VetRepo.ConsultationRepo
             return new ConsultationVetDto
             {
                 Id = consultation.Id,
-                RendezVousID = consultation.RendezVousId,
                 Diagnostic = consultation.Diagnostic,
                 Treatment = consultation.Treatment,
                 Prescription = consultation.Prescriptions,
@@ -94,8 +92,7 @@ namespace backend.Repo.VetRepo.ConsultationRepo
                 DocumentPath = consultation.DocumentPath,
                 CreatedAt = consultation.CreatedAt,
                 UpdatedAt = consultation.UpdatedAt,
-                ClientName = rendezVous.Animal.Owner.UserName,
-                AnimalId = consultation.AnimalId,
+                ClientId = consultation.ClientId,
                 Date = consultation.Date
             };
         }
@@ -103,15 +100,15 @@ namespace backend.Repo.VetRepo.ConsultationRepo
         public async Task<bool> UpdateConsultation(Guid consultationId, UpdateConsultationVetDto dto, Guid vetId)
         {
             var consultation = await _context.Consultations
+                .Include(c => c.Client)
                 .FirstOrDefaultAsync(c => c.Id == consultationId && c.VeterinaireId == vetId);
 
             if (consultation == null) return false;
-
+            consultation.Date = dto.Date.ToUniversalTime();
             consultation.Diagnostic = dto.Diagnostic;
             consultation.Treatment = dto.Treatment;
             consultation.Prescriptions = dto.Prescription;
             consultation.Notes = dto.Notes;
-            consultation.RendezVousId = dto.RendezVousID;
             consultation.UpdatedAt = DateTime.UtcNow;
 
             if (dto.Document != null && dto.Document.Length > 0)
@@ -124,7 +121,7 @@ namespace backend.Repo.VetRepo.ConsultationRepo
                 }
 
                 var newFolder = DateTime.UtcNow.ToString("yyyyMMdd_HHmmss");
-                var uploadsFolder = Path.Combine("wwwroot", "docs", consultation.AnimalId.ToString(), newFolder);
+                var uploadsFolder = Path.Combine("wwwroot", "docs", consultation.ClientId.ToString(), newFolder);
                 Directory.CreateDirectory(uploadsFolder);
 
                 var fileName = $"{Guid.NewGuid()}_{dto.Document.FileName}";
@@ -133,7 +130,7 @@ namespace backend.Repo.VetRepo.ConsultationRepo
                 using var stream = new FileStream(filePath, FileMode.Create);
                 await dto.Document.CopyToAsync(stream);
 
-                consultation.DocumentPath = Path.Combine("docs", consultation.AnimalId.ToString(), newFolder, fileName);
+                consultation.DocumentPath = Path.Combine("docs", consultation.ClientId.ToString(), newFolder, fileName);
             }
 
             _context.Consultations.Update(consultation);

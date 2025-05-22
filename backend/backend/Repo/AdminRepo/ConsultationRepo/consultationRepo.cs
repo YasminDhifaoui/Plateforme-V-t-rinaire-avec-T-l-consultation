@@ -17,30 +17,31 @@ namespace backend.Repo.AdminRepo.ConsultationRepo
 
             public async Task<IEnumerable<Consultation>> GetAllConsultations()
             {
-                return await _context.Consultations.ToListAsync();
+                return await _context.Consultations.Include(r => r.Client).ThenInclude(cl => cl.AppUser)
+                                                   .ToListAsync();
 
         }
 
         public async Task<Consultation> GetConsultationById(Guid id)
             {
                 return await _context.Consultations
-                    .Include(c => c.RendezVous)
-                    .ThenInclude(r => r.Animal)
-                    .Include(c => c.Veterinaire)
+                    .Include(r => r.Client)
+                    .Include
+                    (c => c.Veterinaire)
                     .FirstOrDefaultAsync(c => c.Id == id);
             }
 
         public async Task<Consultation> AddConsultation(AddConsultationDto dto)
         {
+            
             string documentPath = null;
-            var rdv = await _context.RendezVous.FindAsync(dto.RendezVousID);
            
             var consultationDate = DateTime.UtcNow;
             var formattedDate = consultationDate.ToString("yyyyMMdd_HHmmss"); 
 
             if (dto.Document != null && dto.Document.Length > 0)
             {
-                var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "docs", rdv.AnimalId.ToString(), formattedDate);
+                var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "docs", dto.ClientId.ToString(), formattedDate);
                 Directory.CreateDirectory(uploadsFolder);
 
                 var fileName = $"{Guid.NewGuid()}_{dto.Document.FileName}";
@@ -51,21 +52,20 @@ namespace backend.Repo.AdminRepo.ConsultationRepo
                     await dto.Document.CopyToAsync(stream);
                 }
 
-                documentPath = Path.Combine("docs", rdv.AnimalId.ToString(), formattedDate, fileName);
+                documentPath = Path.Combine("docs", dto.ClientId.ToString(), formattedDate, fileName);
             }
 
             var consultation = new Consultation
             {
                 Id = Guid.NewGuid(),
                 Date = dto.Date,
-                RendezVousId = dto.RendezVousID,
                 Diagnostic = dto.Diagnostic,
                 Treatment = dto.Treatment,
                 Prescriptions = dto.Prescription,
                 Notes = dto.Notes,
                 DocumentPath = documentPath,
-                VeterinaireId = rdv.VeterinaireId,
-                AnimalId = rdv.AnimalId,
+                VeterinaireId = dto.VetId,
+                ClientId = dto.ClientId,
                 CreatedAt = consultationDate,
                 UpdatedAt = consultationDate
             };
@@ -81,17 +81,15 @@ namespace backend.Repo.AdminRepo.ConsultationRepo
             if (consultation == null)
                 return "Consultation not found";
 
-            var rdv =await _context.RendezVous.FindAsync(dto.RendezVousID);
-            if (rdv == null) return "rendez vous not found!";
+           
 
             consultation.Date = dto.Date.ToUniversalTime();
             consultation.Diagnostic = dto.Diagnostic;
             consultation.Treatment = dto.Treatment;
             consultation.Prescriptions = dto.Prescription;
             consultation.Notes = dto.Notes;
-            consultation.RendezVousId = dto.RendezVousID;
-            consultation.AnimalId = rdv.AnimalId;
-            consultation.VeterinaireId = rdv.VeterinaireId;
+            consultation.ClientId = dto.ClientId;
+            consultation.VeterinaireId = dto.VetId;
             consultation.UpdatedAt = DateTime.UtcNow;
 
             if (dto.Document != null && dto.Document.Length > 0)
@@ -106,7 +104,7 @@ namespace backend.Repo.AdminRepo.ConsultationRepo
                 }
 
                 var newDateFolder = dto.Date.ToString("yyyyMMdd_HHmmss");
-                var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "docs", consultation.AnimalId.ToString(), newDateFolder);
+                var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "docs", consultation.ClientId.ToString(), newDateFolder);
                 Directory.CreateDirectory(uploadsFolder);
 
                 var fileName = $"{Guid.NewGuid()}_{dto.Document.FileName}";
@@ -117,7 +115,7 @@ namespace backend.Repo.AdminRepo.ConsultationRepo
                     await dto.Document.CopyToAsync(stream);
                 }
 
-                consultation.DocumentPath = Path.Combine("docs", consultation.AnimalId.ToString(), newDateFolder, fileName);
+                consultation.DocumentPath = Path.Combine("docs", consultation.ClientId.ToString(), newDateFolder, fileName);
             }
 
             _context.Consultations.Update(consultation);

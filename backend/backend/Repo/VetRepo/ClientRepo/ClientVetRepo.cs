@@ -1,5 +1,6 @@
 ﻿using backend.Data;
 using backend.Dtos.VetDtos.ClientDtos;
+using backend.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace backend.Repo.VetRepo.ClientRepo
@@ -28,6 +29,12 @@ namespace backend.Repo.VetRepo.ClientRepo
 
             return clients;
         }
+        public async Task<AppUser> GetClientById(Guid clientId)
+        {
+            return await _context.Users
+                .FirstOrDefaultAsync(u => u.Id == clientId);
+        }
+
 
     }
 }

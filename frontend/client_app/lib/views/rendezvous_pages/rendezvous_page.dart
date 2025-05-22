@@ -87,16 +87,20 @@ class _RendezvousPageState extends State<RendezvousPage> {
         trailing: PopupMenuButton<String>(
           onSelected: (value) async {
             if (value == 'update') {
-              Navigator.push(
+              final shouldRefresh = await Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => UpdateRendezvousPage(),
+                  builder: (_) => const UpdateRendezvousPage(),
                   settings: RouteSettings(arguments: {
                     'rendezvous': rv,
                     'vetName': rv.vetName,
                   }),
                 ),
               );
+
+              if (shouldRefresh == true) {
+                _refreshRendezvous();
+              }
             } else if (value == 'delete') {
               final confirm = await showDialog<bool>(
                 context: context,
@@ -138,7 +142,6 @@ class _RendezvousPageState extends State<RendezvousPage> {
         username: widget.username,
         onLogout: () => LogoutHelper.handleLogout(context),
       ),
-
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -150,7 +153,7 @@ class _RendezvousPageState extends State<RendezvousPage> {
               label: const Text('Retour'),
               style: ElevatedButton.styleFrom(
                 padding:
-                    const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+                const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
                 textStyle: const TextStyle(fontSize: 18),
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10)),
@@ -158,12 +161,13 @@ class _RendezvousPageState extends State<RendezvousPage> {
             ),
           ),
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 12.0),
+            padding:
+            const EdgeInsets.symmetric(horizontal: 20.0, vertical: 12.0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const Text(
-                  'My appointments  ',
+                  'My appointments',
                   style: TextStyle(
                     fontSize: 30,
                     fontWeight: FontWeight.bold,
@@ -176,16 +180,17 @@ class _RendezvousPageState extends State<RendezvousPage> {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => VetListPage(username: widget.username), // Pass widget.username
+                        builder: (context) =>
+                            VetListPage(username: widget.username),
                       ),
                     );
-
                   },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.teal, // Button color
-                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                    backgroundColor: Colors.teal,
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 24, vertical: 12),
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(20), // Rounded corners
+                      borderRadius: BorderRadius.circular(20),
                     ),
                     elevation: 5,
                   ),
@@ -198,11 +203,9 @@ class _RendezvousPageState extends State<RendezvousPage> {
                     ),
                   ),
                 ),
-
               ],
             ),
           ),
-
           Expanded(
             child: RefreshIndicator(
               onRefresh: _refreshRendezvous,

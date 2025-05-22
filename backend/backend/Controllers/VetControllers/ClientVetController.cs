@@ -26,5 +26,28 @@ namespace backend.Controllers.VetControllers
             var clients = await _repo.GetClients(vetId);
             return Ok(clients);
         }
+
+        [HttpGet]
+        [Route("get-client/{clientId}")]
+        public async Task<IActionResult> GetClientById(Guid clientId)
+        {
+            var userIdClaim = User.FindFirst("Id")?.Value;
+
+            if (!Guid.TryParse(userIdClaim, out var vetId))
+            {
+                return Unauthorized("Invalid or missing user ID claim.");
+            }
+
+            // You can optionally verify that the vet has access to this client here,
+            // or just return the client info if your repo method handles that.
+
+            var client = await _repo.GetClientById(clientId);
+            if (client == null)
+            {
+                return NotFound($"Client with id {clientId} not found.");
+            }
+            return Ok(client);
+        }
+
     }
 }
