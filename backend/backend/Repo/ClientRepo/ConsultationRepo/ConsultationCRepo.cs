@@ -17,10 +17,10 @@ namespace backend.Repo.ClientRepo.ConsultationRepo
         public async Task<IEnumerable<ConsultationCDto>> GetMyConsultation(Guid id)
         {
             var consultations = await _context.Consultations
-                           .Include(c => c.RendezVous)
-                            .ThenInclude(r => r.Animal)
+                            .Include(r => r.Client).ThenInclude(cl => cl.AppUser) // Then include the AppUser object related to that Client
+
                             .Include(c => c.Veterinaire)
-                           .Where(c => c.RendezVous.ClientId == id)
+
                            .Select(c => new ConsultationCDto
                            {
                                Id = c.Id,
@@ -32,8 +32,7 @@ namespace backend.Repo.ClientRepo.ConsultationRepo
                                DocumentPath = c.DocumentPath,
                                CreatedAt = c.CreatedAt,
                                UpdatedAt = c.UpdatedAt,
-                               VeterinaireName = c.Veterinaire.UserName!,
-                               AnimalName = c.RendezVous.Animal.Nom
+                               
                            })
                            .ToListAsync();
 

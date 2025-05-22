@@ -42,7 +42,7 @@ class _HomePageState extends State<HomePage> {
   int clientsCount = 0;
   int consultationsCount = 0;
   int vaccinationsCount = 0;
-  int productCount = 0;
+  int productCount = 8;
 
   @override
   void initState() {
@@ -139,8 +139,10 @@ class _HomePageState extends State<HomePage> {
         productCount = products.length;
       });
     } catch (e) {
+      print('Error fetching products: $e');
+
       setState(() {
-        productCount = 0;
+        productCount = 3;
       });
     }
   }

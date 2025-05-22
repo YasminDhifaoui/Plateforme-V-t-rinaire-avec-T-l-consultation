@@ -8,5 +8,7 @@ namespace backend.Models
 
         [ForeignKey("AppUser")]
         public Guid AppUserId { get; set; }
+        public AppUser AppUser { get; set; } // Navigation property to AppUser
+
     }
 }

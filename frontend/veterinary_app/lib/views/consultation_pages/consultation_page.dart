@@ -288,7 +288,7 @@ class _ConsultationListPageState extends State<ConsultationListPage> {
                         padding: const EdgeInsets.all(8.0),
                         child: ListTile(
                           title: Text(
-                            'Client: ${consult.clientName} | Animal: ${consult.animalName}',
+                            'Client: ${consult.clientName} ',
                           ),
                           subtitle: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
@@ -432,21 +432,27 @@ class _ConsultationListPageState extends State<ConsultationListPage> {
         ],
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          Navigator.push(
+        onPressed: () async {
+          final result = await Navigator.push(
             context,
             MaterialPageRoute(
-              builder:
-                  (context) => AddConsultationPage(
-                    token: widget.token,
-                    username: widget.username,
-                  ),
+              builder: (context) => AddConsultationPage(
+                token: widget.token,
+                username: widget.username,
+              ),
             ),
           );
+
+          // If a new consultation was added, refresh the list
+          if (result == true) {
+            setState(() {
+              _consultations = ConsultationService.fetchConsultations(widget.token);
+            });
+          }
         },
-        tooltip: 'Add Consultation',
-        child: const Icon(Icons.add),
+        child: Icon(Icons.add), // This adds the plus icon
       ),
+
     );
   }
 }

@@ -114,13 +114,11 @@ class _AddRendezvousPageState extends State<AddRendezvousPage> {
     }
 
     Map<String, dynamic> data = {
-    "model": { // Add model field
-
-      "animalId": _selectedAnimal!.id.toString(), // Ensure it's a string GUID
+      "animalId": _selectedAnimal!.id.toString(),
       "vetId": widget.vet.id,
       "date": _selectedDateTime!.toIso8601String(),
-    }
     };
+
 
     print("Sending vetId: ${widget.vet.id.runtimeType} = ${widget.vet.id}");
 

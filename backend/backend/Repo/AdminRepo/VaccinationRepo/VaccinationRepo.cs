@@ -16,7 +16,7 @@ namespace backend.Repo.AdminRepo.VaccinationRepo
 
         public async Task<IEnumerable<Vaccination>> GetAllVaccinations()
         {
-            return await _context.Vaccinations.ToListAsync();
+            return await _context.Vaccinations.Include(v => v.Animal).Include(v => v.Animal.Owner).ToListAsync();
         }
 
         public async Task<Vaccination> GetVaccinationById(Guid id)

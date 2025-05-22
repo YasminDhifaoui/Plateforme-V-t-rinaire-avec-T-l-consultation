@@ -7,7 +7,6 @@
         public string Treatment { get; set; }
         public string Prescription { get; set; }
         public string Notes { get; set; }
-        public IFormFile Document { get; set; }
-        public Guid RendezVousID { get; set; }
+        public IFormFile? Document { get; set; }
     }
 }

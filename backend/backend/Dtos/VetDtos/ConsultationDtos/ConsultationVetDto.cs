@@ -11,9 +11,9 @@
         public string DocumentPath { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateTime UpdatedAt { get; set; }
-        public Guid RendezVousID { get; set; }
+
+        public Guid ClientId { get; set; }
         public string ClientName { get; set; }
-        public Guid AnimalId { get; set; }
-        public string AnimalName { get; set;}
+
     }
 }

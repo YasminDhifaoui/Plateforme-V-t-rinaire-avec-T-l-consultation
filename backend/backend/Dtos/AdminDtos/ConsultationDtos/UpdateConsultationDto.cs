@@ -8,6 +8,7 @@
         public string Prescription { get; set; }
         public string Notes { get; set; }
         public IFormFile Document { get; set; } // ✅ Accept the actual uploaded file here
-        public Guid RendezVousID { get; set; }
+        public Guid ClientId { get; set; }
+        public Guid VetId { get; set; }
     }
 }

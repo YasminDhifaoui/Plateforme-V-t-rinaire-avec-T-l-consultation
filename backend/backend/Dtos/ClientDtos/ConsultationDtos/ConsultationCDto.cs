@@ -12,6 +12,5 @@
         public DateTime CreatedAt { get; set; }
         public DateTime UpdatedAt { get; set; }
         public string VeterinaireName { get; set; }
-        public string AnimalName { get; set; }
     }
 }

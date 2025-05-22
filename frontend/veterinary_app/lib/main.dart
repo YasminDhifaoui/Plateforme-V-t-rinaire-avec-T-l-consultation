@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:veterinary_app/services/video_call_services/signalr_tc_service.dart';
+import 'package:veterinary_app/views/video_call_pages/incoming_call_screen.dart';
 import 'views/Auth_pages/vet_login_page.dart';
 import 'views/Auth_pages/vet_register_page.dart';
 
@@ -33,6 +35,18 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Example: In your home screen or root widget
+    SignalRTCService.onIncomingCall = (callerId) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => IncomingCallScreen(
+            callerId: callerId,
+            callerName: "Dr. Smith", // Fetch from your user data
+          ),
+        ),
+      );
+    };
     return MaterialApp(
       navigatorKey: navigatorKey,
 

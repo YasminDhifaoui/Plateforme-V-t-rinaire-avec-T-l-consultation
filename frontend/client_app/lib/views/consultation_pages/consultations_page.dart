@@ -181,7 +181,6 @@ class _ConsultationsPageState extends State<ConsultationsPage> {
                               Text('Vétérinaire: ${consultation.vetName}',
                                   style: const TextStyle(
                                       fontWeight: FontWeight.bold)),
-                              Text('Animal: ${consultation.petName}'),
                               const SizedBox(height: 8),
                               const Divider(),
                               Text('Diagnostic:',

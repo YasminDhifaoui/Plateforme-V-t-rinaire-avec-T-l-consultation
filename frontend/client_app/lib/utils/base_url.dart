@@ -1,6 +1,6 @@
 enum Environment { emulator, realDevice }
 
-const Environment currentEnv = Environment.realDevice;
+const Environment currentEnv = Environment.emulator;
 
 class BaseUrl {
   static String get api {

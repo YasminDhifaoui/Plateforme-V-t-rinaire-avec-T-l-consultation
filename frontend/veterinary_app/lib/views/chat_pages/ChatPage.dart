@@ -301,7 +301,9 @@ class _ChatPageState extends State<ChatPage> {
                   MaterialPageRoute(
                     builder:
                         (context) => VideoCallScreen(
-                          targetUserId: "123", // Replace with dynamic user ID
+                          targetUserId: "123",
+                          isCaller: true,
+
                         ),
                   ),
                 );

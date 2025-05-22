@@ -469,7 +469,7 @@ namespace backend.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<Guid>("AnimalId")
+                    b.Property<Guid>("ClientId")
                         .HasColumnType("uuid");
 
                     b.Property<DateTime>("CreatedAt")
@@ -498,9 +498,6 @@ namespace backend.Migrations
                         .HasMaxLength(1000)
                         .HasColumnType("character varying(1000)");
 
-                    b.Property<Guid>("RendezVousId")
-                        .HasColumnType("uuid");
-
                     b.Property<string>("Treatment")
                         .IsRequired()
                         .HasMaxLength(1000)
@@ -514,9 +511,7 @@ namespace backend.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("AnimalId");
-
-                    b.HasIndex("RendezVousId");
+                    b.HasIndex("ClientId");
 
                     b.HasIndex("VeterinaireId");
 
@@ -775,15 +770,9 @@ namespace backend.Migrations
 
             modelBuilder.Entity("backend.Models.Consultation", b =>
                 {
-                    b.HasOne("backend.Models.Animal", "Animal")
+                    b.HasOne("backend.Models.Client", "Client")
                         .WithMany()
-                        .HasForeignKey("AnimalId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("backend.Models.RendezVous", "RendezVous")
-                        .WithMany()
-                        .HasForeignKey("RendezVousId")
+                        .HasForeignKey("ClientId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -793,9 +782,7 @@ namespace backend.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Animal");
-
-                    b.Navigation("RendezVous");
+                    b.Navigation("Client");
 
                     b.Navigation("Veterinaire");
                 });
