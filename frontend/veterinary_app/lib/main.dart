@@ -36,17 +36,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // Example: In your home screen or root widget
-    SignalRTCService.onIncomingCall = (callerId) {
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => IncomingCallScreen(
-            callerId: callerId,
-            callerName: "Dr. Smith", // Fetch from your user data
-          ),
-        ),
-      );
-    };
+
     return MaterialApp(
       navigatorKey: navigatorKey,
 

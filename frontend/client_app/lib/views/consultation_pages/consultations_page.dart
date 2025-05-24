@@ -238,14 +238,41 @@ class _ConsultationsPageState extends State<ConsultationsPage> {
                                     ),
                                     IconButton(
                                       icon: const Icon(Icons.download_rounded),
-                                      onPressed: () {
-                                        downloadFile(
-                                            consultation.documentPath,
-                                            extractFileName(
-                                                consultation.documentPath),
-                                            context);
+                                      onPressed: () async {
+                                        try {
+                                          final Uri uri = Uri.parse(
+                                            '${BaseUrl.api}/${consultation.documentPath}',
+                                          );
+                                          if (!await launchUrl(
+                                            uri,
+                                            mode: LaunchMode.externalApplication,
+                                          )) {
+                                            ScaffoldMessenger.of(
+                                              context,
+                                            ).showSnackBar(
+                                              const SnackBar(
+                                                content: Text(
+                                                  'Could not open document in browser',
+                                                ),
+                                                backgroundColor: Colors.red,
+                                              ),
+                                            );
+                                          }
+                                        } catch (e) {
+                                          ScaffoldMessenger.of(
+                                            context,
+                                          ).showSnackBar(
+                                            SnackBar(
+                                              content: Text(
+                                                'Error opening document: $e',
+                                              ),
+                                              backgroundColor: Colors.red,
+                                            ),
+                                          );
+                                        }
                                       },
                                     ),
+
                                     IconButton(
                                       icon: const Icon(Icons.remove_red_eye),
                                       onPressed: () async {

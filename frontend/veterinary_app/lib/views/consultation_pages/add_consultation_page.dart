@@ -8,6 +8,8 @@ import 'package:veterinary_app/models/client_models/client_model.dart';
 import 'package:veterinary_app/services/client_services/client_service.dart';
 import 'package:veterinary_app/views/components/home_navbar.dart';
 
+import '../../utils/base_url.dart';
+
 class AddConsultationPage extends StatefulWidget {
   final String token;
   final String username;
@@ -49,9 +51,9 @@ class _AddConsultationPageState extends State<AddConsultationPage> {
         _clientList = clients;
       });
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error fetching clients: $e')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Error fetching clients: $e')));
     }
   }
 
@@ -87,17 +89,22 @@ class _AddConsultationPageState extends State<AddConsultationPage> {
       }
 
       try {
-        final uri = Uri.parse('http://10.0.2.2:5000/api/vet/consultationsvet/create-consultation');
+        final uri = Uri.parse(
+          '${BaseUrl.api}/api/vet/consultationsvet/create-consultation',
+        );
 
-        var request = http.MultipartRequest('POST', uri)
-          ..headers['Authorization'] = 'Bearer ${widget.token}'
-          ..fields['Date'] = _dateController.text
-          ..fields['Diagnostic'] = _diagnosticController.text
-          ..fields['Treatment'] = _treatmentController.text
-          ..fields['Prescription'] = _prescriptionController.text
-          ..fields['Notes'] = _notesController.text
-          ..fields['ClientID'] = _selectedClientId!
-          ..files.add(await http.MultipartFile.fromPath('Document', _document!.path));
+        var request =
+            http.MultipartRequest('POST', uri)
+              ..headers['Authorization'] = 'Bearer ${widget.token}'
+              ..fields['Date'] = _dateController.text
+              ..fields['Diagnostic'] = _diagnosticController.text
+              ..fields['Treatment'] = _treatmentController.text
+              ..fields['Prescription'] = _prescriptionController.text
+              ..fields['Notes'] = _notesController.text
+              ..fields['ClientID'] = _selectedClientId!
+              ..files.add(
+                await http.MultipartFile.fromPath('Document', _document!.path),
+              );
 
         final response = await request.send();
 
@@ -111,9 +118,9 @@ class _AddConsultationPageState extends State<AddConsultationPage> {
           throw Exception('Failed with ${response.statusCode}: $body');
         }
       } catch (e) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Submission failed: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Submission failed: $e')));
       }
     }
   }
@@ -158,52 +165,60 @@ class _AddConsultationPageState extends State<AddConsultationPage> {
                     lastDate: DateTime(2101),
                   );
                   if (pickedDate != null) {
-                    String formattedDate = pickedDate.toIso8601String().split('T')[0];
+                    String formattedDate =
+                        pickedDate.toIso8601String().split('T')[0];
                     setState(() {
                       _dateController.text = formattedDate;
                     });
                   }
                 },
-                validator: (value) => value!.isEmpty ? 'Please enter a date' : null,
+                validator:
+                    (value) => value!.isEmpty ? 'Please enter a date' : null,
               ),
               TextFormField(
                 controller: _diagnosticController,
                 decoration: const InputDecoration(labelText: 'Diagnostic'),
-                validator: (value) => value!.isEmpty ? 'Please enter a diagnostic' : null,
+                validator:
+                    (value) =>
+                        value!.isEmpty ? 'Please enter a diagnostic' : null,
               ),
               TextFormField(
                 controller: _treatmentController,
                 decoration: const InputDecoration(labelText: 'Treatment'),
-                validator: (value) => value!.isEmpty ? 'Please enter treatment' : null,
+                validator:
+                    (value) => value!.isEmpty ? 'Please enter treatment' : null,
               ),
               TextFormField(
                 controller: _prescriptionController,
                 decoration: const InputDecoration(labelText: 'Prescription'),
-                validator: (value) => value!.isEmpty ? 'Please enter a prescription' : null,
+                validator:
+                    (value) =>
+                        value!.isEmpty ? 'Please enter a prescription' : null,
               ),
               TextFormField(
                 controller: _notesController,
                 decoration: const InputDecoration(labelText: 'Notes'),
-                validator: (value) => value!.isEmpty ? 'Please enter notes' : null,
+                validator:
+                    (value) => value!.isEmpty ? 'Please enter notes' : null,
               ),
               const SizedBox(height: 16),
               DropdownButtonFormField<String>(
                 value: _selectedClientId,
-                items: _clientList.map((client) {
-                  return DropdownMenuItem<String>(
-                    value: client.id.toString(),
-                    child: Text(client.username),
-                  );
-                }).toList(),
+                items:
+                    _clientList.map((client) {
+                      return DropdownMenuItem<String>(
+                        value: client.id.toString(),
+                        child: Text(client.username),
+                      );
+                    }).toList(),
                 onChanged: (value) {
                   setState(() {
                     _selectedClientId = value;
                   });
                 },
-                decoration: const InputDecoration(
-                  labelText: 'Select Client',
-                ),
-                validator: (value) => value == null ? 'Please select a client' : null,
+                decoration: const InputDecoration(labelText: 'Select Client'),
+                validator:
+                    (value) => value == null ? 'Please select a client' : null,
               ),
               const SizedBox(height: 16),
               ElevatedButton.icon(

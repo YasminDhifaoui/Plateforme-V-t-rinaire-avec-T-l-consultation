@@ -5,6 +5,7 @@ import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 import '../../models/chat_models/chat_model.dart';
 import '../../services/chat_services/chat_signal_service.dart';
+import '../video_call_pages/video_call_screen.dart';
 
 class ChatPage extends StatefulWidget {
   final String token;
@@ -278,8 +279,16 @@ class _ChatPageState extends State<ChatPage> {
             child: InkWell(
               borderRadius: BorderRadius.circular(30),
               onTap: () {
-                // TODO: Add your video call action here
                 print('Video call button pressed');
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => VideoCallScreen(
+                      targetUserId: widget.receiverId,
+                      isCaller: true,
+                    ),
+                  ),
+                );
               },
               child: Container(
                 decoration: BoxDecoration(

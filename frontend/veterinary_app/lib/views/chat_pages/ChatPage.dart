@@ -301,9 +301,8 @@ class _ChatPageState extends State<ChatPage> {
                   MaterialPageRoute(
                     builder:
                         (context) => VideoCallScreen(
-                          targetUserId: "123",
+                          targetUserId: widget.receiverId,
                           isCaller: true,
-
                         ),
                   ),
                 );

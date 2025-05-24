@@ -8,6 +8,8 @@ import 'package:path_provider/path_provider.dart'; // Import path_provider for t
 import 'package:veterinary_app/models/consultation_models/consulattion_model.dart';
 import 'package:veterinary_app/views/components/home_navbar.dart';
 
+import '../../utils/base_url.dart';
+
 class UpdateConsultationPage extends StatefulWidget {
 final String token;
 final String username;
@@ -96,7 +98,7 @@ return;
 }
 
 try {
-final uri = Uri.parse('http://10.0.2.2:5000/api/vet/consultationsvet/update-consultation/${widget.consultation.id}');
+final uri = Uri.parse('${BaseUrl.api}/api/vet/consultationsvet/update-consultation/${widget.consultation.id}');
 
 var request = http.MultipartRequest('PUT', uri)
 ..headers['Authorization'] = 'Bearer ${widget.token}'
@@ -267,19 +269,6 @@ label: const Text('Take Photo'),
 ],
 ),
 
-// Option to remove existing document if allowed by backend
-if (_existingDocumentName != null && _document == null)
-TextButton(
-onPressed: () {
-setState(() {
-_existingDocumentName = null;
-// You might also want to explicitly clear the documentPath on the backend
-// by sending a specific field, if allowed.
-// For instance, request.fields['ClearDocument'] = 'true';
-});
-},
-child: const Text('Remove Current Document', style: TextStyle(color: Colors.red)),
-),
 
 const SizedBox(height: 24),
 

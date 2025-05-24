@@ -1,3 +1,4 @@
+// models/rendezvous_models/rendezvous_model.dart
 class RendezVousModel {
   final String id;
   final String status;
@@ -14,18 +15,28 @@ class RendezVousModel {
   });
 
   factory RendezVousModel.fromJson(Map<String, dynamic> json) {
+    // Safely extract client name
+    String extractedClientName = 'Unknown';
+    if (json['client'] != null) {
+      if (json['client']['userName'] != null) {
+        extractedClientName = json['client']['userName'].toString();
+      } else if (json['client']['firstName'] != null && json['client']['lastName'] != null) {
+        extractedClientName = '${json['client']['firstName']} ${json['client']['lastName']}';
+      }
+    }
+
+    // Safely extract animal name
+    String extractedAnimalName = 'Unknown';
+    if (json['animal'] != null && json['animal']['nom'] != null) {
+      extractedAnimalName = json['animal']['nom'].toString();
+    }
+
     return RendezVousModel(
       id: json['id'].toString(),
-      status: json['status']?.toString() ?? '',
+      status: json['status']?.toString() ?? 'Unknown',
       date: json['date']?.toString() ?? '',
-      clientName:
-          json['client'] != null
-              ? '${json['client']['firstName']} ${json['client']['lastName']}'
-              : 'Unknown',
-      animalName:
-          json['animal'] != null
-              ? json['animal']['nom'] ?? 'Unknown'
-              : 'Unknown',
+      clientName: extractedClientName,
+      animalName: extractedAnimalName,
     );
   }
 

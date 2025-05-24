@@ -36,10 +36,19 @@ class _ConsultationListPageState extends State<ConsultationListPage> {
   @override
   void initState() {
     super.initState();
-    _consultations = ConsultationService.fetchConsultations(widget.token);
+    _consultations = _fetchAndSortConsultations(); // Call the new sorting method
     _fetchAnimals();
     _fetchClients();
   }
+
+  // New method to fetch and sort consultations
+  Future<List<Consultation>> _fetchAndSortConsultations() async {
+    final consultations = await ConsultationService.fetchConsultations(widget.token);
+    // Sort the list from newest to oldest date
+    consultations.sort((a, b) => b.date.compareTo(a.date));
+    return consultations;
+  }
+
 
   Future<void> _fetchAnimals() async {
     setState(() {
@@ -55,7 +64,7 @@ class _ConsultationListPageState extends State<ConsultationListPage> {
       if (context.mounted) {
         ScaffoldMessenger.of(
           context,
-        ).showSnackBar(SnackBar(content: Text('Failed to load animals: \$e')));
+        ).showSnackBar(SnackBar(content: Text('Failed to load animals: $e')));
       }
     } finally {
       setState(() {
@@ -77,7 +86,7 @@ class _ConsultationListPageState extends State<ConsultationListPage> {
       if (context.mounted) {
         ScaffoldMessenger.of(
           context,
-        ).showSnackBar(SnackBar(content: Text('Failed to load clients: \$e')));
+        ).showSnackBar(SnackBar(content: Text('Failed to load clients: $e')));
       }
     } finally {
       setState(() {
@@ -88,19 +97,18 @@ class _ConsultationListPageState extends State<ConsultationListPage> {
 
   void _showAnimalDetails(String animalName) {
     final animal = _animals.firstWhere(
-      (a) => a.name == animalName,
-      orElse:
-          () => AnimalModel(
-            id: '',
-            name: 'Unknown',
-            espece: '',
-            race: '',
-            age: 0,
-            sexe: '',
-            allergies: '',
-            anttecedentsmedicaux: '',
-            ownerId: '',
-          ),
+          (a) => a.name == animalName,
+      orElse: () => AnimalModel(
+        id: '',
+        name: 'Unknown',
+        espece: '',
+        race: '',
+        age: 0,
+        sexe: '',
+        allergies: '',
+        anttecedentsmedicaux: '',
+        ownerId: '',
+      ),
     );
 
     if (animal.id == '') {
@@ -142,15 +150,14 @@ class _ConsultationListPageState extends State<ConsultationListPage> {
 
   void _showClientDetails(String clientName) {
     final client = _clients.firstWhere(
-      (c) => c.username == clientName,
-      orElse:
-          () => ClientModel(
-            id: '',
-            username: 'Unknown',
-            email: '',
-            phoneNumber: '',
-            address: '',
-          ),
+          (c) => c.username == clientName,
+      orElse: () => ClientModel(
+        id: '',
+        username: 'Unknown',
+        email: '',
+        phoneNumber: '',
+        address: '',
+      ),
     );
 
     if (client.username == 'Unknown') {
@@ -215,14 +222,14 @@ class _ConsultationListPageState extends State<ConsultationListPage> {
           content: SingleChildScrollView(
             child: ListBody(
               children: [
-                Text('Client: ${consult.clientName}'),
-                Text('Animal: ${consult.animalName}'),
+                Text('Client: ${consult.clientName ?? 'N/A'}'),
                 Text('Date: ${formatDate(consult.date)}'),
-                Text('Diagnostic: ${consult.diagnostic}'),
-                Text('Treatment: ${consult.treatment}'),
-                Text('Prescription: ${consult.prescription}'),
-                Text('Notes: ${consult.notes}'),
-                Text('Document: ${consult.documentPath}'),
+                Text('Diagnostic: ${consult.diagnostic ?? 'N/A'}'),
+                Text('Treatment: ${consult.treatment ?? 'N/A'}'),
+                Text('Prescription: ${consult.prescription ?? 'N/A'}'),
+                Text('Notes: ${consult.notes ?? 'N/A'}'),
+                Text('Document: ${consult.documentPath != null && consult.documentPath!.isNotEmpty ? consult.documentPath!.split('\\').last : 'No Document'}'),
+
               ],
             ),
           ),
@@ -275,6 +282,9 @@ class _ConsultationListPageState extends State<ConsultationListPage> {
                   return const Center(child: Text('No consultations found'));
                 }
 
+                // The sorting is now handled in _fetchAndSortConsultations()
+                // So, snapshot.data! will already be sorted.
+
                 return ListView.builder(
                   itemCount: snapshot.data!.length,
                   itemBuilder: (context, index) {
@@ -288,17 +298,17 @@ class _ConsultationListPageState extends State<ConsultationListPage> {
                         padding: const EdgeInsets.all(8.0),
                         child: ListTile(
                           title: Text(
-                            'Client: ${consult.clientName} ',
+                            'Client: ${consult.clientName ?? 'N/A'}', // Use null-aware operator
                           ),
                           subtitle: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               const SizedBox(height: 6),
                               Text('Date: ${formatDate(consult.date)}'),
-                              Text('Diagnostic: ${consult.diagnostic}'),
-                              Text('Treatment: ${consult.treatment}'),
-                              Text('Prescription: ${consult.prescription}'),
-                              Text('Notes: ${consult.notes}'),
+                              Text('Diagnostic: ${consult.diagnostic ?? 'N/A'}'),
+                              Text('Treatment: ${consult.treatment ?? 'N/A'}'),
+                              Text('Prescription: ${consult.prescription ?? 'N/A'}'),
+                              Text('Notes: ${consult.notes ?? 'N/A'}'),
                               const SizedBox(height: 6),
                               Row(
                                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -306,50 +316,87 @@ class _ConsultationListPageState extends State<ConsultationListPage> {
                                   const Text('Document: '),
                                   Flexible(
                                     child: Text(
-                                      consult.documentPath,
+                                      consult.documentPath != null && consult.documentPath!.isNotEmpty
+                                          ? consult.documentPath!.split('\\').last // Display just the filename
+                                          : 'No Document',
                                       overflow: TextOverflow.ellipsis,
-                                      style: const TextStyle(
+                                      style: consult.documentPath != null && consult.documentPath!.isNotEmpty
+                                          ? const TextStyle(
                                         color: Colors.blue,
                                         decoration: TextDecoration.underline,
-                                      ),
+                                      )
+                                          : null, // No underline if no doc
                                     ),
                                   ),
-                                  IconButton(
-                                    icon: const Icon(Icons.remove_red_eye),
-                                    onPressed: () async {
-                                      try {
-                                        final Uri uri = Uri.parse(
-                                          '${BaseUrl.api}/${consult.documentPath}',
-                                        );
-                                        if (!await launchUrl(
-                                          uri,
-                                          mode: LaunchMode.externalApplication,
-                                        )) {
+                                  if (consult.documentPath != null && consult.documentPath!.isNotEmpty) // Only show buttons if document exists
+                                    IconButton(
+                                      icon: const Icon(Icons.download_rounded),
+                                      onPressed: () async {
+                                        try {
+                                          final Uri uri = Uri.parse(
+                                            '${BaseUrl.api}/${consult.documentPath}',
+                                          );
+                                          if (!await launchUrl(
+                                            uri,
+                                            mode: LaunchMode.externalApplication,
+                                          )) {
+                                            ScaffoldMessenger.of(
+                                              context,
+                                            ).showSnackBar(
+                                              const SnackBar(
+                                                content: Text(
+                                                  'Could not open document in browser',
+                                                ),
+                                                backgroundColor: Colors.red,
+                                              ),
+                                            );
+                                          }
+                                        } catch (e) {
                                           ScaffoldMessenger.of(
                                             context,
                                           ).showSnackBar(
-                                            const SnackBar(
+                                            SnackBar(
                                               content: Text(
-                                                'Could not open document in browser',
+                                                'Error opening document: $e',
                                               ),
                                               backgroundColor: Colors.red,
                                             ),
                                           );
                                         }
-                                      } catch (e) {
-                                        ScaffoldMessenger.of(
-                                          context,
-                                        ).showSnackBar(
-                                          SnackBar(
-                                            content: Text(
-                                              'Error opening document: $e',
+                                      },
+                                    ),
+
+                                  if (consult.documentPath != null && consult.documentPath!.isNotEmpty) // Only show buttons if document exists
+                                    IconButton(
+                                      icon: const Icon(Icons.remove_red_eye),
+                                      onPressed: () async {
+                                        try {
+                                          final Uri uri = Uri.parse(
+                                              '${BaseUrl.api}/${consult.documentPath}');
+                                          if (!await launchUrl(uri,
+                                              mode: LaunchMode
+                                                  .externalApplication)) {
+                                            ScaffoldMessenger.of(context)
+                                                .showSnackBar(
+                                              const SnackBar(
+                                                content: Text(
+                                                    'Could not open document in browser'),
+                                                backgroundColor: Colors.red,
+                                              ),
+                                            );
+                                          }
+                                        } catch (e) {
+                                          ScaffoldMessenger.of(context)
+                                              .showSnackBar(
+                                            SnackBar(
+                                              content: Text(
+                                                  'Error opening document: $e'),
+                                              backgroundColor: Colors.red,
                                             ),
-                                            backgroundColor: Colors.red,
-                                          ),
-                                        );
-                                      }
-                                    },
-                                  ),
+                                          );
+                                        }
+                                      },
+                                    ),
                                 ],
                               ),
                             ],
@@ -358,68 +405,52 @@ class _ConsultationListPageState extends State<ConsultationListPage> {
                           trailing: PopupMenuButton<String>(
                             onSelected: (value) {
                               switch (value) {
-                                case 'see_animal':
-                                  _showAnimalDetails(consult.animalName);
-                                  break;
+
                                 case 'see_client':
-                                  _showClientDetails(consult.clientName);
+                                  _showClientDetails(consult.clientName ?? ''); // Add null-check
                                   break;
-                                case 'see_doc':
-                                  _downloadDocument(consult.documentPath);
-                                  break;
+
                                 case 'update':
                                   Navigator.push(
                                     context,
                                     MaterialPageRoute(
-                                      builder:
-                                          (context) => UpdateConsultationPage(
-                                            token: widget.token,
-                                            username: widget.username,
-                                            consultation: consult,
-                                          ),
+                                      builder: (context) => UpdateConsultationPage(
+                                        token: widget.token,
+                                        username: widget.username,
+                                        consultation: consult,
+                                      ),
                                     ),
                                   ).then((value) {
                                     if (value == true) {
                                       setState(() {
-                                        _consultations =
-                                            ConsultationService.fetchConsultations(
-                                              widget.token,
-                                            );
+                                        _consultations = _fetchAndSortConsultations(); // Refresh and re-sort
                                       });
                                     }
                                   });
                                   break;
-                                case 'delete':
-                                  // TODO: implement delete logic
-                                  break;
-                                case 'detail0s':
+
+                                case 'details':
                                   _showConsultationDetails(consult);
                                   break;
                               }
                             },
-                            itemBuilder:
-                                (context) => [
-                                  const PopupMenuItem(
-                                    value: 'see_animal',
-                                    child: Text('See Animal'),
-                                  ),
-                                  const PopupMenuItem(
-                                    value: 'see_client',
-                                    child: Text('See Client'),
-                                  ),
-                                  const PopupMenuItem(
-                                    value: 'see_doc',
-                                    child: Text('See Document'),
-                                  ),
-                                  const PopupMenuItem(
-                                    value: 'update',
-                                    child: Text('Update'),
-                                  ),
-                                  const PopupMenuItem(
-                                    value: 'details',
-                                    child: Text('Details'),
-                                  ),
-                                ],
+                            itemBuilder: (context) => [
+
+                              const PopupMenuItem(
+                                value: 'see_client',
+                                child: Text('See Client'),
+                              ),
+
+                              const PopupMenuItem(
+                                value: 'update',
+                                child: Text('Update'),
+                              ),
+
+                              const PopupMenuItem(
+                                value: 'details',
+                                child: Text('Details'),
+                              ),
+                            ],
                           ),
                         ),
                       ),
@@ -446,13 +477,12 @@ class _ConsultationListPageState extends State<ConsultationListPage> {
           // If a new consultation was added, refresh the list
           if (result == true) {
             setState(() {
-              _consultations = ConsultationService.fetchConsultations(widget.token);
+              _consultations = _fetchAndSortConsultations(); // Refresh and re-sort
             });
           }
         },
-        child: Icon(Icons.add), // This adds the plus icon
+        child: const Icon(Icons.add), // This adds the plus icon
       ),
-
     );
   }
 }

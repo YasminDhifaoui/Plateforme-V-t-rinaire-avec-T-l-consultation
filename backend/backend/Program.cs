@@ -198,7 +198,7 @@ builder.Services.AddAuthentication(options =>
             // Case-insensitive path check
             if (!string.IsNullOrEmpty(accessToken) &&
                 (path.StartsWithSegments("/chatHub", StringComparison.OrdinalIgnoreCase) ||
-                 path.StartsWithSegments("/webrtchub", StringComparison.OrdinalIgnoreCase)))
+                 path.StartsWithSegments("/rtchub", StringComparison.OrdinalIgnoreCase)))
             {
                 context.Token = accessToken;
             }
@@ -227,9 +227,8 @@ builder.Services.Configure<Microsoft.AspNetCore.Builder.WebSocketOptions>(option
 });
 // Add to builder setup
 builder.Logging.AddConsole().SetMinimumLevel(LogLevel.Debug);
-builder.Services.AddSignalR(options => {
-    options.EnableDetailedErrors = true;
-});
+
+
 
 // For Kestrel (if using)
 builder.WebHost.ConfigureKestrel(serverOptions =>
