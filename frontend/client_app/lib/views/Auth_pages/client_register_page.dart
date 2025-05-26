@@ -2,17 +2,20 @@ import 'package:client_app/models/auth_models/client_register.dart';
 import 'package:client_app/services/auth_services/client_auth_services.dart';
 import 'package:client_app/views/Auth_pages/client_confirm_email_page.dart';
 import 'package:client_app/views/Auth_pages/client_login_page.dart';
-import 'package:client_app/views/components/login_navbar.dart';
+import 'package:client_app/views/components/login_navbar.dart'; // Keep if it's a custom widget, otherwise AppBar is fine
 import 'package:flutter/material.dart';
 
-class RegisterPage extends StatefulWidget {
-  const RegisterPage({super.key});
+// Import the blue color constants from main.dart
+import 'package:client_app/main.dart'; // Assuming main.dart holds kPrimaryBlue, kAccentBlue etc.
+
+class ClientRegisterPage extends StatefulWidget { // Renamed from RegisterPage for consistency
+  const ClientRegisterPage({super.key});
 
   @override
-  State<RegisterPage> createState() => _RegisterPageState();
+  State<ClientRegisterPage> createState() => _ClientRegisterPageState(); // Renamed state class
 }
 
-class _RegisterPageState extends State<RegisterPage> {
+class _ClientRegisterPageState extends State<ClientRegisterPage> { // Renamed state class
   final _formKey = GlobalKey<FormState>();
   final emailController = TextEditingController();
   final usernameController = TextEditingController();
@@ -37,27 +40,72 @@ class _RegisterPageState extends State<RegisterPage> {
       password: passwordController.text,
     );
 
-    final result = await apiService.registerClient(client);
+    try {
+      final result = await apiService.registerClient(client);
 
-    setState(() {
-      isLoading = false;
-      message = result["message"];
-    });
+      setState(() {
+        isLoading = false;
+        message = result["message"];
+      });
 
-    if (result["success"]) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text("Check your email to confirm.")));
+      if (result["success"]) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                "Registration successful! Please check your email to confirm.",
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Colors.white),
+              ),
+              backgroundColor: Colors.green.shade600, // Green for success
+              behavior: SnackBarBehavior.floating, // Modern snackbar style
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+            ),
+          );
 
-      // Navigate to confirm email page with email parameter
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => ClientConfirmEmailPage(
-            email: emailController.text,
+          // Navigate to confirm email page with email parameter
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => ClientConfirmEmailPage(
+                email: emailController.text,
+              ),
+            ),
+          );
+        }
+      } else {
+        // If registration was not successful, ensure message is displayed
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                message ?? "Registration failed. Please try again.",
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Colors.white),
+              ),
+              backgroundColor: Colors.red.shade600, // Red for error
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      setState(() {
+        isLoading = false;
+        message = 'Registration failed: $e';
+      });
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'Registration failed: $e',
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Colors.white),
+            ),
+            backgroundColor: Colors.red.shade600,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
           ),
-        ),
-      );
+        );
+      }
     }
   }
 
@@ -76,6 +124,7 @@ class _RegisterPageState extends State<RegisterPage> {
     if (value == null || value.isEmpty) {
       return 'Username is required';
     }
+    // Optional: Add more username validation rules (e.g., min length, no special chars)
     return null;
   }
 
@@ -86,77 +135,205 @@ class _RegisterPageState extends State<RegisterPage> {
     if (value.length < 6) {
       return 'Password must be at least 6 characters';
     }
+    // Optional: Add more password complexity rules (e.g., contains uppercase, number, special char)
     return null;
   }
 
   @override
   Widget build(BuildContext context) {
+    final TextTheme textTheme = Theme.of(context).textTheme;
+
     return Scaffold(
-      appBar: const LoginNavbar(),
+      appBar: AppBar(
+        centerTitle: true,
+        backgroundColor: kPrimaryBlue,
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          onPressed: () => Navigator.pop(context),
+        ),
+      ),
       body: Center(
-        child: Container(
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: Colors.teal.shade50,
-            border: Border.all(color: Colors.teal, width: 2),
-            borderRadius: BorderRadius.circular(8),
-          ),
-          margin: const EdgeInsets.all(24),
-          child: Form(
-            key: _formKey,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                TextFormField(
-                  controller: emailController,
-                  decoration: InputDecoration(labelText: 'Email'),
-                  validator: _validateEmail,
-                ),
-                TextFormField(
-                  controller: usernameController,
-                  decoration: InputDecoration(labelText: 'Username'),
-                  validator: _validateUsername,
-                ),
-                TextFormField(
-                  controller: passwordController,
-                  decoration: InputDecoration(labelText: 'Password'),
-                  obscureText: true,
-                  validator: _validatePassword,
-                ),
-                const SizedBox(height: 16),
-                isLoading
-                    ? const CircularProgressIndicator()
-                    : ElevatedButton(
-                        onPressed: register, child: Text("Register")),
-                if (message != null) ...[
-                  const SizedBox(height: 12),
-                  Text(message!, style: TextStyle(color: Colors.red)),
-                ],
-                const SizedBox(height: 16),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(24.0),
+          child: Card(
+            elevation: 8,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
+            margin: EdgeInsets.zero,
+            child: Padding(
+              padding: const EdgeInsets.all(24.0),
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
                   children: [
-                    const Text('You already have an account? '),
-                    GestureDetector(
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const ClientLoginPage(),
+                    Text(
+                      "Create Your Account",
+                      textAlign: TextAlign.center,
+                      style: textTheme.headlineMedium?.copyWith(
+                        color: kPrimaryBlue,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    Text(
+                      "Join our community for seamless pet care services.",
+                      textAlign: TextAlign.center,
+                      style: textTheme.bodyMedium?.copyWith(color: Colors.black54),
+                    ),
+                    const SizedBox(height: 40),
+                    TextFormField(
+                      controller: emailController,
+                      keyboardType: TextInputType.emailAddress,
+                      decoration: InputDecoration(
+                        labelText: "Email",
+                        hintText: "example@email.com",
+                        prefixIcon: const Icon(Icons.email, color: kAccentBlue),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10),
+                          borderSide: BorderSide(color: kPrimaryBlue.withOpacity(0.6)),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10),
+                          borderSide: const BorderSide(color: kPrimaryBlue, width: 2),
+                        ),
+                        errorBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10),
+                          borderSide: const BorderSide(color: Colors.red, width: 2),
+                        ),
+                        focusedErrorBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10),
+                          borderSide: const BorderSide(color: Colors.red, width: 2),
+                        ),
+                        labelStyle: textTheme.bodyMedium,
+                        hintStyle: textTheme.bodySmall?.copyWith(color: Colors.black38),
+                      ),
+                      validator: _validateEmail,
+                      style: textTheme.bodyLarge,
+                    ),
+                    const SizedBox(height: 20),
+                    TextFormField(
+                      controller: usernameController,
+                      keyboardType: TextInputType.text,
+                      decoration: InputDecoration(
+                        labelText: "Username",
+                        hintText: "petlover123",
+                        prefixIcon: const Icon(Icons.person, color: kAccentBlue), // Icon for username
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10),
+                          borderSide: BorderSide(color: kPrimaryBlue.withOpacity(0.6)),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10),
+                          borderSide: const BorderSide(color: kPrimaryBlue, width: 2),
+                        ),
+                        errorBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10),
+                          borderSide: const BorderSide(color: Colors.red, width: 2),
+                        ),
+                        focusedErrorBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10),
+                          borderSide: const BorderSide(color: Colors.red, width: 2),
+                        ),
+                        labelStyle: textTheme.bodyMedium,
+                        hintStyle: textTheme.bodySmall?.copyWith(color: Colors.black38),
+                      ),
+                      validator: _validateUsername,
+                      style: textTheme.bodyLarge,
+                    ),
+                    const SizedBox(height: 20),
+                    TextFormField(
+                      controller: passwordController,
+                      obscureText: true,
+                      decoration: InputDecoration(
+                        labelText: "Password",
+                        hintText: "********",
+                        prefixIcon: const Icon(Icons.lock, color: kAccentBlue),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10),
+                          borderSide: BorderSide(color: kPrimaryBlue.withOpacity(0.6)),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10),
+                          borderSide: const BorderSide(color: kPrimaryBlue, width: 2),
+                        ),
+                        errorBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10),
+                          borderSide: const BorderSide(color: Colors.red, width: 2),
+                        ),
+                        focusedErrorBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10),
+                          borderSide: const BorderSide(color: Colors.red, width: 2),
+                        ),
+                        labelStyle: textTheme.bodyMedium,
+                        hintStyle: textTheme.bodySmall?.copyWith(color: Colors.black38),
+                      ),
+                      validator: _validatePassword,
+                      style: textTheme.bodyLarge,
+                    ),
+                    const SizedBox(height: 30),
+                    SizedBox(
+                      width: double.infinity,
+                      child: isLoading
+                          ? CircularProgressIndicator(color: kPrimaryBlue)
+                          : ElevatedButton(
+                        onPressed: register,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: kPrimaryBlue,
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
                           ),
-                        );
-                      },
-                      child: const Text(
-                        'Login',
-                        style: TextStyle(
-                          color: Colors.blue,
-                          decoration: TextDecoration.underline,
+                          elevation: 5,
+                        ),
+                        child: Text("Register", style: textTheme.labelLarge),
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    // Displaying API response message if any
+                    if (message != null && !isLoading) // Only show message if not loading
+                      Text(
+                        message!,
+                        textAlign: TextAlign.center,
+                        style: textTheme.bodyMedium?.copyWith(
+                          color: message!.toLowerCase().contains('success') ? Colors.green.shade700 : Colors.red.shade700,
+                          fontWeight: FontWeight.w500,
                         ),
                       ),
+                    const SizedBox(height: 20),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          'Already have an account?',
+                          style: textTheme.bodyMedium,
+                        ),
+                        const SizedBox(width: 5),
+                        GestureDetector(
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => const ClientLoginPage(),
+                              ),
+                            );
+                          },
+                          child: Text(
+                            'Login',
+                            style: textTheme.bodyMedium?.copyWith(
+                              color: kPrimaryBlue,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ),
-              ],
+              ),
             ),
           ),
         ),

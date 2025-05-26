@@ -40,7 +40,9 @@ namespace backend.Repo.VetRepo.ProfileRepo
 
             user.FirstName = dto.FirstName;
             user.LastName = dto.LastName;
-            user.BirthDate = dto.BirthDate;
+            user.BirthDate = dto.BirthDate.HasValue
+                ? DateTime.SpecifyKind(dto.BirthDate.Value, DateTimeKind.Utc)
+                : (DateTime?)null;
             user.Address = dto.Address;
             user.ZipCode = dto.ZipCode;
             user.Gender = dto.Gender;
