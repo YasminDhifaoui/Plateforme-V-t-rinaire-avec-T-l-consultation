@@ -2,12 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:client_app/models/rendezvous_models/rendezvous.dart';
 import 'package:client_app/services/rendezvous_services/update_rendezvous.dart';
-import 'package:client_app/views/components/home_navbar.dart';
-import 'package:client_app/utils/logout_helper.dart';
+// import 'package:client_app/views/components/home_navbar.dart'; // Replaced with standard AppBar
+// import 'package:client_app/utils/logout_helper.dart'; // Keep if needed for general logout logic
 import 'package:client_app/services/animal_services/animal_service.dart';
 import 'package:client_app/models/animals_models/animal.dart';
 import 'package:client_app/services/vet_services/veterinaire_service.dart';
 import 'package:client_app/models/vet_models/veterinaire.dart';
+
+// Import your blue color constants. Ensure these are correctly defined.
+import 'package:client_app/main.dart'; // Adjust path if using a separate constants.dart
 
 class UpdateRendezvousPage extends StatefulWidget {
   const UpdateRendezvousPage({Key? key}) : super(key: key);
@@ -32,6 +35,7 @@ class _UpdateRendezvousPageState extends State<UpdateRendezvousPage> {
   @override
   void initState() {
     super.initState();
+    // No initialization here, it's handled in didChangeDependencies
   }
 
   @override
@@ -60,24 +64,26 @@ class _UpdateRendezvousPageState extends State<UpdateRendezvousPage> {
         _isLoading = false;
 
         _selectedAnimal = animals.firstWhere(
-              (a) => a.name.toLowerCase().trim() == rendezvous.animalName.toLowerCase().trim(),
+              (a) =>
+          a.name.toLowerCase().trim() ==
+              rendezvous.animalName.toLowerCase().trim(),
           orElse: () {
             print('Animal not found: ${rendezvous.animalName}');
             return animals.first;
           },
         );
 
-
         _selectedVeterinaire = vets.firstWhere(
               (v) => v.username == (passedVetName ?? rendezvous.vetName),
-          orElse: () => vets.first,
+          orElse: () {
+            print('Veterinarian not found: ${passedVetName ?? rendezvous.vetName}');
+            return vets.first; // Fallback to first vet if not found
+          },
         );
       });
     } catch (e) {
       setState(() => _isLoading = false);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Erreur de chargement : $e')),
-      );
+      _showSnackBar('Error loading data: $e', isSuccess: false);
     }
   }
 
@@ -91,12 +97,46 @@ class _UpdateRendezvousPageState extends State<UpdateRendezvousPage> {
       initialDate: initialDate,
       firstDate: DateTime.now(),
       lastDate: DateTime(2100),
+      builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: ColorScheme.light(
+              primary: kPrimaryBlue, // Header background color
+              onPrimary: Colors.white, // Header text color
+              onSurface: Colors.black87, // Body text color
+            ),
+            textButtonTheme: TextButtonThemeData(
+              style: TextButton.styleFrom(
+                foregroundColor: kPrimaryBlue, // Button text color
+              ),
+            ),
+          ),
+          child: child!,
+        );
+      },
     );
 
     if (pickedDate != null) {
       final TimeOfDay? pickedTime = await showTimePicker(
         context: context,
         initialTime: TimeOfDay.fromDateTime(rendezvous.date),
+        builder: (context, child) {
+          return Theme(
+            data: Theme.of(context).copyWith(
+              colorScheme: ColorScheme.light(
+                primary: kPrimaryBlue, // Header background color
+                onPrimary: Colors.white, // Header text color
+                onSurface: Colors.black87, // Body text color
+              ),
+              textButtonTheme: TextButtonThemeData(
+                style: TextButton.styleFrom(
+                  foregroundColor: kPrimaryBlue, // Button text color
+                ),
+              ),
+            ),
+            child: child!,
+          );
+        },
       );
 
       if (pickedTime != null) {
@@ -124,11 +164,11 @@ class _UpdateRendezvousPageState extends State<UpdateRendezvousPage> {
   }
 
   void _updateRendezvous() async {
+    setState(() => _isLoading = true); // Set loading true during update
     final vetIdToSend = _selectedVeterinaire?.id;
     if (vetIdToSend == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Erreur: vétérinaire introuvable')),
-      );
+      _showSnackBar('Error: Veterinarian not found.', isSuccess: false);
+      setState(() => _isLoading = false);
       return;
     }
 
@@ -140,46 +180,118 @@ class _UpdateRendezvousPageState extends State<UpdateRendezvousPage> {
       "status": rendezvous.status.name,
     };
 
-    print('Sending data: $data');
+    print('Sending data: $data'); // For debugging
 
     try {
       await UpdateRendezvousService().updateRendezvous(rendezvous.id, data);
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Rendez-vous mis à jour')),
-      );
+      _showSnackBar('Appointment updated successfully!', isSuccess: true);
       Navigator.pop(context, true); // <- send 'true' to indicate successful update
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Erreur de mise à jour: $e')),
-      );
+      _showSnackBar('Failed to update appointment: $e', isSuccess: false);
+    } finally {
+      setState(() => _isLoading = false); // Set loading false after update attempt
     }
+  }
+
+  // Helper to show themed SnackBar feedback
+  void _showSnackBar(String message, {bool isSuccess = true}) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          message,
+          style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Colors.white),
+        ),
+        backgroundColor: isSuccess ? kPrimaryBlue : Colors.red.shade600,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+        margin: const EdgeInsets.all(10),
+      ),
+    );
+  }
+
+  // Reusable text field builder with themed icons & style
+  Widget _buildTextField(
+      TextEditingController controller,
+      String label,
+      IconData icon,
+      TextTheme textTheme, {
+        bool isOptional = false,
+        TextInputType keyboardType = TextInputType.text,
+        String? Function(String?)? validator,
+        bool readOnly = false,
+        VoidCallback? onTap,
+      }) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 20), // Increased spacing
+      child: TextFormField(
+        controller: controller,
+        readOnly: readOnly,
+        keyboardType: keyboardType,
+        style: textTheme.bodyLarge?.copyWith(color: Colors.black87),
+        decoration: InputDecoration(
+          labelText: label,
+          hintText: isOptional ? '(Optional)' : null,
+          prefixIcon: Icon(icon, color: kAccentBlue),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(10),
+            borderSide: BorderSide(color: kPrimaryBlue.withOpacity(0.6)),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(10),
+            borderSide: const BorderSide(color: kPrimaryBlue, width: 2),
+          ),
+          labelStyle: TextStyle(color: kPrimaryBlue),
+          floatingLabelStyle: TextStyle(color: kPrimaryBlue, fontSize: 18),
+          filled: true,
+          fillColor: Colors.white,
+        ),
+        validator: isOptional
+            ? null
+            : validator ??
+                (value) {
+              if (value == null || value.isEmpty) {
+                return 'Please enter $label';
+              }
+              return null;
+            },
+        onTap: onTap,
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
+    final TextTheme textTheme = Theme.of(context).textTheme;
+
     return Scaffold(
-      appBar: HomeNavbar(
-        username: '',
-        onLogout: () => LogoutHelper.handleLogout(context),
+      backgroundColor: Colors.grey.shade50, // Consistent light background
+      appBar: AppBar(
+        backgroundColor: kPrimaryBlue, // Themed AppBar background
+        foregroundColor: Colors.white, // White icons and text
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_ios_rounded), // Modern back icon
+          onPressed: () => Navigator.pop(context),
+          tooltip: 'Back',
+        ),
+        title: Text(
+          'Update Appointment', // Clearer, themed title
+          style: textTheme.titleLarge?.copyWith(color: Colors.white),
+        ),
+        centerTitle: true,
+        elevation: 0, // No shadow
       ),
       body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
+          ? Center(child: CircularProgressIndicator(color: kPrimaryBlue)) // Themed loading indicator
           : SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            ElevatedButton.icon(
-              onPressed: () => Navigator.pop(context),
-              icon: const Icon(Icons.arrow_back),
-              label: const Text('Retour'),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.grey[800],
-                foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
+            Text(
+              "Edit Appointment Details",
+              style: textTheme.headlineSmall?.copyWith(
+                color: kPrimaryBlue,
+                fontWeight: FontWeight.bold,
               ),
             ),
             const SizedBox(height: 25),
@@ -187,14 +299,26 @@ class _UpdateRendezvousPageState extends State<UpdateRendezvousPage> {
             // 🔹 Animal Dropdown
             InputDecorator(
               decoration: InputDecoration(
-                labelText: 'Nom de l\'animal',
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                prefixIcon: const Icon(Icons.pets),
+                labelText: 'Select Animal',
+                labelStyle: TextStyle(color: kPrimaryBlue),
+                prefixIcon: Icon(Icons.pets_rounded, color: kAccentBlue),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
+                  borderSide: BorderSide(color: kPrimaryBlue.withOpacity(0.6)),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
+                  borderSide: const BorderSide(color: kPrimaryBlue, width: 2),
+                ),
+                filled: true,
+                fillColor: Colors.white,
               ),
               child: DropdownButtonHideUnderline(
                 child: DropdownButton<Animal>(
                   isExpanded: true,
                   value: _selectedAnimal,
+                  icon: Icon(Icons.arrow_drop_down_rounded, color: kPrimaryBlue),
+                  style: textTheme.bodyLarge?.copyWith(color: Colors.black87),
                   items: _animals.map((animal) {
                     return DropdownMenuItem(
                       value: animal,
@@ -209,60 +333,58 @@ class _UpdateRendezvousPageState extends State<UpdateRendezvousPage> {
                 ),
               ),
             ),
-
             const SizedBox(height: 20),
 
             // 🔹 Veterinarian Field (Read-only)
-            TextFormField(
-              initialValue: _selectedVeterinaire != null
-                  ? (_selectedVeterinaire!.firstName.isNotEmpty &&
-                  _selectedVeterinaire!.lastName.isNotEmpty
-                  ? '${_selectedVeterinaire!.firstName} ${_selectedVeterinaire!.lastName}'
-                  : _selectedVeterinaire!.username)
-                  : rendezvous.vetName,
-              readOnly: true,
-              decoration: InputDecoration(
-                labelText: 'Vétérinaire',
-                prefixIcon: const Icon(Icons.medical_services),
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+            _buildTextField(
+              TextEditingController(
+                text: _selectedVeterinaire != null
+                    ? (_selectedVeterinaire!.firstName.isNotEmpty &&
+                    _selectedVeterinaire!.lastName.isNotEmpty
+                    ? '${_selectedVeterinaire!.firstName} ${_selectedVeterinaire!.lastName}'
+                    : _selectedVeterinaire!.username)
+                    : rendezvous.vetName,
               ),
+              'Veterinarian',
+              Icons.medical_services_rounded,
+              textTheme,
+              readOnly: true, // This field is read-only
             ),
 
-            const SizedBox(height: 20),
-
             // 🔹 Date and Time Picker
-            TextFormField(
-              controller: _dateController,
-              readOnly: true,
-              decoration: InputDecoration(
-                labelText: 'Date et Heure',
-                prefixIcon: const Icon(Icons.calendar_today),
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-              ),
+            _buildTextField(
+              _dateController,
+              'Date and Time',
+              Icons.calendar_today_rounded,
+              textTheme,
+              readOnly: true, // This field is read-only, opens picker on tap
               onTap: _selectDateTime,
             ),
 
             const SizedBox(height: 30),
 
             // 🔹 Save Button
-            ElevatedButton.icon(
-              onPressed: _updateRendezvous,
-              icon: const Icon(Icons.save),
-              label: const Text('Enregistrer'),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.green[600],
-                foregroundColor: Colors.white,
-                textStyle: const TextStyle(fontSize: 18),
-                padding: const EdgeInsets.symmetric(vertical: 14),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton.icon(
+                onPressed: _updateRendezvous,
+                icon: const Icon(Icons.save_rounded, color: Colors.white),
+                label: Text('Save Changes', style: textTheme.labelLarge),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: kPrimaryBlue,
+                  foregroundColor: Colors.white,
+                  textStyle: const TextStyle(fontSize: 18),
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  elevation: 6,
                 ),
               ),
             ),
           ],
         ),
       ),
-
     );
   }
 }

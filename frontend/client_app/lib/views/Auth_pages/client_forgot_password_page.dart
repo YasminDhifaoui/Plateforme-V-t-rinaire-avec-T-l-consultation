@@ -1,8 +1,11 @@
-import 'package:client_app/views/components/login_navbar.dart';
+import 'package:client_app/views/components/login_navbar.dart'; // Keep this import if LoginNavbar is custom and needed elsewhere
 import 'package:flutter/material.dart';
 import 'package:client_app/models/auth_models/client_forget_password.dart';
 import 'package:client_app/services/auth_services/client_auth_services.dart';
 import 'client_login_page.dart';
+
+// Import your blue color constants. Ensure these are correctly defined.
+import 'package:client_app/main.dart'; // Adjust path if using a separate constants.dart
 
 class ClientForgotPasswordPage extends StatefulWidget {
   const ClientForgotPasswordPage({super.key});
@@ -30,13 +33,29 @@ class _ClientForgotPasswordPageState extends State<ClientForgotPasswordPage> {
     return null;
   }
 
+  // Helper to show themed SnackBar feedback
+  void _showSnackBar(String message, {bool isSuccess = true}) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          message,
+          style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Colors.white),
+        ),
+        backgroundColor: isSuccess ? kPrimaryBlue : Colors.red.shade600,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+        margin: const EdgeInsets.all(10),
+      ),
+    );
+  }
+
   void submitForgotPassword() async {
     if (!_formKey.currentState!.validate()) {
       return;
     }
     setState(() {
       isLoading = true;
-      responseMessage = '';
+      responseMessage = ''; // Clear previous message
     });
 
     final model = ClientForgetPasswordDto(email: emailController.text.trim());
@@ -46,12 +65,14 @@ class _ClientForgotPasswordPageState extends State<ClientForgotPasswordPage> {
       setState(() {
         responseMessage = result["message"] ?? "Unknown response";
       });
+      _showSnackBar(responseMessage, isSuccess: responseMessage.toLowerCase().contains('success'));
     } catch (e) {
       setState(() {
         responseMessage =
-            'Failed to send reset password email: ${e.toString()}';
+        'Failed to send reset password email: ${e.toString()}';
       });
-      print('Forgot password error: $e');
+      _showSnackBar(responseMessage, isSuccess: false);
+      print('Forgot password error: $e'); // For debugging
     } finally {
       setState(() {
         isLoading = false;
@@ -60,56 +81,157 @@ class _ClientForgotPasswordPageState extends State<ClientForgotPasswordPage> {
   }
 
   @override
+  void dispose() {
+    emailController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final TextTheme textTheme = Theme.of(context).textTheme;
+
     return Scaffold(
-      appBar: const LoginNavbar(),
+      backgroundColor: Colors.grey.shade50, // Consistent light background
+      appBar: AppBar(
+        backgroundColor: kPrimaryBlue, // Themed AppBar background
+        foregroundColor: Colors.white, // White icons and text
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_ios_rounded), // Modern back icon
+          onPressed: () => Navigator.pop(context),
+          tooltip: 'Back to Login', // Tooltip for clarity
+        ),
+        title: Text(
+          'Forgot Password', // Clearer, themed title
+          style: textTheme.titleLarge?.copyWith(color: Colors.white),
+        ),
+        centerTitle: true,
+        elevation: 0, // No shadow
+      ),
       body: Center(
-        child: Container(
-          padding: const EdgeInsets.all(16.0),
-          margin: const EdgeInsets.all(24.0),
-          decoration: BoxDecoration(
-            color: Colors.teal.shade50,
-            border: Border.all(color: Colors.teal, width: 2),
-            borderRadius: BorderRadius.circular(8),
-          ),
-          child: Form(
-            key: _formKey,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                TextFormField(
-                  controller: emailController,
-                  decoration: const InputDecoration(labelText: 'Email'),
-                  validator: _validateEmail,
-                ),
-                const SizedBox(height: 20),
-                isLoading
-                    ? const CircularProgressIndicator()
-                    : ElevatedButton(
-                        onPressed: submitForgotPassword,
-                        child: const Text('Send Reset Link'),
-                      ),
-                const SizedBox(height: 20),
-                Text(
-                  responseMessage,
-                  style: TextStyle(
-                    color: responseMessage.toLowerCase().contains('success')
-                        ? Colors.green
-                        : Colors.red,
-                  ),
-                ),
-                const SizedBox(height: 20),
-                TextButton(
-                  onPressed: () {
-                    Navigator.pushReplacement(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => const ClientLoginPage()),
-                    );
-                  },
-                  child: const Text('Back to Login'),
+        child: SingleChildScrollView( // Use SingleChildScrollView for keyboard overflow
+          padding: const EdgeInsets.all(24.0), // Increased padding
+          child: Container(
+            padding: const EdgeInsets.all(24.0), // Increased inner padding
+            decoration: BoxDecoration(
+              color: Colors.white, // White background for the form card
+              borderRadius: BorderRadius.circular(15), // More rounded corners
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.1),
+                  blurRadius: 15,
+                  offset: const Offset(0, 8),
                 ),
               ],
+            ),
+            child: Form(
+              key: _formKey,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    'Reset Your Password',
+                    style: textTheme.headlineSmall?.copyWith(
+                      color: kPrimaryBlue,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 20),
+                  Text(
+                    'Enter your email address below to receive a password reset link.',
+                    style: textTheme.bodyMedium?.copyWith(color: Colors.black54),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 30),
+                  TextFormField(
+                    controller: emailController,
+                    keyboardType: TextInputType.emailAddress,
+                    style: textTheme.bodyLarge?.copyWith(color: Colors.black87),
+                    decoration: InputDecoration(
+                      labelText: 'Email Address',
+                      labelStyle: TextStyle(color: kPrimaryBlue),
+                      prefixIcon: Icon(Icons.email_outlined, color: kAccentBlue),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(10),
+                        borderSide: BorderSide(color: kPrimaryBlue.withOpacity(0.6)),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(10),
+                        borderSide: const BorderSide(color: kPrimaryBlue, width: 2),
+                      ),
+                      filled: true,
+                      fillColor: Colors.grey.shade100, // Light grey fill
+                    ),
+                    validator: _validateEmail,
+                  ),
+                  const SizedBox(height: 30),
+                  isLoading
+                      ? CircularProgressIndicator(color: kPrimaryBlue) // Themed loading indicator
+                      : SizedBox(
+                    width: double.infinity, // Make button full width
+                    child: ElevatedButton.icon(
+                      onPressed: submitForgotPassword,
+                      icon: const Icon(Icons.send_rounded, color: Colors.white), // Modern send icon
+                      label: Text(
+                        'Send Reset Link',
+                        style: textTheme.labelLarge,
+                      ),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: kPrimaryBlue, // Themed button
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12), // More rounded
+                        ),
+                        elevation: 6, // Subtle shadow
+                      ),
+                    ),
+                  ),
+                  if (responseMessage.isNotEmpty) ...[
+                    const SizedBox(height: 20),
+                    Text(
+                      responseMessage,
+                      textAlign: TextAlign.center,
+                      style: textTheme.bodyMedium?.copyWith(
+                        color: responseMessage.toLowerCase().contains('success')
+                            ? Colors.green.shade700
+                            : Colors.red.shade700,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
+                  const SizedBox(height: 20),
+                  SizedBox( // Wrap with SizedBox to give it full width
+                    width: double.infinity,
+                    child: OutlinedButton.icon( // Changed from TextButton to OutlinedButton
+                      onPressed: () {
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => const ClientLoginPage()),
+                        );
+                      },
+                      icon: Icon(Icons.login_rounded, color: kAccentBlue), // Login icon
+                      label: Text(
+                        'Back to Login',
+                        style: textTheme.labelLarge?.copyWith(
+                          color: kPrimaryBlue,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: kPrimaryBlue, // Text and icon color
+                        side: BorderSide(color: kPrimaryBlue, width: 1.5), // Themed border
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        elevation: 0, // No shadow for outlined button
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ),

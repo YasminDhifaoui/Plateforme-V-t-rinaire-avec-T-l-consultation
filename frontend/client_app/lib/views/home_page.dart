@@ -154,7 +154,6 @@ class _HomePageState extends State<HomePage> {
                   MaterialPageRoute(
                     builder: (context) => ConsultationsPage(
                       username: widget.username,
-                      onLogout: () => LogoutHelper.handleLogout(context),
                     ),
                   ),
                 );
