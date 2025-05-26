@@ -10,12 +10,12 @@ class LoginNavbar extends StatelessWidget implements PreferredSizeWidget {
       backgroundColor:
           const Color(0xFF003366), // Marine blue (same as main navbar)
       title: GestureDetector(
-        onTap: () {
+        /*onTap: () {
           Navigator.pushReplacement(
             context,
-            MaterialPageRoute(builder: (context) => const HomePage()),
+            MaterialPageRoute(builder: (context) => const MyApp()),
           );
-        },
+        },*/
         child: Image.asset('assets/images/app_logo.png', height: 40),
       ),
       centerTitle: true,

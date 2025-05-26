@@ -1,137 +1,250 @@
+import 'dart:async'; // Import for StreamController
 import 'package:flutter_webrtc/flutter_webrtc.dart';
 import 'package:signalr_core/signalr_core.dart';
-import 'package:veterinary_app/services/video_call_services/rtc_peer_service.dart';
-import 'package:veterinary_app/utils/base_url.dart';
+
+import '../../utils/base_url.dart';
 
 class SignalRTCService {
-  static late HubConnection connection;
-  static String? callerUserId;
-  static String? targetUserId;
-  static Function(String)? onIncomingCall;
-  static Function()? onCallAccepted;
-  static Function(String)? onCallRejected;
-  static Function()? onCallEnded;
+  static HubConnection? connection;
+  static String? callerUserId; // Stored when an incoming call arrives or when accepting a call.
+  static String? targetUserId; // Stored when initiating a call.
+
+  // --- StreamControllers for different events ---
+  static final _incomingCallStreamController = StreamController<String>.broadcast();
+  static final _callAcceptedStreamController = StreamController<String>.broadcast(); // Pass calleeId or callerId
+  static final _callRejectedStreamController = StreamController<String>.broadcast();
+  static final _callEndedStreamController = StreamController<String>.broadcast(); // Pass reason
+  static final _receiveOfferStreamController = StreamController<Map<String, dynamic>>.broadcast();
+  static final _receiveAnswerStreamController = StreamController<Map<String, dynamic>>.broadcast();
+  static final _receiveIceCandidateStreamController = StreamController<Map<String, dynamic>>.broadcast();
+
+  // --- Public Streams to listen to ---
+  static Stream<String> get incomingCallStream => _incomingCallStreamController.stream;
+  static Stream<String> get callAcceptedStream => _callAcceptedStreamController.stream;
+  static Stream<String> get callRejectedStream => _callRejectedStreamController.stream;
+  static Stream<String> get callEndedStream => _callEndedStreamController.stream;
+  static Stream<Map<String, dynamic>> get receiveOfferStream => _receiveOfferStreamController.stream;
+  static Stream<Map<String, dynamic>> get receiveAnswerStream => _receiveAnswerStreamController.stream;
+  static Stream<Map<String, dynamic>> get receiveIceCandidateStream => _receiveIceCandidateStreamController.stream;
 
   static Future<void> init(String token) async {
-    connection = HubConnectionBuilder()
-        .withUrl(
-      '${BaseUrl.api}/rtchub',
-      HttpConnectionOptions(
-        accessTokenFactory: () => Future.value(token),
-        logging: (level, message) => print(message),
-      ),
-    )
-        .withAutomaticReconnect()
-        .build();
+    print('[SignalRTCService.init] - START. Token received: ${token.isNotEmpty ? 'YES' : 'NO'}');
 
-    await connection.start();
+    if (connection != null && connection!.state == HubConnectionState.connected) {
+      print('[SignalRTCService.init] - Already connected to SignalR. Skipping re-initialization.');
+      return;
+    }
 
-    // WebRTC Signaling Handlers
-    connection.on('ReceiveOffer', _handleOffer);
-    connection.on('ReceiveAnswer', _handleAnswer);
-    connection.on('ReceiveIceCandidate', _handleIceCandidate);
+    print('[SignalRTCService.init] - Building HubConnection...');
+    try {
+      connection = HubConnectionBuilder()
+          .withUrl(
+        '${BaseUrl.api}/rtchub',
+        HttpConnectionOptions(
+          accessTokenFactory: () => Future.value(token),
+          logging: (level, message) => print('[SignalR_log] $message'),
+        ),
+      )
+          .withAutomaticReconnect()
+          .build();
+      print('[SignalRTCService.init] - HubConnection built successfully. State: ${connection?.state}');
 
-    // Call Management Handlers
-    connection.on('IncomingCall', _handleIncomingCall);
-    connection.on('CallAccepted', _handleCallAccepted);
-    connection.on('CallRejected', _handleCallRejected);
-    connection.on('CallEnded', _handleCallEnded);
+      // Register all handlers BEFORE starting the connection
+      _registerHandlers();
+
+      print('[SignalRTCService.init] - Attempting to start connection...');
+      await connection!.start();
+      print('[SignalRTCService.init] - Connection started successfully. ID: ${connection!.connectionId}, State: ${connection!.state}');
+
+    } catch (e) {
+      print('[SignalRTCService.init] - ERROR during init: $e');
+      rethrow;
+    }
+  }
+
+  static void _registerHandlers() {
+    connection!.on('ReceiveOffer', (args) {
+      if (args != null && args.length >= 2) {
+        // args[0] is the callerId, args[1] is the offer data
+        callerUserId = args[0]; // Store callerId when offer received
+        final offerData = args[1] as Map<String, dynamic>;
+        print('[SignalRTCService] Received Offer from ${callerUserId}. Data: $offerData');
+        _receiveOfferStreamController.add(offerData);
+      }
+    });
+
+    connection!.on('ReceiveAnswer', (args) {
+      if (args != null && args.isNotEmpty) {
+        final answerData = args[0] as Map<String, dynamic>;
+        print('[SignalRTCService] Received Answer. Data: $answerData');
+        _receiveAnswerStreamController.add(answerData);
+      }
+    });
+
+    connection!.on('ReceiveIceCandidate', (args) {
+      if (args != null && args.isNotEmpty) {
+        final candidateData = args[0] as Map<String, dynamic>;
+        print('[SignalRTCService] Received ICE Candidate. Data: $candidateData');
+        _receiveIceCandidateStreamController.add(candidateData);
+      }
+    });
+
+    connection!.on('IncomingCall', (args) {
+      if (args != null && args.isNotEmpty) {
+        final incomingCallerId = args[0].toString();
+        print('[SignalRTCService] Incoming Call from: $incomingCallerId');
+        callerUserId = incomingCallerId; // Store incoming callerId
+        _incomingCallStreamController.add(incomingCallerId);
+      }
+    });
+
+    connection!.on('CallAccepted', (args) {
+      if (args != null && args.isNotEmpty) {
+        final acceptedById = args[0].toString(); // The ID of the user who accepted
+        print('[SignalRTCService] Call Accepted by: $acceptedById');
+        _callAcceptedStreamController.add(acceptedById);
+      }
+    });
+
+    connection!.on('CallRejected', (args) {
+      if (args != null && args.isNotEmpty) {
+        final reason = args[0].toString();
+        print('[SignalRTCService] Call Rejected: $reason');
+        _callRejectedStreamController.add(reason);
+      }
+    });
+
+    connection!.on('CallEnded', (args) {
+      if (args != null && args.isNotEmpty) {
+        final reason = args[0].toString();
+        print('[SignalRTCService] Call Ended: $reason');
+        _callEndedStreamController.add(reason);
+      } else {
+        print('[SignalRTCService] Call Ended (no specific reason)');
+        _callEndedStreamController.add('Call ended');
+      }
+      // This is crucial: Clear stored IDs when call ends
+      callerUserId = null;
+      targetUserId = null;
+    });
+
+    // Add logging for connection state changes
+    connection!.onclose((error) {
+      print('[SignalRTCService] Connection closed: $error');
+    });
+
+    connection!.onreconnecting((error) {
+      print('[SignalRTCService] Connection reconnecting: $error');
+    });
+
+    connection!.onreconnected((connectionId) {
+      print('[SignalRTCService] Connection reconnected with ID: $connectionId');
+    });
   }
 
   // Call Management Methods
-  static Future<void> initiateCall(String targetUserId) async {
-    await connection.invoke('InitiateCall', args: [targetUserId]);
-    SignalRTCService.targetUserId = targetUserId;
-  }
-
-  static Future<void> acceptCall(String callerUserId) async {
-    await connection.invoke('AcceptCall', args: [callerUserId]);
-    SignalRTCService.callerUserId = callerUserId;
-  }
-
-  static Future<void> rejectCall(String callerUserId, {String? reason}) async {
-    await connection.invoke('RejectCall', args: [callerUserId, reason ?? 'Call rejected']);
-  }
-
-  static Future<void> endCall() async {
-    if (callerUserId != null) {
-      await connection.invoke('EndCall', args: [callerUserId]);
-    } else if (targetUserId != null) {
-      await connection.invoke('EndCall', args: [targetUserId]);
+  static Future<void> initiateCall(String targetId) async {
+    if (connection?.state == HubConnectionState.connected) {
+      print('[SignalRTCService] Initiating call to: $targetId');
+      targetUserId = targetId; // Set targetUserId when initiating
+      await connection!.invoke('InitiateCall', args: [targetId]);
+    } else {
+      print('[SignalRTCService] Cannot initiate call: Not connected to SignalR hub.');
     }
-    await RTCPeerService().endCall();
+  }
+
+  static Future<void> acceptCall(String callerId) async {
+    if (connection?.state == HubConnectionState.connected) {
+      print('[SignalRTCService] Accepting call from: $callerId');
+      callerUserId = callerId; // Set callerUserId when accepting
+      await connection!.invoke('AcceptCall', args: [callerId]);
+    } else {
+      print('[SignalRTCService] Cannot accept call: Not connected to SignalR hub.');
+    }
+  }
+
+  static Future<void> rejectCall(String remoteUserId, {String? reason}) async {
+    if (connection?.state == HubConnectionState.connected) {
+      print('[SignalRTCService] Rejecting call from/to: $remoteUserId. Reason: ${reason ?? "Call rejected."}');
+      await connection!.invoke('RejectCall', args: [remoteUserId, reason ?? 'Call rejected']);
+    } else {
+      print('[SignalRTCService] Cannot reject call: Not connected to SignalR hub.');
+    }
+  }
+
+  static Future<void> endCall({String? otherUserId}) async {
+    if (connection?.state == HubConnectionState.connected) {
+      String? userToSignal = otherUserId ?? callerUserId ?? targetUserId;
+      if (userToSignal != null) {
+        print('[SignalRTCService] Sending EndCall to: $userToSignal');
+        await connection!.invoke('EndCall', args: [userToSignal, 'Call ended by user.']);
+      } else {
+        print('[SignalRTCService] No remote user ID to send EndCall signal to.');
+      }
+    } else {
+      print('[SignalRTCService] Cannot send end call signal: Not connected to SignalR hub.');
+    }
+    // Note: The `CallEnded` handler will clear `callerUserId`/`targetUserId`
+    // when the other side acknowledges or if the local `endCall` is directly called.
   }
 
   // WebRTC Signaling Methods
-  static Future<void> sendOffer(String targetUserId, dynamic offer) async {
-    await connection.invoke('SendOffer', args: [targetUserId, offer]);
+  static Future<void> sendOffer(String targetId, Map<String, dynamic> offer) async {
+    if (connection?.state == HubConnectionState.connected) {
+      print('[SignalRTCService] Sending offer to: $targetId');
+      await connection!.invoke('SendOffer', args: [targetId, offer]);
+    } else {
+      print('[SignalRTCService] Cannot send offer: Not connected to SignalR hub.');
+    }
   }
 
-  static Future<void> sendAnswer(String callerUserId, dynamic answer) async {
-    await connection.invoke('SendAnswer', args: [callerUserId, answer]);
+  static Future<void> sendAnswer(String callerId, Map<String, dynamic> answer) async {
+    if (connection?.state == HubConnectionState.connected) {
+      print('[SignalRTCService] Sending answer to: $callerId');
+      await connection!.invoke('SendAnswer', args: [callerId, answer]);
+    } else {
+      print('[SignalRTCService] Cannot send answer: Not connected to SignalR hub.');
+    }
   }
 
-  static Future<void> sendIceCandidate(String targetUserId, dynamic candidate) async {
-    await connection.invoke('SendIceCandidate', args: [targetUserId, candidate]);
+  static Future<void> sendIceCandidate(String remoteUserId, Map<String, dynamic> candidate) async {
+    if (connection?.state == HubConnectionState.connected) {
+      print('[SignalRTCService] Sending ICE candidate to: $remoteUserId');
+      await connection!.invoke('SendIceCandidate', args: [remoteUserId, candidate]);
+    } else {
+      print('[SignalRTCService] Cannot send ICE candidate: Not connected to SignalR hub.');
+    }
   }
-
-  // Handler Methods
-  static void _handleIncomingCall(List<dynamic>? args) {
-    if (args == null || args.isEmpty) return;
-    callerUserId = args[0];
-    onIncomingCall?.call(callerUserId!);
-  }
-
-  static void _handleCallAccepted(List<dynamic>? args) {
-    onCallAccepted?.call();
-  }
-
-  static void _handleCallRejected(List<dynamic>? args) {
-    if (args == null || args.isEmpty) return;
-    onCallRejected?.call(args[0].toString());
-  }
-
-  static void _handleCallEnded(List<dynamic>? args) {
-    onCallEnded?.call();
-    RTCPeerService().endCall();
-  }
-
-  static void _handleOffer(List<dynamic>? args) {
-    if (args == null || args.length < 2) return;
-    callerUserId = args[0];
-    final offer = RTCSessionDescription(args[1]['sdp'], args[1]['type']);
-    RTCPeerService().setRemoteOffer(offer);
-  }
-
-  static void _handleAnswer(List<dynamic>? args) {
-    if (args == null || args.isEmpty) return;
-    final answer = RTCSessionDescription(args[0]['sdp'], args[0]['type']);
-    RTCPeerService().setRemoteAnswer(answer);
-  }
-
-  static void _handleIceCandidate(List<dynamic>? args) {
-    if (args == null || args.isEmpty) return;
-    final candidate = RTCIceCandidate(
-      args[0]['candidate'],
-      args[0]['sdpMid'],
-      args[0]['sdpMLineIndex'],
-    );
-    RTCPeerService().addIceCandidate(candidate);
-  }
-  // Inside SignalRTCService.dart
- /* static Function(String)? onIncomingCall;
-
-// When initializing the service
-  connection.on('IncomingCall', (args) {
-  final callerId = args[0];
-  if (onIncomingCall != null) {
-  onIncomingCall!(callerId);
-  }
-  });*/
 
   static Future<void> disconnect() async {
-    await connection.stop();
+    if (connection != null && connection!.state != HubConnectionState.disconnected) {
+      print('[SignalRTCService] Disconnecting SignalR connection...');
+      try {
+        await connection!.stop();
+        print('[SignalRTCService] Connection stopped.');
+      } catch (e) {
+        print('[SignalRTCService] Error stopping connection: $e');
+      }
+    } else {
+      print('[SignalRTCService] Connection was not active or initialized, skipping stop.');
+    }
+    // Clear stored IDs
     callerUserId = null;
     targetUserId = null;
+  }
+
+  // Dispose all stream controllers
+  static Future<void> dispose() async {
+    print('[SignalRTCService] Disposing all StreamControllers.');
+    await _incomingCallStreamController.close();
+    await _callAcceptedStreamController.close();
+    await _callRejectedStreamController.close();
+    await _callEndedStreamController.close();
+    await _receiveOfferStreamController.close();
+    await _receiveAnswerStreamController.close();
+    await _receiveIceCandidateStreamController.close();
+    // Ensure disconnect is also called to stop the underlying hub connection
+    await disconnect();
+    print('[SignalRTCService] SignalRTCService disposed completely.');
   }
 }

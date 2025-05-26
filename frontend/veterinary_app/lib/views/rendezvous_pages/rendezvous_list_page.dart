@@ -25,7 +25,25 @@ class _RendezVousListPageState extends State<RendezVousListPage> {
   @override
   void initState() {
     super.initState();
-    _rdvFuture = _service.getRendezVousList(widget.token);
+    // Call the method to fetch and sort the appointments
+    _rdvFuture = _fetchAndSortRendezVous();
+  }
+
+  // New method to fetch and sort rendezvous
+  Future<List<RendezVousModel>> _fetchAndSortRendezVous() async {
+    final rendezVousList = await _service.getRendezVousList(widget.token);
+    // Sort from newest to oldest date
+    rendezVousList.sort((a, b) {
+      try {
+        final DateTime dateA = DateTime.parse(a.date);
+        final DateTime dateB = DateTime.parse(b.date);
+        return dateB.compareTo(dateA); // Newest first
+      } catch (e) {
+        // Handle cases where date string might be invalid
+        return 0; // Don't sort if dates are unparseable
+      }
+    });
+    return rendezVousList;
   }
 
   String formatDate(String date) {
@@ -115,12 +133,13 @@ class _RendezVousListPageState extends State<RendezVousListPage> {
                     ),
                   );
                   setState(() {
-                    _rdvFuture = _service.getRendezVousList(widget.token);
+                    // Re-fetch and re-sort the list after an update
+                    _rdvFuture = _fetchAndSortRendezVous();
                   });
                 } catch (e) {
                   Navigator.of(context).pop();
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Failed to update status')),
+                    SnackBar(content: Text('Failed to update status: $e')),
                   );
                 }
               },
@@ -171,6 +190,7 @@ class _RendezVousListPageState extends State<RendezVousListPage> {
                 } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
                   return const Center(child: Text('No rendez-vous found.'));
                 } else {
+                  // The data is already sorted by _fetchAndSortRendezVous()
                   final rdvs = snapshot.data!;
                   return ListView.builder(
                     itemCount: rdvs.length,
@@ -197,7 +217,9 @@ class _RendezVousListPageState extends State<RendezVousListPage> {
                                 ),
                               ),
                               const SizedBox(height: 4),
+                              // Display the client name correctly
                               Text('Client: ${rdv.clientName}'),
+                              // Display the animal name correctly
                               Text('Animal: ${rdv.animalName}'),
                               getStatusWidget(rdv.status),
                               const SizedBox(height: 8),

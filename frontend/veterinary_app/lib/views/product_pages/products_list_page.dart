@@ -30,7 +30,7 @@ class _ProductsListPageState extends State<ProductsListPage> {
   @override
   void initState() {
     super.initState();
-    _productService = ProductService(baseUrl: _baseUrl);
+    _productService = ProductService();
     _productsFuture = _productService.getAllProducts(widget.token);
   }
 
