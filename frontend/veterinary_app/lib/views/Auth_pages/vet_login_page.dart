@@ -1,13 +1,20 @@
 import 'package:flutter/material.dart';
-import 'package:veterinary_app/models/auth_models/vet_login.dart';
-import 'package:veterinary_app/services/auth_services/vet_auth_services.dart';
+import 'package:veterinary_app/models/auth_models/vet_login.dart'; // Ensure this is correct for VetLoginDto
+import 'package:veterinary_app/services/auth_services/vet_auth_services.dart'; // Ensure this contains ApiService and loginClient method
 import 'package:veterinary_app/views/Auth_pages/vet_register_page.dart';
 import 'package:veterinary_app/views/Auth_pages/verify_login_code_page.dart';
 import 'package:veterinary_app/views/Auth_pages/vet_forgot_password_page.dart';
 import 'package:veterinary_app/views/components/login_navbar.dart';
 
+// Assuming kPrimaryGreen is defined in main.dart or a shared constants file,
+// otherwise you'd define it here too:
+// const Color kPrimaryGreen = Color(0xFF00A86B);
+
 class VetLoginPage extends StatefulWidget {
-  const VetLoginPage({super.key});
+  // NEW: Callback from MyHomePage/AppWrapper
+  final Function(String token)? onLoginSuccessCallback;
+
+  const VetLoginPage({super.key, this.onLoginSuccessCallback}); // MODIFIED Constructor
 
   @override
   State<VetLoginPage> createState() => _VetLoginPageState();
@@ -17,14 +24,21 @@ class _VetLoginPageState extends State<VetLoginPage> {
   final _formKey = GlobalKey<FormState>();
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
-  final ApiService _authService = ApiService();
+  final ApiService _authService = ApiService(); // Renamed from _apiService for clarity
 
   String responseMessage = '';
+  bool isLoading = false; // Added isLoading state
 
   void loginUser() async {
     if (!_formKey.currentState!.validate()) {
       return;
     }
+
+    setState(() {
+      isLoading = true; // Set loading true
+      responseMessage = '';
+    });
+
     final loginDto = VetLoginDto(
       email: emailController.text.trim(),
       password: passwordController.text.trim(),
@@ -36,19 +50,30 @@ class _VetLoginPageState extends State<VetLoginPage> {
         responseMessage = result["message"] ?? "Unknown response";
       });
       if (result["success"] == true) {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder:
-                (context) =>
-                    VerifyLoginCodePage(email: emailController.text.trim()),
-          ),
-        );
+        if (mounted) {
+          // NAVIGATE TO 2FA Verification page
+          Navigator.push( // Use push, not pushReplacement here
+            context,
+            MaterialPageRoute(
+              builder: (context) => VerifyLoginCodePage(
+                email: emailController.text.trim(),
+                // Pass the callback to the 2FA verification page
+                onLoginSuccessCallback: widget.onLoginSuccessCallback,
+              ),
+            ),
+          );
+        }
       }
     } catch (e) {
       setState(() {
         responseMessage = 'Login failed: $e';
       });
+    } finally {
+      if (mounted) {
+        setState(() {
+          isLoading = false; // Set loading false
+        });
+      }
     }
   }
 
@@ -75,6 +100,9 @@ class _VetLoginPageState extends State<VetLoginPage> {
 
   @override
   Widget build(BuildContext context) {
+    // Re-using kPrimaryGreen from main.dart or defining locally if not shared
+    final Color kPrimaryGreen = Theme.of(context).primaryColor; // A safe way to get primary green if defined in theme
+
     return Scaffold(
       appBar: const LoginNavbar(username: ''),
       body: SingleChildScrollView(
@@ -102,7 +130,7 @@ class _VetLoginPageState extends State<VetLoginPage> {
                     "Vet Login",
                     style: TextStyle(
                       fontSize: 24,
-                      color: Colors.green,
+                      color: Colors.green, // You can use kPrimaryGreen here if defined or directly Colors.green
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -130,15 +158,17 @@ class _VetLoginPageState extends State<VetLoginPage> {
                   const SizedBox(height: 30),
                   SizedBox(
                     width: double.infinity,
-                    child: ElevatedButton(
+                    child: isLoading // Show CircularProgressIndicator when loading
+                        ? const CircularProgressIndicator()
+                        : ElevatedButton(
                       onPressed: loginUser,
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.green,
+                        backgroundColor: Colors.green, // You can use kPrimaryGreen here
                         padding: const EdgeInsets.symmetric(vertical: 14),
                       ),
                       child: const Text(
                         "Login",
-                        style: TextStyle(fontSize: 16),
+                        style: TextStyle(fontSize: 16, color: Colors.white), // Added white color for text
                       ),
                     ),
                   ),
@@ -146,7 +176,9 @@ class _VetLoginPageState extends State<VetLoginPage> {
                   if (responseMessage.isNotEmpty)
                     Text(
                       responseMessage,
-                      style: const TextStyle(color: Colors.red),
+                      style: TextStyle(
+                        color: responseMessage.toLowerCase().contains('success') ? Colors.green : Colors.red,
+                      ),
                     ),
                   const SizedBox(height: 16),
                   GestureDetector(

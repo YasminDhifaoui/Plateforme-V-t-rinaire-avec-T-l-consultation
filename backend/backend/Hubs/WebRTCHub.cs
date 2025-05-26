@@ -1,15 +1,15 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
 using System.Collections.Concurrent;
-using System.Text.Json; // For System.Text.Json
-// For Newtonsoft.Json (if preferred) using Newtonsoft.Json;
+using System.Text.Json;
+using System.Linq; // Ensure this is present for .Any()
 
 [Authorize]
 public class WebRTCHub : Hub
 {
     // Stores userId -> connectionId mapping
     private static readonly ConcurrentDictionary<string, string> _userConnections = new();
-    // Stores active calls: CallerId -> TargetId (or vice versa)
+    // Stores active calls: CallerId -> TargetId
     private static readonly ConcurrentDictionary<string, string> _activeCalls = new();
 
     public override async Task OnConnectedAsync()
@@ -35,21 +35,52 @@ public class WebRTCHub : Hub
             _userConnections.TryRemove(userId, out _);
             Console.WriteLine($"[Hub] User disconnected: UserId={userId}, ConnectionId={Context.ConnectionId}");
 
-            // Find and clean up any active calls involving this user
-            var ongoingCall = _activeCalls.FirstOrDefault(x => x.Key == userId || x.Value == userId);
-            if (ongoingCall.Key != null) // If a call was found
+            string? partnerIdInCall = null;
+            string? callKeyToRemove = null;
+
+            // Case 1: Current user (userId) is the caller in an active call (userId is the key)
+            if (_activeCalls.TryGetValue(userId, out var targetOfThisUser) && targetOfThisUser != null)
             {
-                string otherUserId = (ongoingCall.Key == userId) ? ongoingCall.Value : ongoingCall.Key;
-
-                // Remove the call from active calls (try to remove both potential keys)
-                _activeCalls.TryRemove(ongoingCall.Key, out _);
-                _activeCalls.TryRemove(otherUserId, out _); // In case the key was the other user's ID
-
-                if (_userConnections.TryGetValue(otherUserId, out string? otherUserConnectionId))
+                partnerIdInCall = targetOfThisUser;
+                callKeyToRemove = userId;
+                Console.WriteLine($"[Hub] OnDisconnected: User {userId} (disconnected) was the caller to {partnerIdInCall}.");
+            }
+            // Case 2: Current user (userId) is the callee/target in an active call (userId is the value)
+            else
+            {
+                var activeCallEntry = _activeCalls.FirstOrDefault(x => x.Value == userId);
+                if (activeCallEntry.Key != null)
                 {
-                    await Clients.Client(otherUserConnectionId).SendAsync("CallEnded", "The other user disconnected.");
-                    Console.WriteLine($"[Hub] Disconnected user {userId} ended call with {otherUserId}");
+                    callKeyToRemove = activeCallEntry.Key;
+                    partnerIdInCall = activeCallEntry.Key; // The partner is the caller
+                    Console.WriteLine($"[Hub] OnDisconnected: User {userId} (disconnected) was the callee from {partnerIdInCall}.");
                 }
+            }
+
+            if (callKeyToRemove != null)
+            {
+                if (_activeCalls.TryRemove(callKeyToRemove, out _))
+                {
+                    Console.WriteLine($"[Hub] Disconnected user {userId} ended call with {partnerIdInCall}. Call entry ({callKeyToRemove} -> {userId}) removed.");
+
+                    if (partnerIdInCall != null && _userConnections.TryGetValue(partnerIdInCall, out string? partnerConnectionId))
+                    {
+                        Console.WriteLine($"[Hub] Sent CallEnded to {partnerIdInCall} (ConnectionId: {partnerConnectionId}) due to {userId}'s disconnection.");
+                        await Clients.Client(partnerConnectionId).SendAsync("CallEnded", "The other user disconnected.");
+                    }
+                    else
+                    {
+                        Console.WriteLine($"[Hub] OnDisconnected: Partner {partnerIdInCall} not found or already disconnected. No CallEnded sent.");
+                    }
+                }
+                else
+                {
+                    Console.WriteLine($"[Hub] OnDisconnectedAsync: Failed to remove call entry for key {callKeyToRemove} from _activeCalls (already removed?).");
+                }
+            }
+            else
+            {
+                Console.WriteLine($"[Hub] OnDisconnectedAsync: User {userId} was not found as a participant in any active call.");
             }
         }
         else
@@ -71,20 +102,37 @@ public class WebRTCHub : Hub
             return;
         }
 
-        if (_activeCalls.ContainsKey(callerId) || _activeCalls.ContainsKey(targetUserId))
+        // Prevent self-calling
+        if (callerId == targetUserId)
+        {
+            Console.WriteLine($"[Hub] InitiateCall: Self-calling blocked for {callerId}.");
+            await Clients.Caller.SendAsync("CallRejected", "Cannot call yourself.");
+            return;
+        }
+
+        // Check if caller or target is already in a call (as key or value)
+        // CORRECTED LINES HERE:
+        if (_activeCalls.ContainsKey(callerId) || _activeCalls.Any(x => x.Value == callerId) ||
+            _activeCalls.ContainsKey(targetUserId) || _activeCalls.Any(x => x.Value == targetUserId))
         {
             Console.WriteLine($"[Hub] InitiateCall: User {callerId} or {targetUserId} already in a call.");
-            await Clients.Caller.SendAsync("CallRejected", "One of the users is already in a call");
+            await Clients.Caller.SendAsync("CallRejected", "One of the users is already in a call.");
             return;
         }
 
         // Check if target user is connected
         if (_userConnections.TryGetValue(targetUserId, out string? targetConnectionId))
         {
-            _activeCalls.TryAdd(callerId, targetUserId); // Map caller to target
-            // Use Clients.Client with the looked-up connection ID
-            await Clients.Client(targetConnectionId).SendAsync("IncomingCall", callerId);
-            Console.WriteLine($"[Hub] Sent IncomingCall to {targetUserId} (ConnectionId: {targetConnectionId})");
+            if (_activeCalls.TryAdd(callerId, targetUserId))
+            {
+                await Clients.Client(targetConnectionId).SendAsync("IncomingCall", callerId);
+                Console.WriteLine($"[Hub] Sent IncomingCall to {targetUserId} (ConnectionId: {targetConnectionId})");
+            }
+            else
+            {
+                Console.WriteLine($"[Hub] InitiateCall: Failed to add call {callerId}->{targetUserId} to _activeCalls. (Concurrent add failure?)");
+                await Clients.Caller.SendAsync("CallRejected", "Failed to register call on server.");
+            }
         }
         else
         {
@@ -99,26 +147,26 @@ public class WebRTCHub : Hub
         var calleeId = Context.User?.FindFirst("Id")?.Value;
         Console.WriteLine($"[Hub] AcceptCall from {calleeId} to {callerUserId}");
 
-        if (calleeId == null) { return; }
+        if (calleeId == null) { Console.WriteLine("[Hub] AcceptCall: Callee ID is null."); return; }
 
+        // Verify the call is still active and matches the expected participants
         if (!_activeCalls.TryGetValue(callerUserId, out var currentTarget) || currentTarget != calleeId)
         {
-            Console.WriteLine($"[Hub] AcceptCall: Call not active or mismatch. CallerKey={callerUserId}, ExpectedTarget={calleeId}, ActualTarget={currentTarget}");
-            await Clients.Caller.SendAsync("CallRejected", "Call no longer active");
+            Console.WriteLine($"[Hub] AcceptCall: Call not active or mismatch. CallerKey={callerUserId}, ExpectedTarget={calleeId}, ActualTarget={currentTarget ?? "null"}");
+            await Clients.Caller.SendAsync("CallRejected", "Call no longer active or participant mismatch.");
             return;
         }
 
         if (_userConnections.TryGetValue(callerUserId, out string? callerConnectionId))
         {
-            // Use Clients.Client with the looked-up connection ID
             await Clients.Client(callerConnectionId).SendAsync("CallAccepted", calleeId);
             Console.WriteLine($"[Hub] Sent CallAccepted to {callerUserId} (ConnectionId: {callerConnectionId})");
         }
         else
         {
-            Console.WriteLine($"[Hub] AcceptCall: Caller {callerUserId} not found or disconnected.");
+            Console.WriteLine($"[Hub] AcceptCall: Caller {callerUserId} not found or disconnected. Removing call entry.");
             await Clients.Caller.SendAsync("CallRejected", "Caller is not online or disconnected.");
-            _activeCalls.TryRemove(callerUserId, out _); // Clean up the call if caller disconnected
+            _activeCalls.TryRemove(callerUserId, out _);
         }
     }
 
@@ -128,132 +176,162 @@ public class WebRTCHub : Hub
         var calleeId = Context.User?.FindFirst("Id")?.Value;
         Console.WriteLine($"[Hub] RejectCall from {calleeId} for {callerUserId}. Reason: {reason}");
 
-        if (calleeId == null) { return; }
+        if (calleeId == null) { Console.WriteLine("[Hub] RejectCall: Callee ID is null."); return; }
 
-        _activeCalls.TryRemove(callerUserId, out _); // Remove the call from active calls
+        // Try to remove the call from active calls, considering the callerUserId is the key
+        if (_activeCalls.TryRemove(callerUserId, out _))
+        {
+            Console.WriteLine($"[Hub] RejectCall: Active call from {callerUserId} removed.");
+        }
+        else
+        {
+            Console.WriteLine($"[Hub] RejectCall: No active call found for caller {callerUserId} to remove (already removed?).");
+        }
 
         if (_userConnections.TryGetValue(callerUserId, out string? callerConnectionId))
         {
-            await Clients.Client(callerConnectionId).SendAsync("CallRejected", reason ?? "Call rejected");
+            await Clients.Client(callerConnectionId).SendAsync("CallRejected", reason ?? "Call rejected.");
             Console.WriteLine($"[Hub] Sent CallRejected to {callerUserId} (ConnectionId: {callerConnectionId})");
         }
         else
         {
-            Console.WriteLine($"[Hub] RejectCall: Caller {callerUserId} not found or disconnected.");
+            Console.WriteLine($"[Hub] RejectCall: Caller {callerUserId} not found or disconnected. No CallRejected sent.");
         }
     }
 
     // End an ongoing call
-    public async Task EndCall(string otherUserId)
+    public async Task EndCall(string otherUserId, string reason)
     {
         var userId = Context.User?.FindFirst("Id")?.Value;
-        Console.WriteLine($"[Hub] EndCall from {userId} to {otherUserId}");
+        Console.WriteLine($"[Hub] EndCall from {userId} to {otherUserId}. Reason: {reason}");
 
-        if (userId == null) { return; }
+        if (userId == null) { Console.WriteLine("[Hub] EndCall: Current user ID is null."); return; }
 
-        // Determine which key in _activeCalls to remove
         bool removed = false;
+        string? callKeyToNotifyOther = null;
+        string? otherUserToNotify = null;
+
+        // Scenario 1: Current user is the caller in the map (userId -> otherUserId)
         if (_activeCalls.TryGetValue(userId, out var target) && target == otherUserId)
         {
             removed = _activeCalls.TryRemove(userId, out _);
+            callKeyToNotifyOther = userId; // The caller (who ended)
+            otherUserToNotify = otherUserId; // The callee (to notify)
+            Console.WriteLine($"[Hub] EndCall: User {userId} (caller) ended call with {otherUserId}.");
         }
+        // Scenario 2: Current user is the target in the map (otherUserId -> userId)
         else if (_activeCalls.TryGetValue(otherUserId, out var caller) && caller == userId)
         {
             removed = _activeCalls.TryRemove(otherUserId, out _);
+            callKeyToNotifyOther = otherUserId; // The caller (whose call entry is being removed)
+            otherUserToNotify = otherUserId; // The caller (to notify)
+            Console.WriteLine($"[Hub] EndCall: User {userId} (callee) ended call from {otherUserId}.");
         }
 
-        if (removed)
+        if (removed && otherUserToNotify != null)
         {
-            Console.WriteLine($"[Hub] EndCall: Active call between {userId} and {otherUserId} removed.");
+            Console.WriteLine($"[Hub] EndCall: Active call entry removed from _activeCalls (caller key: {callKeyToNotifyOther}).");
+            if (_userConnections.TryGetValue(otherUserToNotify, out string? otherUserConnectionId))
+            {
+                await Clients.Client(otherUserConnectionId).SendAsync("CallEnded", reason);
+                Console.WriteLine($"[Hub] Sent CallEnded to {otherUserToNotify} (ConnectionId: {otherUserConnectionId}) with reason: {reason}");
+            }
+            else
+            {
+                Console.WriteLine($"[Hub] EndCall: Other user {otherUserToNotify} not found or disconnected. No CallEnded sent.");
+            }
         }
         else
         {
-            Console.WriteLine($"[Hub] EndCall: No active call found for {userId} and {otherUserId}.");
-        }
-
-        if (_userConnections.TryGetValue(otherUserId, out string? otherUserConnectionId))
-        {
-            await Clients.Client(otherUserConnectionId).SendAsync("CallEnded", "The other user ended the call.");
-            Console.WriteLine($"[Hub] Sent CallEnded to {otherUserId} (ConnectionId: {otherUserConnectionId})");
-        }
-        else
-        {
-            Console.WriteLine($"[Hub] EndCall: Other user {otherUserId} not found or disconnected.");
+            Console.WriteLine($"[Hub] EndCall: No active call found for {userId} with {otherUserId} to remove or call already ended.");
         }
     }
 
     // Send WebRTC offer
-    // CHANGE: Receive as JsonElement (System.Text.Json) or JObject (Newtonsoft.Json)
-    public async Task SendOffer(string targetUserId, JsonElement offer) // Changed type from string to JsonElement
+    public async Task SendOffer(string targetUserId, JsonElement offer)
     {
         var callerId = Context.User?.FindFirst("Id")?.Value;
         Console.WriteLine($"[Hub] SendOffer from {callerId} to {targetUserId}");
 
-        if (callerId == null) { return; }
+        if (callerId == null) { Console.WriteLine("[Hub] SendOffer: Caller ID is null."); return; }
 
+        // Validate that there's an active call between these two users
         if (!_activeCalls.TryGetValue(callerId, out var currentTarget) || currentTarget != targetUserId)
         {
-            Console.WriteLine($"[Hub] SendOffer: Call no longer active. CallerKey={callerId}, ExpectedTarget={targetUserId}, ActualTarget={currentTarget}");
-            await Clients.Caller.SendAsync("CallRejected", "Call no longer active"); // Send rejection
+            Console.WriteLine($"[Hub] SendOffer: No active call for {callerId} to {targetUserId}. Current active call: {callerId} -> {currentTarget ?? "null"}");
+            await Clients.Caller.SendAsync("CallRejected", "Call no longer active or mismatch for offer exchange.");
             return;
         }
 
         if (_userConnections.TryGetValue(targetUserId, out string? targetConnectionId))
         {
-            // Send the JSON directly. Flutter_WebRTC expects a Map.
-            await Clients.Client(targetConnectionId).SendAsync("ReceiveOffer", callerId, offer);
-            Console.WriteLine($"[Hub] Sent ReceiveOffer to {targetUserId} (ConnectionId: {targetConnectionId})");
+            await Clients.Client(targetConnectionId).SendAsync("ReceiveOffer", new { callerId = callerId, offer = offer });
+            Console.WriteLine($"[Hub] Sent ReceiveOffer to {targetUserId} (ConnectionId: {targetConnectionId}) from {callerId}");
         }
         else
         {
-            Console.WriteLine($"[Hub] SendOffer: Target user {targetUserId} not found or disconnected.");
-            await Clients.Caller.SendAsync("CallRejected", "Target user disconnected during offer exchange.");
-            // Consider ending the call if target user disappears
+            Console.WriteLine($"[Hub] SendOffer: Target user {targetUserId} not found or disconnected. Ending call for caller.");
+            await Clients.Caller.SendAsync("CallEnded", "Target user disconnected during offer exchange.");
             _activeCalls.TryRemove(callerId, out _);
         }
     }
 
     // Send WebRTC answer
-    // CHANGE: Receive as JsonElement (System.Text.Json) or JObject (Newtonsoft.Json)
-    public async Task SendAnswer(string callerUserId, JsonElement answer) // Changed type from string to JsonElement
+    public async Task SendAnswer(string callerUserId, JsonElement answer)
     {
         var calleeId = Context.User?.FindFirst("Id")?.Value;
         Console.WriteLine($"[Hub] SendAnswer from {calleeId} to {callerUserId}");
 
-        if (calleeId == null) { return; }
+        if (calleeId == null) { Console.WriteLine("[Hub] SendAnswer: Callee ID is null."); return; }
+
+        // Validate that there's an active call between these two users
+        if (!_activeCalls.TryGetValue(callerUserId, out var currentTarget) || currentTarget != calleeId)
+        {
+            Console.WriteLine($"[Hub] SendAnswer: No active call for {calleeId} to {callerUserId}. Current active call: {callerUserId} -> {currentTarget ?? "null"}");
+            await Clients.Caller.SendAsync("CallRejected", "Call no longer active or mismatch for answer exchange.");
+            return;
+        }
 
         if (_userConnections.TryGetValue(callerUserId, out string? callerConnectionId))
         {
-            // Send the JSON directly
             await Clients.Client(callerConnectionId).SendAsync("ReceiveAnswer", answer);
             Console.WriteLine($"[Hub] Sent ReceiveAnswer to {callerUserId} (ConnectionId: {callerConnectionId})");
         }
         else
         {
-            Console.WriteLine($"[Hub] SendAnswer: Caller {callerUserId} not found or disconnected.");
-            // Consider ending the call if caller disappears during answer exchange
-            _activeCalls.TryRemove(callerUserId, out _); // Assumes caller is key
+            Console.WriteLine($"[Hub] SendAnswer: Caller {callerUserId} not found or disconnected. Ending call for callee.");
+            await Clients.Caller.SendAsync("CallEnded", "Caller disconnected before answer could be sent.");
+            _activeCalls.TryRemove(callerUserId, out _);
         }
     }
 
     // Relay ICE candidate between peers
-    // CHANGE: Receive as JsonElement (System.Text.Json) or JObject (Newtonsoft.Json)
-    public async Task SendIceCandidate(string targetUserId, JsonElement candidate) // Changed type from string to JsonElement
+    public async Task SendIceCandidate(string targetUserId, JsonElement candidate)
     {
         var senderId = Context.User?.FindFirst("Id")?.Value;
         Console.WriteLine($"[Hub] SendIceCandidate from {senderId} to {targetUserId}");
 
-        if (senderId == null) { return; }
+        if (senderId == null) { Console.WriteLine("[Hub] SendIceCandidate: Sender ID is null."); return; }
+
+        // While not strictly necessary to check _activeCalls for every candidate,
+        // it can help prevent relaying candidates for non-existent calls.
+        bool callActive = (_activeCalls.TryGetValue(senderId, out var target) && target == targetUserId) ||
+                          (_activeCalls.Any(x => x.Key == targetUserId && x.Value == senderId));
+
+        if (!callActive)
+        {
+            Console.WriteLine($"[Hub] SendIceCandidate: No active call found between {senderId} and {targetUserId}. Skipping candidate relay.");
+            return;
+        }
 
         if (_userConnections.TryGetValue(targetUserId, out string? targetConnectionId))
         {
-            // Send the JSON directly
             await Clients.Client(targetConnectionId).SendAsync("ReceiveIceCandidate", candidate);
             Console.WriteLine($"[Hub] Sent ReceiveIceCandidate to {targetUserId} (ConnectionId: {targetConnectionId})");
         }
         else
         {
-            Console.WriteLine($"[Hub] SendIceCandidate: Target user {targetUserId} not found or disconnected.");
+            Console.WriteLine($"[Hub] SendIceCandidate: Target user {targetUserId} not found or disconnected. Skipping candidate relay.");
         }
     }
 }

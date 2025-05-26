@@ -3,12 +3,18 @@ import 'package:client_app/views/components/login_navbar.dart';
 import 'package:flutter/material.dart';
 import 'package:client_app/models/auth_models/client_verify_login.dart';
 import 'package:client_app/services/auth_services/client_auth_services.dart';
-import '../home_page.dart';
+import '../home_page.dart'; // Assuming this is your client's actual home page
 
 class VerifyLoginCodePage extends StatefulWidget {
   final String email;
+  // NEW: Add the onLoginSuccessCallback parameter
+  final Function(String token)? onLoginSuccessCallback;
 
-  const VerifyLoginCodePage({Key? key, required this.email}) : super(key: key);
+  const VerifyLoginCodePage({
+    Key? key,
+    required this.email,
+    this.onLoginSuccessCallback, // Make sure this is present
+  }) : super(key: key);
 
   @override
   _VerifyLoginCodePageState createState() => _VerifyLoginCodePageState();
@@ -43,13 +49,13 @@ class _VerifyLoginCodePageState extends State<VerifyLoginCodePage> {
         final data = result['data'];
         final token = data['token'];
         final userData = data['data']; // this is a nested map
-        final userId = userData['clientId'];
-        final username = userData['username'];
-
+        final userId = userData['clientId']; // Assuming this is the correct key for user ID
+        final username = userData['username']; // Assuming this is the correct key for username
 
         print('Token: $token');
         print('User ID: $userId');
         print('Username: $username');
+
         if (token == null || token.toString().isEmpty ||
             userId == null || userId.toString().isEmpty ||
             username == null || username.toString().isEmpty) {
@@ -60,8 +66,10 @@ class _VerifyLoginCodePageState extends State<VerifyLoginCodePage> {
           return;
         }
 
+        await _storeSession(token, userId.toString()); // Ensure userId is string for token service
 
-        await _storeSession(token, userId);
+        // *** CRUCIAL: Call the global SignalR initialization callback here ***
+        widget.onLoginSuccessCallback?.call(token.toString()); // Ensure token is string
 
         if (mounted) {
           Navigator.pushReplacement(
@@ -95,45 +103,73 @@ class _VerifyLoginCodePageState extends State<VerifyLoginCodePage> {
 
   @override
   Widget build(BuildContext context) {
+    // Use Theme.of(context).primaryColor (which is Colors.teal for client app)
+    final Color primaryTeal = Theme.of(context).primaryColor;
+
     return Scaffold(
       appBar: const LoginNavbar(),
       body: Center(
-        child: Container(
-          padding: const EdgeInsets.all(16.0),
-          margin: const EdgeInsets.all(24.0),
-          decoration: BoxDecoration(
-            color: Colors.teal.shade50,
-            border: Border.all(color: Colors.teal, width: 2),
-            borderRadius: BorderRadius.circular(8),
-          ),
-          child: Form(
-            key: _formKey,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text('Enter the verification code sent to ${widget.email}'),
-                TextFormField(
-                  controller: codeController,
-                  decoration:
-                  const InputDecoration(labelText: 'Verification Code'),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Verification code is required';
-                    }
-                    return null;
-                  },
-                ),
-                const SizedBox(height: 20),
-                isLoading
-                    ? const CircularProgressIndicator()
-                    : ElevatedButton(
-                  onPressed: verifyCode,
-                  child: const Text('Verify'),
-                ),
-                const SizedBox(height: 20),
-                Text(responseMessage,
-                    style: const TextStyle(color: Colors.red)),
-              ],
+        child: SingleChildScrollView( // Added SingleChildScrollView for safety
+          child: Container(
+            padding: const EdgeInsets.all(16.0),
+            margin: const EdgeInsets.all(24.0),
+            decoration: BoxDecoration(
+              color: primaryTeal.withBlue(0), // Use primaryTeal for consistent theming
+              border: Border.all(color: primaryTeal, width: 2),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Form(
+              key: _formKey,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    'Enter the verification code sent to ${widget.email}',
+                    style: const TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 16), // Added SizedBox for spacing
+                  TextFormField(
+                    controller: codeController,
+                    decoration: InputDecoration(
+                      labelText: 'Verification Code',
+                      focusedBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: primaryTeal),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderSide: BorderSide(
+                          color: primaryTeal.withOpacity(0.6),
+                        ),
+                      ),
+                    ),
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Verification code is required';
+                      }
+                      return null;
+                    },
+                  ),
+                  const SizedBox(height: 20),
+                  isLoading
+                      ? const CircularProgressIndicator()
+                      : ElevatedButton(
+                    onPressed: verifyCode,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: primaryTeal,
+                      foregroundColor: Colors.white, // Ensure text is visible
+                    ),
+                    child: const Text('Verify'),
+                  ),
+                  const SizedBox(height: 20),
+                  Text(
+                    responseMessage,
+                    style: TextStyle(
+                      color: responseMessage.toLowerCase().contains('success')
+                          ? Colors.green
+                          : Colors.red,
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ),

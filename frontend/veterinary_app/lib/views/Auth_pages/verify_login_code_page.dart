@@ -4,15 +4,23 @@ import 'package:veterinary_app/models/auth_models/vet_verify_login.dart';
 import 'package:veterinary_app/services/auth_services/vet_auth_services.dart';
 import 'package:veterinary_app/services/auth_services/token_service.dart';
 import 'package:veterinary_app/views/components/login_navbar.dart';
-import '../home_page.dart';
+import '../home_page.dart'; // Still needed as you navigate to it from here
 
-// Define your primary green color used in login/register
-const Color kPrimaryGreen = Color(0xFF00A86B); // Adjust if needed
+// Assuming kPrimaryGreen is defined in main.dart or a shared constants file,
+// otherwise you'd define it here too:
+// const Color kPrimaryGreen = Color(0xFF00A86B);
 
 class VerifyLoginCodePage extends StatefulWidget {
   final String email;
+  // NEW: Callback for SignalR init received from previous page
+  final Function(String token)? onLoginSuccessCallback;
 
-  const VerifyLoginCodePage({super.key, required this.email});
+  // MODIFIED Constructor
+  const VerifyLoginCodePage({
+    super.key,
+    required this.email,
+    this.onLoginSuccessCallback, // Make sure this is present
+  });
 
   @override
   _VerifyLoginCodePageState createState() => _VerifyLoginCodePageState();
@@ -59,7 +67,12 @@ class _VerifyLoginCodePageState extends State<VerifyLoginCodePage> {
 
         await _storeSession(token, username);
 
+        // *** CALL THE GLOBAL SIGNALR INITIALIZATION HERE ***
+        // This will trigger the initSignalRAndListenGlobally method in AppWrapper (in main.dart)
+        widget.onLoginSuccessCallback?.call(token); // Crucial call here
+
         if (mounted) {
+          // Navigate to HomePage after successful verification
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(
@@ -91,6 +104,9 @@ class _VerifyLoginCodePageState extends State<VerifyLoginCodePage> {
 
   @override
   Widget build(BuildContext context) {
+    // Re-using kPrimaryGreen from main.dart or defining locally if not shared
+    final Color kPrimaryGreen = Theme.of(context).primaryColor; // A safe way to get primary green if defined in theme
+
     return Scaffold(
       appBar: LoginNavbar(username: ''),
       body: Center(
@@ -136,21 +152,21 @@ class _VerifyLoginCodePageState extends State<VerifyLoginCodePage> {
                 isLoading
                     ? const CircularProgressIndicator()
                     : ElevatedButton(
-                      onPressed: verifyCode,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: kPrimaryGreen,
-                        foregroundColor: Colors.white,
-                      ),
-                      child: const Text('Verify'),
-                    ),
+                  onPressed: verifyCode,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: kPrimaryGreen,
+                    foregroundColor: Colors.white,
+                  ),
+                  child: const Text('Verify'),
+                ),
                 const SizedBox(height: 20),
                 Text(
                   responseMessage,
                   style: TextStyle(
                     color:
-                        responseMessage.toLowerCase().contains('success')
-                            ? Colors.green
-                            : Colors.red,
+                    responseMessage.toLowerCase().contains('success')
+                        ? Colors.green
+                        : Colors.red,
                   ),
                 ),
               ],
