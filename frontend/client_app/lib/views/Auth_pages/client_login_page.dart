@@ -6,11 +6,13 @@ import 'package:client_app/views/Auth_pages/verify_login_code_page.dart'; // Cor
 import 'package:client_app/views/Auth_pages/client_forgot_password_page.dart';
 import 'package:flutter/material.dart';
 
+// Import the blue color constants from main.dart
+import 'package:client_app/main.dart'; // Assuming main.dart holds kPrimaryBlue, kAccentBlue etc.
+
 class ClientLoginPage extends StatefulWidget {
-  // NEW: Callback from HomePage/ClientAppWrapper
   final Function(String token)? onLoginSuccessCallback;
 
-  const ClientLoginPage({super.key, this.onLoginSuccessCallback}); // MODIFIED Constructor
+  const ClientLoginPage({super.key, this.onLoginSuccessCallback});
 
   @override
   State<ClientLoginPage> createState() => _ClientLoginPageState();
@@ -23,7 +25,7 @@ class _ClientLoginPageState extends State<ClientLoginPage> {
   final ApiService _authService = ApiService();
 
   String responseMessage = '';
-  bool isLoading = false; // Added isLoading state
+  bool isLoading = false;
 
   void loginUser() async {
     if (!_formKey.currentState!.validate()) {
@@ -31,7 +33,7 @@ class _ClientLoginPageState extends State<ClientLoginPage> {
     }
 
     setState(() {
-      isLoading = true; // Set loading true
+      isLoading = true;
       responseMessage = '';
     });
 
@@ -47,13 +49,11 @@ class _ClientLoginPageState extends State<ClientLoginPage> {
       });
       if (result["success"] == true) {
         if (mounted) {
-          // Navigate to verify login code page with email
           Navigator.push(
             context,
             MaterialPageRoute(
               builder: (context) => VerifyLoginCodePage(
                 email: emailController.text.trim(),
-                // Pass the callback to the 2FA verification page
                 onLoginSuccessCallback: widget.onLoginSuccessCallback,
               ),
             ),
@@ -67,7 +67,7 @@ class _ClientLoginPageState extends State<ClientLoginPage> {
     } finally {
       if (mounted) {
         setState(() {
-          isLoading = false; // Set loading false
+          isLoading = false;
         });
       }
     }
@@ -96,132 +96,190 @@ class _ClientLoginPageState extends State<ClientLoginPage> {
 
   @override
   Widget build(BuildContext context) {
+    // Access the defined text theme
+    final TextTheme textTheme = Theme.of(context).textTheme;
+
     return Scaffold(
-      appBar: const LoginNavbar(),
+      // Assuming LoginNavbar is just a basic AppBar, we'll let the main theme handle its appearance.
+      // If LoginNavbar is a custom widget, ensure its background and text colors are aligned with the theme.
+      appBar: AppBar(
+        centerTitle: true,
+        backgroundColor: kPrimaryBlue, // Explicitly use our primary blue
+        elevation: 0,
+        leading: IconButton( // Add a back button for navigation
+          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          onPressed: () => Navigator.pop(context),
+        ),
+      ),
       body: Center(
-        child: SingleChildScrollView( // Added SingleChildScrollView to prevent overflow
-          child: Container(
-            padding: const EdgeInsets.all(16.0),
-            decoration: BoxDecoration(
-              color: Colors.teal.shade50,
-              border: Border.all(color: Colors.teal, width: 2),
-              borderRadius: BorderRadius.circular(8),
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(24.0), // Padding around the scrollable content
+          child: Card( // Using Card for a subtle elevation and professional look
+            elevation: 8, // Add a shadow
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16), // Rounded corners for the card
             ),
-            margin: const EdgeInsets.all(24.0),
-            child: Form(
-              key: _formKey,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  // Using Theme.of(context).primaryColor for consistency with theme
-                  Text(
-                    "Client Login",
-                    style: TextStyle(
-                      fontSize: 24,
-                      color: Theme.of(context).primaryColor,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 30),
-                  TextFormField(
-                    controller: emailController,
-                    decoration: InputDecoration(
-                      labelText: "Email",
-                      focusedBorder: OutlineInputBorder(
-                        borderSide: BorderSide(color: Theme.of(context).primaryColor),
-                      ),
-                      enabledBorder: OutlineInputBorder(
-                        borderSide: BorderSide(
-                          color: Theme.of(context).primaryColor.withOpacity(0.6),
-                        ),
-                      ),
-                    ),
-                    validator: _validateEmail,
-                  ),
-                  const SizedBox(height: 20),
-                  TextFormField(
-                    controller: passwordController,
-                    obscureText: true,
-                    decoration: InputDecoration(
-                      labelText: "Password",
-                      focusedBorder: OutlineInputBorder(
-                        borderSide: BorderSide(color: Theme.of(context).primaryColor),
-                      ),
-                      enabledBorder: OutlineInputBorder(
-                        borderSide: BorderSide(
-                          color: Theme.of(context).primaryColor.withOpacity(0.6),
-                        ),
-                      ),
-                    ),
-                    validator: _validatePassword,
-                  ),
-                  const SizedBox(height: 30),
-                  SizedBox(
-                    width: double.infinity,
-                    child: isLoading
-                        ? const CircularProgressIndicator()
-                        : ElevatedButton(
-                      onPressed: loginUser,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Theme.of(context).primaryColor,
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(vertical: 14),
-                      ),
-                      child: const Text("Login", style: TextStyle(fontSize: 16)),
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  if (responseMessage.isNotEmpty)
+            margin: EdgeInsets.zero, // Card handles its own margin via parent padding
+            child: Padding(
+              padding: const EdgeInsets.all(24.0), // Padding inside the card
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min, // Keep column compact
+                  children: [
                     Text(
-                      responseMessage,
-                      style: TextStyle(
-                        color: responseMessage.toLowerCase().contains('success') ? Colors.green : Colors.red,
+                      "Welcome Back!",
+                      style: textTheme.headlineMedium?.copyWith(
+                        color: kPrimaryBlue, // Use primary blue for the title
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
-                  const SizedBox(height: 16),
-                  GestureDetector(
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const ClientForgotPasswordPage(),
+                    const SizedBox(height: 10),
+                    Text(
+                      "Login to access your pet's healthcare portal.",
+                      textAlign: TextAlign.center,
+                      style: textTheme.bodyMedium?.copyWith(color: Colors.black54),
+                    ),
+                    const SizedBox(height: 40),
+                    TextFormField(
+                      controller: emailController,
+                      keyboardType: TextInputType.emailAddress,
+                      decoration: InputDecoration(
+                        labelText: "Email",
+                        hintText: "example@email.com",
+                        prefixIcon: const Icon(Icons.email, color: kAccentBlue), // Blue icon
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10), // Rounded input field borders
+                          borderSide: BorderSide(color: kPrimaryBlue.withOpacity(0.6)),
                         ),
-                      );
-                    },
-                    child: const Text(
-                      "Did you forget your password ?",
-                      style: TextStyle(
-                        color: Colors.blue,
-                        decoration: TextDecoration.underline,
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10),
+                          borderSide: const BorderSide(color: kPrimaryBlue, width: 2), // Stronger blue on focus
+                        ),
+                        errorBorder: OutlineInputBorder( // Style for validation error
+                          borderRadius: BorderRadius.circular(10),
+                          borderSide: const BorderSide(color: Colors.red, width: 2),
+                        ),
+                        focusedErrorBorder: OutlineInputBorder( // Style for validation error when focused
+                          borderRadius: BorderRadius.circular(10),
+                          borderSide: const BorderSide(color: Colors.red, width: 2),
+                        ),
+                        labelStyle: textTheme.bodyMedium,
+                        hintStyle: textTheme.bodySmall?.copyWith(color: Colors.black38),
                       ),
+                      validator: _validateEmail,
+                      style: textTheme.bodyLarge, // Text input style
                     ),
-                  ),
-                  const SizedBox(height: 24),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Text("You don't have an account yet? "),
-                      GestureDetector(
+                    const SizedBox(height: 20),
+                    TextFormField(
+                      controller: passwordController,
+                      obscureText: true,
+                      decoration: InputDecoration(
+                        labelText: "Password",
+                        hintText: "********",
+                        prefixIcon: const Icon(Icons.lock, color: kAccentBlue), // Blue icon
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10),
+                          borderSide: BorderSide(color: kPrimaryBlue.withOpacity(0.6)),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10),
+                          borderSide: const BorderSide(color: kPrimaryBlue, width: 2),
+                        ),
+                        errorBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10),
+                          borderSide: const BorderSide(color: Colors.red, width: 2),
+                        ),
+                        focusedErrorBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10),
+                          borderSide: const BorderSide(color: Colors.red, width: 2),
+                        ),
+                        labelStyle: textTheme.bodyMedium,
+                        hintStyle: textTheme.bodySmall?.copyWith(color: Colors.black38),
+                      ),
+                      validator: _validatePassword,
+                      style: textTheme.bodyLarge,
+                    ),
+                    const SizedBox(height: 20),
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: GestureDetector(
                         onTap: () {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (context) => const RegisterPage(),
+                              builder: (context) => const ClientForgotPasswordPage(),
                             ),
                           );
                         },
-                        child: const Text(
-                          "Create account",
-                          style: TextStyle(
-                            color: Colors.blue,
-                            decoration: TextDecoration.underline,
-                            fontWeight: FontWeight.w600,
+                        child: Text(
+                          "Forgot password?",
+                          style: textTheme.bodyMedium?.copyWith(
+                            color: kPrimaryBlue, // Blue text for links
+                            fontWeight: FontWeight.w500,
                           ),
                         ),
                       ),
-                    ],
-                  ),
-                ],
+                    ),
+                    const SizedBox(height: 30),
+                    SizedBox(
+                      width: double.infinity,
+                      child: isLoading
+                          ? CircularProgressIndicator(color: kPrimaryBlue) // Blue loading indicator
+                          : ElevatedButton(
+                        onPressed: loginUser,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: kPrimaryBlue, // Use primary blue for button
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(vertical: 16), // Taller button
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10), // Rounded button corners
+                          ),
+                          elevation: 5, // Add a subtle shadow
+                        ),
+                        child: Text("Login", style: textTheme.labelLarge),
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    if (responseMessage.isNotEmpty)
+                      Text(
+                        responseMessage,
+                        textAlign: TextAlign.center,
+                        style: textTheme.bodyMedium?.copyWith(
+                          color: responseMessage.toLowerCase().contains('success') ? Colors.green.shade700 : Colors.red.shade700,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    const SizedBox(height: 20),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          "Don't have an account?",
+                          style: textTheme.bodyMedium,
+                        ),
+                        const SizedBox(width: 5),
+                        GestureDetector(
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => const ClientRegisterPage(), // Corrected to ClientRegisterPage
+                              ),
+                            );
+                          },
+                          child: Text(
+                            "Sign Up", // Changed text to "Sign Up" for common usage
+                            style: textTheme.bodyMedium?.copyWith(
+                              color: kPrimaryBlue, // Blue text for link
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
               ),
             ),
           ),

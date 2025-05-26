@@ -5,6 +5,9 @@ import 'package:flutter/material.dart';
 import 'package:client_app/services/profile_services/profile_service.dart';
 import 'package:intl/intl.dart'; // Import intl package
 
+// Import the blue color constants from main.dart
+import 'package:client_app/main.dart';
+
 class ProfilePage extends StatefulWidget {
   final String jwtToken;
 
@@ -51,227 +54,234 @@ class _ProfilePageState extends State<ProfilePage> {
 
   @override
   Widget build(BuildContext context) {
-    final primaryColor = Colors.blue.shade700;
+    final TextTheme textTheme = Theme.of(context).textTheme;
 
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: primaryColor,
+        backgroundColor: kPrimaryBlue, // Use primary blue
+        foregroundColor: Colors.white, // White icons/text
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
+          icon: const Icon(Icons.arrow_back_ios_rounded), // Modern back arrow
           onPressed: () => Navigator.pop(context),
         ),
-        title: const Text('Profile'),
-        elevation: 1,
+        title: Text(
+          'My Profile', // More personal title
+          style: textTheme.titleLarge?.copyWith(color: Colors.white),
+        ),
+        centerTitle: true, // Center the title
+        elevation: 0, // No shadow
       ),
       body: isLoading
-          ? const Center(child: CircularProgressIndicator())
+          ? Center(
+        child: CircularProgressIndicator(color: kPrimaryBlue), // Themed loading indicator
+      )
           : errorMessage.isNotEmpty
-              ? Center(
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 24.0),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
+          ? Center(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 24.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                Icons.error_outline_rounded, // Error icon
+                color: Colors.red.shade400,
+                size: 60,
+              ),
+              const SizedBox(height: 20),
+              Text(
+                errorMessage,
+                textAlign: TextAlign.center,
+                style: textTheme.bodyLarge?.copyWith(color: Colors.red.shade700),
+              ),
+              const SizedBox(height: 20),
+              ElevatedButton(
+                onPressed: _fetchProfile, // Retry fetching the profile
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: kPrimaryBlue, // Themed button
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 12),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
+                child: Text('Retry', style: textTheme.labelLarge),
+              ),
+            ],
+          ),
+        ),
+      )
+          : _profile == null
+          ? Center(
+        child: Text(
+          'No profile data available.',
+          style: textTheme.bodyLarge?.copyWith(color: Colors.black54),
+        ),
+      )
+          : SingleChildScrollView(
+        padding: const EdgeInsets.all(20), // Slightly reduced overall padding
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Card(
+              elevation: 10, // Increased elevation for more depth
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20), // More rounded corners
+              ),
+               // Use a very light blue for the card background
+              child: Padding(
+                padding: const EdgeInsets.all(28), // Increased padding inside the card
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Profile header: picture + username + email + phone
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
-                        Text(
-                          errorMessage,
-                          textAlign: TextAlign.center,
-                          style:
-                              const TextStyle(color: Colors.red, fontSize: 16),
+                        Container(
+                          width: 90, // Larger profile picture
+                          height: 90,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            border: Border.all(
+                                color: kAccentBlue, width: 3), // Thicker, accent blue border
+                            boxShadow: const [ // Subtle shadow for the image
+                              BoxShadow(
+                                color: Colors.black26,
+                                blurRadius: 6,
+                                offset: Offset(0, 3),
+                              ),
+                            ],
+                          ),
+                          child: ClipOval(
+                            child: Image.asset(
+                              'assets/images/pet_owner.png',
+                              fit: BoxFit.cover,
+                              errorBuilder: (context, error, stackTrace) {
+                                return Icon(
+                                  Icons.account_circle,
+                                  size: 90,
+                                  color: Colors.grey.shade400,
+                                );
+                              },
+                            ),
+                          ),
                         ),
-                        const SizedBox(height: 20),
-                        ElevatedButton(
-                          onPressed:
-                              _fetchProfile, // Retry fetching the profile
-                          child: const Text('Retry'),
+                        const SizedBox(width: 24), // Increased spacing
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                _profile!.userName,
+                                style: textTheme.headlineSmall?.copyWith( // Use theme for username
+                                  color: kPrimaryBlue,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              const SizedBox(height: 8), // Spacing
+                              _contactInfoRow(
+                                Icons.email_outlined,
+                                _profile!.email,
+                                textTheme,
+                              ),
+                              const SizedBox(height: 6), // Spacing
+                              _contactInfoRow(
+                                Icons.phone_outlined,
+                                _profile!.phoneNumber,
+                                textTheme,
+                              ),
+                            ],
+                          ),
                         ),
                       ],
                     ),
-                  ),
-                )
-              : _profile == null
-                  ? const Center(child: Text('No profile data available'))
-                  : SingleChildScrollView(
-                      padding: const EdgeInsets.all(24),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          Card(
-                            elevation: 8,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(18),
-                            ),
-                            color: Colors.blue.shade50,
-                            child: Padding(
-                              padding: const EdgeInsets.all(24),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  // Profile header: picture + username + email + phone
-                                  Row(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.center,
-                                    children: [
-                                      Container(
-                                        width: 80,
-                                        height: 80,
-                                        decoration: BoxDecoration(
-                                          shape: BoxShape.circle,
-                                          border: Border.all(
-                                              color: primaryColor, width: 2),
-                                          image: const DecorationImage(
-                                            image: AssetImage(
-                                                'assets/images/pet_owner.png'),
-                                            fit: BoxFit.cover,
-                                          ),
-                                        ),
-                                      ),
-                                      const SizedBox(width: 20),
-                                      Expanded(
-                                        child: Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          mainAxisSize: MainAxisSize.min,
-                                          children: [
-                                            Text(
-                                              _profile!.userName,
-                                              style: TextStyle(
-                                                fontSize: 22,
-                                                fontWeight: FontWeight.bold,
-                                                color: primaryColor,
-                                              ),
-                                            ),
-                                            const SizedBox(height: 6),
-                                            Row(
-                                              children: [
-                                                Icon(Icons.email_outlined,
-                                                    size: 18,
-                                                    color: primaryColor
-                                                        .withOpacity(0.8)),
-                                                const SizedBox(width: 6),
-                                                Flexible(
-                                                  child: Text(
-                                                    _profile!.email,
-                                                    style: TextStyle(
-                                                      fontSize: 16,
-                                                      color: primaryColor
-                                                          .withOpacity(0.85),
-                                                    ),
-                                                    overflow:
-                                                        TextOverflow.ellipsis,
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
-                                            const SizedBox(height: 4),
-                                            Row(
-                                              children: [
-                                                Icon(Icons.phone_outlined,
-                                                    size: 18,
-                                                    color: primaryColor
-                                                        .withOpacity(0.8)),
-                                                const SizedBox(width: 6),
-                                                Text(
-                                                  _profile!.phoneNumber,
-                                                  style: TextStyle(
-                                                    fontSize: 16,
-                                                    color: primaryColor
-                                                        .withOpacity(0.85),
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    ],
-                                  ),
 
-                                  const SizedBox(height: 30),
+                    const SizedBox(height: 40), // More spacing before personal info
 
-                                  const Text(
-                                    'Personal Information',
-                                    style: TextStyle(
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.w600,
-                                      color: Colors.black87,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 16),
-
-                                  _infoRow(Icons.person_outline, 'First Name',
-                                      _profile!.firstName),
-                                  const Divider(
-                                      height: 32,
-                                      thickness: 1,
-                                      color: Color(0xffe0e0e0)),
-                                  _infoRow(Icons.person_outline, 'Last Name',
-                                      _profile!.lastName),
-                                  const Divider(
-                                      height: 32,
-                                      thickness: 1,
-                                      color: Color(0xffe0e0e0)),
-                                  _infoRow(Icons.transgender, 'Gender',
-                                      _profile!.gender),
-                                  const Divider(
-                                      height: 32,
-                                      thickness: 1,
-                                      color: Color(0xffe0e0e0)),
-                                  _infoRow(Icons.cake_outlined, 'Date of Birth',
-                                      _profile!.birthDate),
-                                  const Divider(
-                                      height: 32,
-                                      thickness: 1,
-                                      color: Color(0xffe0e0e0)),
-                                  _infoRow(Icons.home_outlined, 'Address',
-                                      _profile!.address),
-                                  const Divider(
-                                      height: 32,
-                                      thickness: 1,
-                                      color: Color(0xffe0e0e0)),
-                                  _infoRow(Icons.markunread_mailbox_outlined,
-                                      'Zip Code', _profile!.zipCode),
-                                ],
-                              ),
-                            ),
-                          ),
-                          const SizedBox(height: 40),
-                          Center(
-                            child: ElevatedButton(
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: primaryColor,
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 48, vertical: 16),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(10),
-                                ),
-                                elevation: 5,
-                                shadowColor: primaryColor.withOpacity(0.5),
-                              ),
-                              onPressed: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => ProfileEditPage(
-                                      profile: _profile!,
-                                      jwtToken: widget.jwtToken,
-                                    ),
-                                  ),
-                                ).then((_) => _fetchProfile());
-                              },
-                              child: const Text(
-                                'Edit Profile',
-                                style: TextStyle(
-                                    fontSize: 20, color: Colors.white),
-                              ),
-                            ),
-                          ),
-                        ],
+                    Text(
+                      'Personal Information',
+                      style: textTheme.titleLarge?.copyWith( // Use theme for section title
+                        color: Colors.black87,
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
+                    const SizedBox(height: 20), // Spacing
+
+                    _infoRow(context, Icons.person_outline, 'First Name', _profile!.firstName),
+                    _themedDivider(), // Custom divider
+                    _infoRow(context, Icons.person_outline, 'Last Name', _profile!.lastName),
+                    _themedDivider(),
+                    _infoRow(context, Icons.transgender, 'Gender', _profile!.gender),
+                    _themedDivider(),
+                    _infoRow(context, Icons.cake_outlined, 'Date of Birth', _profile!.birthDate),
+                    _themedDivider(),
+                    _infoRow(context, Icons.home_outlined, 'Address', _profile!.address),
+                    _themedDivider(),
+                    _infoRow(context, Icons.markunread_mailbox_outlined, 'Zip Code', _profile!.zipCode),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: 40), // Spacing before button
+            Center(
+              child: ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: kPrimaryBlue, // Themed button
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 50, vertical: 18), // Larger button
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12), // More rounded
+                  ),
+                  elevation: 8, // More prominent shadow
+                  shadowColor: kPrimaryBlue.withOpacity(0.4), // Themed shadow
+                ),
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => ProfileEditPage(
+                        profile: _profile!,
+                        jwtToken: widget.jwtToken,
+                      ),
+                    ),
+                  ).then((_) => _fetchProfile()); // Refresh profile after edit
+                },
+                child: Text(
+                  'Edit Profile',
+                  style: textTheme.labelLarge?.copyWith(fontSize: 18), // Use theme and adjust size
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 
-  Widget _infoRow(IconData icon, String label, String value) {
+  // Helper for contact info rows (email/phone)
+  Widget _contactInfoRow(IconData icon, String value, TextTheme textTheme) {
+    return Row(
+      children: [
+        Icon(icon, size: 20, color: kAccentBlue), // Accent blue icon
+        const SizedBox(width: 8),
+        Flexible(
+          child: Text(
+            value.isEmpty ? 'Not provided' : value,
+            style: textTheme.bodyMedium?.copyWith(
+              color: Colors.black87,
+            ),
+            overflow: TextOverflow.ellipsis,
+          ),
+        ),
+      ],
+    );
+  }
+
+  // Helper for general info rows
+  Widget _infoRow(BuildContext context, IconData icon, String label, String value) {
+    final TextTheme textTheme = Theme.of(context).textTheme;
     value = value.isEmpty ? 'Not provided' : value;
 
     if (label == 'Date of Birth') {
@@ -283,36 +293,48 @@ class _ProfilePageState extends State<ProfilePage> {
       }
     }
 
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Icon(icon, color: Colors.blue.shade700),
-        const SizedBox(width: 16),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                label,
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w700,
-                  color: Colors.blue.shade700,
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8.0), // Padding around each row
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(icon, color: kAccentBlue, size: 24), // Themed icon, slightly larger
+          const SizedBox(width: 20), // Increased spacing
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  label,
+                  style: textTheme.titleMedium?.copyWith( // Use theme for label
+                    color: kPrimaryBlue,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
-              ),
-              const SizedBox(height: 6),
-              Text(
-                value,
-                style: const TextStyle(
-                  fontSize: 16,
-                  color: Colors.black87,
-                  height: 1.3,
+                const SizedBox(height: 6),
+                Text(
+                  value,
+                  style: textTheme.bodyLarge?.copyWith( // Use theme for value
+                    color: Colors.black87,
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
+    );
+  }
+
+  // Custom themed divider
+  Widget _themedDivider() {
+    return const Padding(
+      padding: EdgeInsets.symmetric(vertical: 10.0), // Spacing around divider
+      child: Divider(
+        height: 1, // Actual height of the line
+        thickness: 0.8, // Thickness of the line
+        color: kAccentBlue, // Themed color for the divider
+      ),
     );
   }
 }

@@ -4,7 +4,10 @@ import 'package:client_app/views/vet_pages/veterinary_page.dart';
 import 'package:client_app/views/pet_pages/pet_list_page.dart';
 import 'package:client_app/views/consultation_pages/consultations_page.dart';
 import 'package:client_app/utils/logout_helper.dart';
-import 'package:client_app/views/components/home_navbar.dart';
+import 'package:client_app/views/components/home_navbar.dart'; // Assuming this is your custom Navbar
+
+// Import the blue color constants from main.dart
+import 'package:client_app/main.dart';
 
 class HomePage extends StatefulWidget {
   final String username;
@@ -16,23 +19,60 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  void _navigateToVeterinary() {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => VetListPage(username: widget.username), // Pass the username
+  // Helper function to build a consistent navigation card
+  Widget _buildNavigationCard({
+    required BuildContext context,
+    required String imagePath,
+    required String title,
+    required VoidCallback onTap,
+    IconData? icon, // Optional icon if you prefer icons over images for some items
+  }) {
+    final TextTheme textTheme = Theme.of(context).textTheme;
+
+    return Card(
+      elevation: 6, // Subtle shadow for a lifted effect
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(15), // Rounded corners
       ),
-    );
-
-  }
-
-  void _navigateToConsultations() {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => ConsultationsPage(
-          username: widget.username,
-          onLogout: () => LogoutHelper.handleLogout(context),
+      margin: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 10.0), // Margin around each card
+      child: InkWell( // Provides visual feedback on tap
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(15),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              // Use Image.asset or Icon based on availability
+              imagePath.isNotEmpty
+                  ? Image.asset(
+                imagePath,
+                width: 50, // Slightly larger image
+                height: 50,
+              )
+                  : (icon != null
+                  ? Icon(icon, size: 50, color: kAccentBlue) // Default icon color
+                  : const SizedBox.shrink()), // Fallback if neither is provided
+              const SizedBox(width: 16),
+              Expanded(
+                child: Text(
+                  title,
+                  style: textTheme.titleLarge?.copyWith(
+                    color: kPrimaryBlue, // Blue title for consistency
+                    fontWeight: FontWeight.w600,
+                  ),
+                  overflow: TextOverflow.ellipsis,
+                  maxLines: 2,
+                ),
+              ),
+              const SizedBox(width: 16),
+              Icon(
+                Icons.arrow_forward_ios, // Modern arrow icon
+                color: kPrimaryBlue, // Blue arrow
+                size: 28,
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -40,194 +80,111 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
+    final TextTheme textTheme = Theme.of(context).textTheme;
+
     return Scaffold(
+      // Assuming HomeNavbar is a custom widget. Ensure its styling matches the app's theme (blue background, white text).
+      // If HomeNavbar cannot be styled externally, consider replacing it with a standard AppBar here.
       appBar: HomeNavbar(
         username: widget.username,
         onLogout: () => LogoutHelper.handleLogout(context),
       ),
-      body: Center(
+      body: SingleChildScrollView(
         child: Column(
-          mainAxisSize: MainAxisSize.min,
           children: [
-            GestureDetector(
-              onTap: _navigateToVeterinary,
-              child: Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(8),
-                  boxShadow: const [
-                    BoxShadow(
-                      color: Colors.black26,
-                      blurRadius: 6,
-                      offset: Offset(0, 3),
+            // --- Welcome Section ---
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(vertical: 40, horizontal: 24),
+              decoration: BoxDecoration(
+                color: kPrimaryBlue, // Blue background for welcome section
+                borderRadius: const BorderRadius.vertical(bottom: Radius.circular(30)),
+                boxShadow: const [
+                  BoxShadow(
+                    color: Colors.black12,
+                    blurRadius: 10,
+                    offset: Offset(0, 5),
+                  ),
+                ],
+              ),
+              child: Column(
+                children: [
+                  Text(
+                    'Hello, ${widget.username}!', // Personalized welcome
+                    textAlign: TextAlign.center,
+                    style: textTheme.headlineLarge?.copyWith(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
                     ),
-                  ],
-                  border: Border.all(color: Colors.grey),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Image.asset(
-                      'assets/images/veterinary.png',
-                      width: 40,
-                      height: 40,
+                  ),
+                  const SizedBox(height: 10),
+                  Text(
+                    'What would you like to do today?',
+                    textAlign: TextAlign.center,
+                    style: textTheme.bodyLarge?.copyWith(
+                      color: Colors.white70,
                     ),
-                    const SizedBox(width: 12),
-                    const Text(
-                      'Look for a veterinary',
-                      style:
-                          TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                    ),
-                    const SizedBox(width: 12),
-                    const Icon(
-                      Icons.arrow_forward,
-                      color: Color.fromARGB(255, 2, 11, 101),
-                      size: 28,
-                    ),
-                  ],
-                ),
+                  ),
+                ],
               ),
             ),
-            const SizedBox(height: 20),
-            GestureDetector(
-              onTap: _navigateToConsultations,
-              child: Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(8),
-                  boxShadow: const [
-                    BoxShadow(
-                      color: Colors.black26,
-                      blurRadius: 6,
-                      offset: Offset(0, 3),
-                    ),
-                  ],
-                  border: Border.all(color: Colors.grey),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Image.asset(
-                      'assets/images/consultation.png',
-                      width: 40,
-                      height: 40,
-                    ),
-                    const SizedBox(width: 12),
-                    const Text(
-                      'See My Consultations',
-                      style:
-                          TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                    ),
-                    const SizedBox(width: 12),
-                    const Icon(
-                      Icons.arrow_forward,
-                      color: Color.fromARGB(255, 2, 11, 101),
-                      size: 28,
-                    ),
-                  ],
-                ),
-              ),
+            const SizedBox(height: 30), // Spacing after welcome section
+
+            // --- Navigation Cards ---
+            _buildNavigationCard(
+              context: context,
+              imagePath: 'assets/images/veterinary.png',
+              title: 'Look for a Veterinary',
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => VetListPage(username: widget.username),
+                  ),
+                );
+              },
             ),
-            const SizedBox(height: 20),
-            GestureDetector(
+            _buildNavigationCard(
+              context: context,
+              imagePath: 'assets/images/consultation.png',
+              title: 'See My Consultations',
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => ConsultationsPage(
+                      username: widget.username,
+                      onLogout: () => LogoutHelper.handleLogout(context),
+                    ),
+                  ),
+                );
+              },
+            ),
+            _buildNavigationCard(
+              context: context,
+              imagePath: 'assets/images/pet_owner.png',
+              title: 'Manage My Pets',
               onTap: () {
                 Navigator.push(
                   context,
                   MaterialPageRoute(builder: (context) => const PetListPage()),
                 );
               },
-              child: Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(8),
-                  boxShadow: const [
-                    BoxShadow(
-                      color: Colors.black26,
-                      blurRadius: 6,
-                      offset: Offset(0, 3),
-                    ),
-                  ],
-                  border: Border.all(color: Colors.grey),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Image.asset(
-                      'assets/images/pet_owner.png',
-                      width: 40,
-                      height: 40,
-                    ),
-                    const SizedBox(width: 12),
-                    const Text(
-                      'Manage My Pets',
-                      style:
-                          TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                    ),
-                    const SizedBox(width: 12),
-                    const Icon(
-                      Icons.arrow_forward,
-                      color: Color.fromARGB(255, 2, 11, 101),
-                      size: 28,
-                    ),
-                  ],
-                ),
-              ),
             ),
-            const SizedBox(height: 20),
-            GestureDetector(
+            _buildNavigationCard(
+              context: context,
+              imagePath: 'assets/images/apointment.png',
+              title: 'My Appointments', // Changed from Rendezvous for clarity
               onTap: () {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                      builder: (context) =>
-                          RendezvousPage(username: widget.username)),
+                    builder: (context) => RendezvousPage(username: widget.username),
+                  ),
                 );
               },
-              child: Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(8),
-                  boxShadow: const [
-                    BoxShadow(
-                      color: Colors.black26,
-                      blurRadius: 6,
-                      offset: Offset(0, 3),
-                    ),
-                  ],
-                  border: Border.all(color: Colors.grey),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Image.asset(
-                      'assets/images/apointment.png',
-                      width: 40,
-                      height: 40,
-                    ),
-                    const SizedBox(width: 12),
-                    const Text(
-                      'My Rendezvous',
-                      style:
-                          TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                    ),
-                    const SizedBox(width: 12),
-                    const Icon(
-                      Icons.arrow_forward,
-                      color: Color.fromARGB(255, 2, 11, 101),
-                      size: 28,
-                    ),
-                  ],
-                ),
-              ),
             ),
+            const SizedBox(height: 30), // Spacing at the bottom
           ],
         ),
       ),

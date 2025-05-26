@@ -197,7 +197,7 @@ class _AppWrapperState extends State<AppWrapper> with WidgetsBindingObserver {
     // For now, let's keep MyHomePage as the initial home.
     // In a real app, you'd likely check auth status here and navigate to login/home.
     return MyHomePage(
-      title: 'Veterinary Services',
+      title: '',
       onLoginSuccessCallback: initSignalRAndListenGlobally,
     );
   }
@@ -357,7 +357,7 @@ class MyHomePage extends StatelessWidget {
                   OutlinedButton(
                     onPressed: () {
                       // Navigate to registration page
-                      Navigator.push(context, MaterialPageRoute(builder: (context) => const RegisterPage()));
+                      Navigator.push(context, MaterialPageRoute(builder: (context) => const ClientRegisterPage()));
                       print('Register now button pressed, navigating to register.');
                     },
                     child: Text(
