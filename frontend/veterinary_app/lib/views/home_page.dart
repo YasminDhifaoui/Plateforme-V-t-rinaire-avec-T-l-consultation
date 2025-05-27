@@ -15,405 +15,459 @@ import 'package:veterinary_app/services/product_services/product_service.dart';
 import 'package:veterinary_app/services/vaccination_services/vaccination_service.dart';
 import 'components/home_navbar.dart';
 
+// CORRECTED: Import kPrimaryGreen and kAccentGreen from your new centralized file
+import 'package:veterinary_app/utils/app_colors.dart'; // <--- KEEP THIS LINE
+
+// REMOVE THIS LINE: This was the source of the duplicate import error.
+// import 'package:veterinary_app/main.dart'; // <-- DELETE THIS LINE
+
 class HomePage extends StatefulWidget {
-final String username;
-final String token;
+  final String username;
+  final String token;
 
-const HomePage({super.key, required this.username, required this.token});
+  const HomePage({super.key, required this.username, required this.token});
 
-@override
-State<HomePage> createState() => _HomePageState();
+  @override
+  State<HomePage> createState() => _HomePageState();
 }
 
 class _HomePageState extends State<HomePage> {
+  final AnimalsVetService _animalsVetService = AnimalsVetService();
+  final RendezVousService _rendezVousService = RendezVousService();
+  final ClientService _clientService = ClientService();
+  final ConsultationService _consultationService = ConsultationService();
+  final VaccinationService _vaccinationService = VaccinationService();
+  final ProductService _productService = ProductService();
 
+  int animalCount = 0;
+  int rendezvousCount = 0;
+  int clientsCount = 0;
+  int consultationsCount = 0;
+  int vaccinationsCount = 0;
+  int productCount = 0;
 
+  bool _isFetchingCounts = false; // To show loading state for counts
 
-final AnimalsVetService _animalsVetService = AnimalsVetService();
-final RendezVousService _rendezVousService = RendezVousService();
-final ClientService _clientService = ClientService();
-final ConsultationService _consultationService = ConsultationService();
-final VaccinationService _vaccinationService = VaccinationService();
+  @override
+  void initState() {
+    super.initState();
+    _fetchDataCounts();
+  }
 
-final ProductService _productService = ProductService();
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _fetchDataCounts();
+  }
 
-int animalCount = 0;
-int rendezvousCount = 0;
-int clientsCount = 0;
-int consultationsCount = 0;
-int vaccinationsCount = 0;
-int productCount = 0;
+  Future<void> _fetchDataCounts() async {
+    if (_isFetchingCounts) return; // Prevent multiple simultaneous fetches
 
-@override
-void initState() {
-super.initState();
-// Initial data fetch when the page is first created
-_fetchDataCounts();
-}
+    setState(() {
+      _isFetchingCounts = true;
+    });
 
-// You can keep didChangeDependencies, it won't hurt,
-// but the .then() callback on Navigator.push will be the primary trigger.
-@override
-void didChangeDependencies() {
-super.didChangeDependencies();
-// If you explicitly want to refresh on every single return regardless,
-// this is fine. If you want more control (e.g., only if something changed),
-// rely solely on the .then() callback.
-_fetchDataCounts();
-}
+    try {
+      await Future.wait([
+        _fetchAnimalCount(),
+        _fetchRendezvousCount(),
+        _fetchClientsCount(),
+        _fetchConsultationsCount(),
+        _fetchVaccinationsCount(),
+        _fetchProductCount(),
+      ]);
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isFetchingCounts = false;
+        });
+      }
+    }
+  }
 
-Future<void> _fetchDataCounts() async {
-// Wrap with setState to ensure UI updates as data comes in
-setState(() {
-// You can await them all simultaneously for better performance
-Future.wait([
-_fetchAnimalCount(),
-_fetchRendezvousCount(),
-_fetchClientsCount(),
-_fetchConsultationsCount(),
-_fetchVaccinationsCount(),
-_fetchProductCount(),
-]);
-});
-}
+  Future<void> _fetchAnimalCount() async {
+    try {
+      final animals = await _animalsVetService.getAnimalsList(widget.token);
+      if (mounted) {
+        setState(() {
+          animalCount = animals.length;
+          print('HomePage: animalCount updated to $animalCount');
+        });
+      }
+    } catch (e) {
+      debugPrint('Error fetching animal count: $e');
+      if (mounted) {
+        setState(() {
+          animalCount = 0;
+        });
+      }
+    }
+  }
 
-Future<void> _fetchAnimalCount() async {
-try {
-final animals = await _animalsVetService.getAnimalsList(widget.token);
-if (mounted) {
-setState(() {
-animalCount = animals.length;
-print('HomePage: animalCount updated to $animalCount');
-});
-}
-} catch (e) {
-debugPrint('Error fetching animal count: $e');
-if (mounted) {
-setState(() {
-animalCount = 0;
-});
-}
-}
-}
+  Future<void> _fetchRendezvousCount() async {
+    try {
+      final rendezvous = await _rendezVousService.getRendezVousList(
+        widget.token,
+      );
+      if (mounted) {
+        setState(() {
+          rendezvousCount = rendezvous.length;
+          print('HomePage: rendezvousCount updated to $rendezvousCount');
+        });
+      }
+    } catch (e) {
+      debugPrint('Error fetching rendezvous count: $e');
+      if (mounted) {
+        setState(() {
+          rendezvousCount = 0;
+        });
+      }
+    }
+  }
 
-Future<void> _fetchRendezvousCount() async {
-try {
-final rendezvous = await _rendezVousService.getRendezVousList(
-widget.token,
-);
-if (mounted) {
-setState(() {
-rendezvousCount = rendezvous.length;
-print('HomePage: rendezvousCount updated to $rendezvousCount');
-});
-}
-} catch (e) {
-debugPrint('Error fetching rendezvous count: $e');
-if (mounted) {
-setState(() {
-rendezvousCount = 0;
-});
-}
-}
-}
+  Future<void> _fetchClientsCount() async {
+    try {
+      final clients = await _clientService.getAllClients(widget.token);
+      if (mounted) {
+        setState(() {
+          clientsCount = clients.length;
+          print('HomePage: clientsCount updated to $clientsCount');
+        });
+      }
+    } catch (e) {
+      debugPrint('Error fetching clients count: $e');
+      if (mounted) {
+        setState(() {
+          clientsCount = 0;
+        });
+      }
+    }
+  }
 
-Future<void> _fetchClientsCount() async {
-try {
-final clients = await _clientService.getAllClients(widget.token);
-if (mounted) {
-setState(() {
-clientsCount = clients.length;
-print('HomePage: clientsCount updated to $clientsCount');
-});
-}
-} catch (e) {
-debugPrint('Error fetching clients count: $e');
-if (mounted) {
-setState(() {
-clientsCount = 0;
-});
-}
-}
-}
+  Future<void> _fetchConsultationsCount() async {
+    try {
+      final consultations =
+      await ConsultationService.fetchConsultations(widget.token);
+      if (mounted) {
+        setState(() {
+          consultationsCount = consultations.length;
+          print('HomePage: consultationsCount updated to $consultationsCount');
+        });
+      }
+    } catch (e) {
+      debugPrint('Error fetching consultations count: $e');
+      if (mounted) {
+        setState(() {
+          consultationsCount = 0;
+        });
+      }
+    }
+  }
 
-Future<void> _fetchConsultationsCount() async {
-try {
-final consultations = await ConsultationService.fetchConsultations(
-widget.token,
-);
-if (mounted) {
-setState(() {
-consultationsCount = consultations.length;
-print('HomePage: consultationsCount updated to $consultationsCount');
-});
-}
-} catch (e) {
-debugPrint('Error fetching consultations count: $e');
-if (mounted) {
-setState(() {
-consultationsCount = 0;
-});
-}
-}
-}
+  Future<void> _fetchVaccinationsCount() async {
+    try {
+      final vaccinations =
+      await _vaccinationService.getAllVaccinations(widget.token);
+      if (mounted) {
+        setState(() {
+          vaccinationsCount = vaccinations.length;
+          print('HomePage: vaccinationsCount updated to $vaccinationsCount');
+        });
+      }
+    } catch (e) {
+      debugPrint('Error fetching vaccinations count: $e');
+      if (mounted) {
+        setState(() {
+          vaccinationsCount = 0;
+        });
+      }
+    }
+  }
 
-Future<void> _fetchVaccinationsCount() async {
-try {
-final vaccinations = await _vaccinationService.getAllVaccinations(
-widget.token,
-);
-if (mounted) {
-setState(() {
-vaccinationsCount = vaccinations.length;
-print('HomePage: vaccinationsCount updated to $vaccinationsCount'); // <-- Check this print!
-});
-}
-} catch (e) {
-debugPrint('Error fetching vaccinations count: $e');
-if (mounted) {
-setState(() {
-vaccinationsCount = 0;
-});
-}
-}
-}
+  Future<void> _fetchProductCount() async {
+    try {
+      final products = await _productService.getAllProducts(widget.token);
+      if (mounted) {
+        setState(() {
+          productCount = products.length;
+          print('HomePage: productCount updated to $productCount');
+        });
+      }
+    } catch (e) {
+      debugPrint('Error fetching products count: $e');
+      if (mounted) {
+        setState(() {
+          productCount = 0;
+        });
+      }
+    }
+  }
 
-Future<void> _fetchProductCount() async {
-try {
-final products = await _productService.getAllProducts(widget.token);
-if (mounted) {
-setState(() {
-productCount = products.length;
-print('HomePage: productCount updated to $productCount');
-});
-}
-} catch (e) {
-debugPrint('Error fetching products count: $e');
-if (mounted) {
-setState(() {
-productCount = 0;
-});
-}
-}
-}
+  @override
+  Widget build(BuildContext context) {
+    final TextTheme textTheme = Theme.of(context).textTheme;
 
-@override
-Widget build(BuildContext context) {
-final cardTextStyle = TextStyle(
-fontSize: 16,
-fontWeight: FontWeight.w600,
-color: Colors.blueGrey[900],
-);
-final cardIconColor = Colors.blueAccent;
+    // Define consistent styles based on your theme, providing a default if null
+    final cardLabelTextStyle = textTheme.titleMedium?.copyWith(
+      fontWeight: FontWeight.w600,
+      color: Colors.white, // Text color on cards
+    ) ??
+        const TextStyle(
+            fontWeight: FontWeight.w600,
+            color: Colors.white,
+            fontSize: 16); // Default if titleMedium is null
+    final cardCountValueTextStyle = textTheme.headlineSmall?.copyWith(
+      fontWeight: FontWeight.bold,
+      color: Colors.white, // Count text color on cards
+    ) ??
+        const TextStyle(
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+            fontSize: 24); // Default if headlineSmall is null
 
-return Scaffold(
-appBar: HomeNavbar(
-username: widget.username,
-onLogout: () => LogoutHelper.handleLogout(context),
-),
-body: SafeArea(
-child: Padding(
-padding: const EdgeInsets.all(24.0),
-child: ListView(
-children: [
-const SizedBox(height: 32),
-GridView.count(
-shrinkWrap: true,
-physics: NeverScrollableScrollPhysics(),
-crossAxisCount: 2,
-crossAxisSpacing: 24,
-mainAxisSpacing: 24,
-children: [
-_buildHomeCard(
-context,
-icon: Icons.pets,
-label: 'Animals',
-count: animalCount,
-onTap: () {
-Navigator.push(
-context,
-MaterialPageRoute(
-builder: (context) => AnimalsListPage(
-token: widget.token,
-username: widget.username,
-),
-),
-).then((_) => _fetchDataCounts()); // <--- ADDED .then()
-},
-textStyle: cardTextStyle,
-iconColor: cardIconColor,
-cardColor: Colors.orangeAccent.withOpacity(0.6),
-),
-_buildHomeCard(
-context,
-icon: Icons.event,
-label: 'RDV',
-count: rendezvousCount,
-onTap: () {
-Navigator.push(
-context,
-MaterialPageRoute(
-builder: (context) => RendezVousListPage(
-token: widget.token,
-username: widget.username,
-),
-),
-).then((_) => _fetchDataCounts()); // <--- ADDED .then()
-},
-textStyle: cardTextStyle,
-iconColor: cardIconColor,
-cardColor: Colors.lightBlueAccent.withOpacity(0.6),
-),
-_buildHomeCard(
-context,
-icon: Icons.people,
-label: 'Clients',
-count: clientsCount,
-onTap: () {
-Navigator.push(
-context,
-MaterialPageRoute(
-builder: (context) => ClientsListPage(
-token: widget.token,
-username: widget.username,
-),
-),
-).then((_) => _fetchDataCounts()); // <--- ADDED .then()
-},
-textStyle: cardTextStyle,
-iconColor: cardIconColor,
-cardColor: Colors.greenAccent.withOpacity(0.6),
-),
-_buildHomeCard(
-context,
-icon: Icons.medical_services,
-label: 'Consultations',
-count: consultationsCount,
-onTap: () {
-Navigator.push(
-context,
-MaterialPageRoute(
-builder: (context) => ConsultationListPage(
-token: widget.token,
-username: widget.username,
-),
-),
-).then((_) => _fetchDataCounts()); // <--- ADDED .then()
-},
-textStyle: cardTextStyle,
-iconColor: cardIconColor,
-cardColor: Colors.purpleAccent.withOpacity(0.6),
-),
-_buildHomeCard(
-context,
-icon: Icons.vaccines,
-label: 'Vaccinations',
-count: vaccinationsCount,
-onTap: () {
-Navigator.push(
-context,
-MaterialPageRoute(
-builder: (context) => VaccinationListPage(
-token: widget.token,
-username: widget.username,
-),
-),
-).then((_) => _fetchDataCounts()); // <--- ADDED .then()
-},
-textStyle: cardTextStyle,
-iconColor: cardIconColor,
-cardColor: Colors.redAccent.withOpacity(0.6),
-),
-_buildHomeCard(
-context,
-icon: Icons.shopping_cart,
-label: 'Products',
-count: productCount,
-onTap: () {
-Navigator.push(
-context,
-MaterialPageRoute(
-builder: (context) => ProductsListPage(
-token: widget.token,
-username: widget.username,
-),
-),
-).then((_) => _fetchDataCounts()); // <--- ADDED .then()
-},
-textStyle: cardTextStyle,
-iconColor: Colors.deepOrange,
-cardColor: Colors.deepOrangeAccent.withOpacity(0.6),
-),
-],
-),
-const SizedBox(height: 16),
-],
-),
-),
-),
-);
-}
+    return Scaffold(
+      backgroundColor:
+      Theme.of(context).colorScheme.background, // Use themed background
+      appBar: HomeNavbar(
+        username: widget.username,
+        onLogout: () => LogoutHelper.handleLogout(context),
+      ),
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(24.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Welcome, ${widget.username}!',
+                style: textTheme.headlineMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                  color: kPrimaryGreen, // Themed welcome text
+                ) ??
+                    const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: Colors.green,
+                        fontSize: 28), // Default if headlineMedium is null
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'Quick overview of your clinic data:',
+                style: textTheme.bodyLarge?.copyWith(color: Colors.black54) ??
+                    const TextStyle(color: Colors.black54, fontSize: 16),
+              ),
+              const SizedBox(height: 32),
+              Expanded(
+                // Use Expanded to allow GridView to take available space
+                child: _isFetchingCounts
+                    ? Center(
+                  child: CircularProgressIndicator(
+                      color: kPrimaryGreen), // Themed loading indicator
+                )
+                    : GridView.count(
+                  shrinkWrap: true,
+                  // Use shrinkWrap because it's inside a Column with Expanded
+                  physics: const AlwaysScrollableScrollPhysics(), // Allow scrolling if content overflows
+                  crossAxisCount: 2,
+                  crossAxisSpacing: 24,
+                  mainAxisSpacing: 24,
+                  children: [
+                    _buildHomeCard(
+                      context,
+                      icon: Icons.pets_rounded, // Modern icon
+                      label: 'Animals',
+                      count: animalCount,
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => AnimalsListPage(
+                              token: widget.token,
+                              username: widget.username,
+                            ),
+                          ),
+                        ).then((_) => _fetchDataCounts());
+                      },
+                      cardColor: kAccentGreen.withOpacity(0.9), // Themed card color
+                      iconColor: Colors.white, // White icon on colored card
+                      labelTextStyle:
+                      cardLabelTextStyle, // Themed label style
+                      countTextStyle:
+                      cardCountValueTextStyle, // Themed count style
+                    ),
+                    _buildHomeCard(
+                      context,
+                      icon: Icons.event_note_rounded, // Modern icon
+                      label: 'Rendezvous',
+                      count: rendezvousCount,
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => RendezVousListPage(
+                              token: widget.token,
+                              username: widget.username,
+                            ),
+                          ),
+                        ).then((_) => _fetchDataCounts());
+                      },
+                      cardColor: kBluePurple // Using the new constant
+                          .withOpacity(0.9), // A nice blue-purple
+                      iconColor: Colors.white,
+                      labelTextStyle: cardLabelTextStyle,
+                      countTextStyle: cardCountValueTextStyle,
+                    ),
+                    _buildHomeCard(
+                      context,
+                      icon: Icons.people_alt_rounded, // Modern icon
+                      label: 'Clients',
+                      count: clientsCount,
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => ClientsListPage(
+                              token: widget.token,
+                              username: widget.username,
+                            ),
+                          ),
+                        ).then((_) => _fetchDataCounts());
+                      },
+                      cardColor: kPrimaryGreen
+                          .withOpacity(0.9), // Another themed card color
+                      iconColor: Colors.white,
+                      labelTextStyle: cardLabelTextStyle,
+                      countTextStyle: cardCountValueTextStyle,
+                    ),
+                    _buildHomeCard(
+                      context,
+                      icon: Icons.local_hospital_rounded, // Modern icon
+                      label: 'Consultations',
+                      count: consultationsCount,
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => ConsultationListPage(
+                              token: widget.token,
+                              username: widget.username,
+                            ),
+                          ),
+                        ).then((_) => _fetchDataCounts());
+                      },
+                      cardColor: kStrongRed // Using the new constant
+                          .withOpacity(0.9), // A strong red
+                      iconColor: Colors.white,
+                      labelTextStyle: cardLabelTextStyle,
+                      countTextStyle: cardCountValueTextStyle,
+                    ),
+                    _buildHomeCard(
+                      context,
+                      icon: Icons.vaccines_rounded, // Modern icon
+                      label: 'Vaccinations',
+                      count: vaccinationsCount,
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => VaccinationListPage(
+                              token: widget.token,
+                              username: widget.username,
+                            ),
+                          ),
+                        ).then((_) => _fetchDataCounts());
+                      },
+                      cardColor: kWarmOrange // Using the new constant
+                          .withOpacity(0.9), // A warm orange
+                      iconColor: Colors.white,
+                      labelTextStyle: cardLabelTextStyle,
+                      countTextStyle: cardCountValueTextStyle,
+                    ),
+                    _buildHomeCard(
+                      context,
+                      icon: Icons.shopping_bag_rounded, // Modern icon
+                      label: 'Products',
+                      count: productCount,
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => ProductsListPage(
+                              token: widget.token,
+                              username: widget.username,
+                            ),
+                          ),
+                        ).then((_) => _fetchDataCounts());
+                      },
+                      cardColor: kTealGreen // Using the new constant
+                          .withOpacity(0.9), // A teal green
+                      iconColor: Colors.white,
+                      labelTextStyle: cardLabelTextStyle,
+                      countTextStyle: cardCountValueTextStyle,
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
 
-Widget _buildHomeCard(
-BuildContext context, {
-required IconData icon,
-required String label,
-required VoidCallback onTap,
-required TextStyle textStyle,
-required Color iconColor,
-int? count,
-Color? cardColor,
-}) {
-return Card(
-elevation: 6,
-color: cardColor ?? Colors.white,
-shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-child: InkWell(
-borderRadius: BorderRadius.circular(16),
-onTap: onTap,
-child: Padding(
-padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
-child: Column(
-mainAxisAlignment: MainAxisAlignment.center,
-mainAxisSize: MainAxisSize.min,
-children: [
-Icon(icon, size: 48, color: iconColor),
-const SizedBox(height: 8),
-Text(label, style: textStyle, textAlign: TextAlign.center),
-if (count != null) ...[
-const SizedBox(height: 8),
-Container(
-padding: const EdgeInsets.symmetric(
-vertical: 4,
-horizontal: 8,
-),
-decoration: BoxDecoration(
-color: iconColor.withOpacity(0.2),
-borderRadius: BorderRadius.circular(12),
-),
-child: Text(
-count.toString(),
-style: TextStyle(
-fontSize: 20,
-fontWeight: FontWeight.bold,
-color: iconColor.darken(0.4),
-),
-),
-),
-],
-],
-),
-),
-),
-);
-}
-}
-
-extension ColorExtension on Color {
-Color darken([double amount = .1]) {
-assert(amount >= 0 && amount <= 1);
-final hsl = HSLColor.fromColor(this);
-final hslDark = hsl.withLightness((hsl.lightness - amount).clamp(0.0, 1.0));
-return hslDark.toColor();
-}
+  Widget _buildHomeCard(
+      BuildContext context, {
+        required IconData icon,
+        required String label,
+        required VoidCallback onTap,
+        required Color cardColor,
+        required Color iconColor,
+        required TextStyle labelTextStyle,
+        required TextStyle countTextStyle,
+        int? count,
+      }) {
+    return Card(
+      elevation: 8, // More pronounced shadow
+      color: cardColor,
+      shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(18)), // More rounded corners
+      child: InkWell(
+        borderRadius: BorderRadius.circular(18),
+        onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsets.all(16.0), // Consistent padding
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(icon, size: 45, color: iconColor), // REDUCED Icon size
+              const SizedBox(height: 8), // REDUCED SizedBox height
+              Text(
+                label,
+                style: labelTextStyle,
+                textAlign: TextAlign.center,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+              if (count != null) ...[
+                const SizedBox(height: 6), // REDUCED SizedBox height
+                // Themed count badge
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                      vertical: 4, horizontal: 12), // REDUCED vertical padding
+                  decoration: BoxDecoration(
+                    color: Colors.white
+                        .withOpacity(0.2), // Subtle white overlay for the count
+                    borderRadius: BorderRadius.circular(15), // Rounded badge
+                  ),
+                  child: Text(
+                    count.toString(),
+                    style: countTextStyle,
+                  ),
+                ),
+              ],
+            ],
+          ),
+        ),
+      ),
+    );
+  }
 }

@@ -4,9 +4,12 @@ import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 import 'package:veterinary_app/utils/base_url.dart';
 import '../../models/chat_models/chat_model.dart';
-import '../../services/notification_handle/message_notifier.dart';
+import '../../services/notification_handle/message_notifier.dart'; // Keep if used for unread count
 import '../../services/chat_services/chat_signal_service.dart';
 import '../video_call_pages/video_call_screen.dart';
+
+// Import kPrimaryGreen and kAccentGreen from main.dart to ensure theme consistency
+import 'package:veterinary_app/main.dart'; // Adjust path if using a separate constants.dart file
 
 class ChatPage extends StatefulWidget {
   final String token;
@@ -41,8 +44,10 @@ class _ChatPageState extends State<ChatPage> {
     _signalService.connect(widget.token);
 
     _signalService.onMessageReceived = (from, message) {
-      if (from.trim().toLowerCase() == _currentUsername?.trim().toLowerCase())
+      if (from.trim().toLowerCase() == _currentUsername?.trim().toLowerCase()) {
+        // This check prevents duplicating messages sent by self and received via SignalR
         return;
+      }
 
       setState(() {
         _messages.add(
@@ -78,43 +83,55 @@ class _ChatPageState extends State<ChatPage> {
   }
 
   Future<void> _fetchMessages() async {
-    final response = await http.get(
-      Uri.parse(
-        '${BaseUrl.api}/api/chat/history/$_currentUserId/${widget.receiverId}',
-      ),
-      headers: {'Authorization': 'Bearer ${widget.token}'},
-    );
+    try {
+      final response = await http.get(
+        Uri.parse(
+          '${BaseUrl.api}/api/chat/history/$_currentUserId/${widget.receiverId}',
+        ),
+        headers: {'Authorization': 'Bearer ${widget.token}'},
+      );
 
-    if (response.statusCode == 200) {
-      setState(() {
-        _messages = ChatMessage.chatMessagesFromJson(
-          response.body,
-          _currentUserId ?? '',
-        );
-      });
-
-      _scrollToBottom();
-    } else {
-      print('Failed to fetch messages');
+      if (response.statusCode == 200) {
+        setState(() {
+          _messages = ChatMessage.chatMessagesFromJson(
+            response.body,
+            _currentUserId ?? '',
+          );
+        });
+        _scrollToBottom();
+      } else {
+        print('Failed to fetch messages: ${response.statusCode}');
+        _showSnackBar('Failed to load chat history.', isSuccess: false);
+      }
+    } catch (e) {
+      print('Error fetching messages: $e');
+      _showSnackBar('Network error. Could not load chat history.', isSuccess: false);
     }
   }
 
   String _getDisplayName(String senderId) {
-    return (senderId.trim().toLowerCase() ==
-            _currentUserId?.trim().toLowerCase())
-        ? "${_currentUsername ?? "Me"} (me)"
-        : senderId;
+    // Assuming senderId from SignalR is the username
+    if (senderId.trim().toLowerCase() == widget.receiverUsername.trim().toLowerCase()) {
+      return widget.receiverUsername; // Display receiver's actual username
+    } else if (senderId.trim().toLowerCase() == _currentUsername?.trim().toLowerCase()) {
+      return "You"; // Display "You" for current user's messages
+    } else {
+      return senderId; // Fallback
+    }
   }
 
   void _sendMessage(String message) {
-    if (_currentUserId == null) return;
+    if (_currentUserId == null) {
+      _showSnackBar('User not authenticated. Cannot send message.', isSuccess: false);
+      return;
+    }
 
     _signalService.sendMessage(_currentUserId!, widget.receiverId, message);
 
     setState(() {
       _messages.add(
         ChatMessage(
-          senderName: "${_currentUsername ?? "Me"} (me)",
+          senderName: "You", // Display "You" for self-sent messages
           text: message,
           isSender: true,
           sentAt: DateTime.now(),
@@ -131,52 +148,70 @@ class _ChatPageState extends State<ChatPage> {
       if (_scrollController.hasClients) {
         _scrollController.animateTo(
           _scrollController.position.maxScrollExtent,
-          duration: Duration(milliseconds: 300),
+          duration: const Duration(milliseconds: 300),
           curve: Curves.easeOut,
         );
       }
     });
   }
 
+  // Helper to show themed SnackBar feedback
+  void _showSnackBar(String message, {bool isSuccess = true}) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          message,
+          style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Colors.white),
+        ),
+        backgroundColor: isSuccess ? kPrimaryGreen : Colors.red.shade600,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+        margin: const EdgeInsets.all(10),
+      ),
+    );
+  }
+
   @override
   void dispose() {
-    _signalService.onMessageReceived = null;
+    _signalService.onMessageReceived = null; // Clear callback
     _signalService.disconnect();
     _controller.dispose();
     _scrollController.dispose();
     super.dispose();
   }
 
-  Widget _buildMessageBubble(ChatMessage message) {
+  Widget _buildMessageBubble(ChatMessage message, TextTheme textTheme) {
     final alignment =
-        message.isSender ? Alignment.centerRight : Alignment.centerLeft;
-    final color = message.isSender ? Colors.green[400] : Colors.green[100];
-    final radius =
-        message.isSender
-            ? BorderRadius.only(
-              topLeft: Radius.circular(16),
-              topRight: Radius.circular(16),
-              bottomLeft: Radius.circular(16),
-            )
-            : BorderRadius.only(
-              topLeft: Radius.circular(16),
-              topRight: Radius.circular(16),
-              bottomRight: Radius.circular(16),
-            );
+    message.isSender ? Alignment.centerRight : Alignment.centerLeft;
+    final bubbleColor = message.isSender ? kPrimaryGreen : Colors.grey.shade200;
+    final textColor = message.isSender ? Colors.white : Colors.black87;
+    final senderNameColor = message.isSender ? Colors.white70 : Colors.black54;
+
+    final radius = message.isSender
+        ? const BorderRadius.only(
+      topLeft: Radius.circular(16),
+      topRight: Radius.circular(16),
+      bottomLeft: Radius.circular(16),
+    )
+        : const BorderRadius.only(
+      topLeft: Radius.circular(16),
+      topRight: Radius.circular(16),
+      bottomRight: Radius.circular(16),
+    );
 
     final formattedTime = DateFormat('hh:mm a').format(message.sentAt);
 
     return Column(
       crossAxisAlignment:
-          message.isSender ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+      message.isSender ? CrossAxisAlignment.end : CrossAxisAlignment.start,
       children: [
         Align(
           alignment: alignment,
           child: Container(
-            margin: EdgeInsets.symmetric(vertical: 6, horizontal: 10),
-            padding: EdgeInsets.all(12),
+            margin: const EdgeInsets.symmetric(vertical: 6, horizontal: 10),
+            padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: color,
+              color: bubbleColor,
               borderRadius: radius,
               boxShadow: [
                 BoxShadow(
@@ -188,20 +223,18 @@ class _ChatPageState extends State<ChatPage> {
             ),
             child: Column(
               crossAxisAlignment:
-                  message.isSender
-                      ? CrossAxisAlignment.end
-                      : CrossAxisAlignment.start,
+              message.isSender ? CrossAxisAlignment.end : CrossAxisAlignment.start,
               children: [
                 Text(
                   message.senderName,
-                  style: TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w600,
-                    color: Colors.black87,
-                  ),
+                  style: textTheme.bodySmall?.copyWith(
+                      fontWeight: FontWeight.w600, color: senderNameColor),
                 ),
-                SizedBox(height: 4),
-                Text(message.text, style: TextStyle(fontSize: 15)),
+                const SizedBox(height: 4),
+                Text(
+                  message.text,
+                  style: textTheme.bodyMedium?.copyWith(color: textColor),
+                ),
               ],
             ),
           ),
@@ -214,50 +247,57 @@ class _ChatPageState extends State<ChatPage> {
           ),
           child: Text(
             formattedTime,
-            style: TextStyle(fontSize: 11, color: Colors.grey[700]),
+            style: textTheme.bodySmall?.copyWith(color: Colors.grey.shade600),
           ),
         ),
       ],
     );
   }
 
-  Widget _buildMessageInput() {
+  Widget _buildMessageInput(TextTheme textTheme) {
     return SafeArea(
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
         decoration: BoxDecoration(
           color: Colors.white,
-          boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 4)],
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black12,
+              blurRadius: 8,
+              offset: Offset(0, -2),
+            ),
+          ],
         ),
         child: Row(
           children: [
             Expanded(
               child: TextField(
                 controller: _controller,
+                style: textTheme.bodyLarge?.copyWith(color: Colors.black87),
                 decoration: InputDecoration(
                   hintText: 'Type a message...',
+                  hintStyle: textTheme.bodyMedium?.copyWith(color: Colors.black45),
                   filled: true,
-                  fillColor: Colors.green[50],
-                  contentPadding: EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 12,
-                  ),
+                  fillColor: Colors.grey.shade100,
+                  contentPadding:
+                  const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(24),
                     borderSide: BorderSide.none,
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(24),
-                    borderSide: BorderSide(color: Colors.green),
+                    borderSide: BorderSide(color: kPrimaryGreen, width: 1.5),
                   ),
                 ),
               ),
             ),
-            SizedBox(width: 8),
+            const SizedBox(width: 8),
             CircleAvatar(
-              backgroundColor: Colors.green,
+              backgroundColor: kPrimaryGreen, // Themed send button
+              radius: 24, // Slightly larger
               child: IconButton(
-                icon: Icon(Icons.send, color: Colors.white),
+                icon: const Icon(Icons.send_rounded, color: Colors.white), // Modern send icon
                 onPressed: () {
                   if (_controller.text.trim().isNotEmpty) {
                     _sendMessage(_controller.text.trim());
@@ -273,20 +313,32 @@ class _ChatPageState extends State<ChatPage> {
 
   @override
   Widget build(BuildContext context) {
+    final TextTheme textTheme = Theme.of(context).textTheme;
+
     return Scaffold(
-      backgroundColor: Colors.green[50],
+      backgroundColor: Theme.of(context).colorScheme.background, // Use themed background
       appBar: AppBar(
-        backgroundColor: Colors.green,
+        backgroundColor: kPrimaryGreen, // Themed AppBar background
+        foregroundColor: Colors.white, // White icons and text
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_ios_rounded), // Modern back icon
+          onPressed: () => Navigator.pop(context),
+          tooltip: 'Back',
+        ),
         title: Row(
           children: [
             CircleAvatar(
               backgroundColor: Colors.white,
-              child: Icon(Icons.person, color: Colors.green),
+              radius: 18, // Smaller avatar in app bar
+              child: Icon(Icons.person_rounded, color: kPrimaryGreen, size: 20), // Themed person icon
             ),
-            SizedBox(width: 10),
-            Text(
-              widget.receiverUsername,
-              style: TextStyle(color: Colors.white),
+            const SizedBox(width: 10),
+            Flexible(
+              child: Text(
+                widget.receiverUsername,
+                style: textTheme.titleLarge?.copyWith(color: Colors.white),
+                overflow: TextOverflow.ellipsis,
+              ),
             ),
           ],
         ),
@@ -296,26 +348,22 @@ class _ChatPageState extends State<ChatPage> {
             child: InkWell(
               borderRadius: BorderRadius.circular(30),
               onTap: () {
+                print('Video call button pressed');
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder:
-                        (context) => VideoCallScreen(
-                          targetUserId: widget.receiverId,
-                          isCaller: true,
-                        ),
+                    builder: (context) => VideoCallScreen(
+                      targetUserId: widget.receiverId,
+                      isCaller: true,
+                    ),
                   ),
                 );
-                print('Video call button pressed');
               },
               child: Container(
                 decoration: BoxDecoration(
-                  color:
-                      Colors
-                          .lightGreenAccent
-                          .shade700, // greenish color for video call
+                  color: kAccentGreen, // Use kAccentGreen for video call button
                   shape: BoxShape.circle,
-                  boxShadow: [
+                  boxShadow: const [
                     BoxShadow(
                       color: Colors.black26,
                       blurRadius: 5,
@@ -323,8 +371,12 @@ class _ChatPageState extends State<ChatPage> {
                     ),
                   ],
                 ),
-                padding: EdgeInsets.all(8),
-                child: Icon(Icons.video_call, color: Colors.white, size: 28),
+                padding: const EdgeInsets.all(8),
+                child: const Icon(
+                  Icons.video_call_rounded, // Modern video call icon
+                  color: Colors.white,
+                  size: 28,
+                ),
               ),
             ),
           ),
@@ -335,13 +387,13 @@ class _ChatPageState extends State<ChatPage> {
           Expanded(
             child: ListView.builder(
               controller: _scrollController,
-              padding: EdgeInsets.symmetric(vertical: 10),
+              padding: const EdgeInsets.symmetric(vertical: 10),
               itemCount: _messages.length,
-              itemBuilder:
-                  (context, index) => _buildMessageBubble(_messages[index]),
+              itemBuilder: (context, index) =>
+                  _buildMessageBubble(_messages[index], textTheme),
             ),
           ),
-          _buildMessageInput(),
+          _buildMessageInput(textTheme),
         ],
       ),
     );
