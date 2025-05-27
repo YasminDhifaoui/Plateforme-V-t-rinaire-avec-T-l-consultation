@@ -4,11 +4,10 @@ import 'package:veterinary_app/services/auth_services/vet_auth_services.dart'; /
 import 'package:veterinary_app/views/Auth_pages/vet_register_page.dart';
 import 'package:veterinary_app/views/Auth_pages/verify_login_code_page.dart';
 import 'package:veterinary_app/views/Auth_pages/vet_forgot_password_page.dart';
-import 'package:veterinary_app/views/components/login_navbar.dart';
+// import 'package:veterinary_app/views/components/login_navbar.dart'; // Removed custom LoginNavbar, using standard AppBar
 
-// Assuming kPrimaryGreen is defined in main.dart or a shared constants file,
-// otherwise you'd define it here too:
-// const Color kPrimaryGreen = Color(0xFF00A86B);
+// Assuming kPrimaryGreen and kAccentGreen are defined in main.dart
+import 'package:veterinary_app/main.dart'; // Adjust path if using a separate constants.dart
 
 class VetLoginPage extends StatefulWidget {
   // NEW: Callback from MyHomePage/AppWrapper
@@ -28,6 +27,22 @@ class _VetLoginPageState extends State<VetLoginPage> {
 
   String responseMessage = '';
   bool isLoading = false; // Added isLoading state
+  bool _obscurePassword = true; // For password visibility toggle
+
+  void _showSnackBar(String message, {bool isSuccess = true}) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          message,
+          style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Colors.white),
+        ),
+        backgroundColor: isSuccess ? kPrimaryGreen : Colors.red.shade600,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+        margin: const EdgeInsets.all(10),
+      ),
+    );
+  }
 
   void loginUser() async {
     if (!_formKey.currentState!.validate()) {
@@ -49,6 +64,8 @@ class _VetLoginPageState extends State<VetLoginPage> {
       setState(() {
         responseMessage = result["message"] ?? "Unknown response";
       });
+      _showSnackBar(responseMessage, isSuccess: result["success"] == true);
+
       if (result["success"] == true) {
         if (mounted) {
           // NAVIGATE TO 2FA Verification page
@@ -66,8 +83,9 @@ class _VetLoginPageState extends State<VetLoginPage> {
       }
     } catch (e) {
       setState(() {
-        responseMessage = 'Login failed: $e';
+        responseMessage = 'Login failed: ${e.toString()}';
       });
+      _showSnackBar(responseMessage, isSuccess: false);
     } finally {
       if (mounted) {
         setState(() {
@@ -99,26 +117,44 @@ class _VetLoginPageState extends State<VetLoginPage> {
   }
 
   @override
+  void dispose() {
+    emailController.dispose();
+    passwordController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    // Re-using kPrimaryGreen from main.dart or defining locally if not shared
-    final Color kPrimaryGreen = Theme.of(context).primaryColor; // A safe way to get primary green if defined in theme
+    final TextTheme textTheme = Theme.of(context).textTheme;
 
     return Scaffold(
-      appBar: const LoginNavbar(username: ''),
+      backgroundColor: Theme.of(context).colorScheme.background, // Use themed background
+      appBar: AppBar(
+        // AppBar styling is handled by AppBarTheme in main.dart
+        title: Text(
+          '',
+          style: textTheme.titleLarge?.copyWith(color: Colors.white),
+        ),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_ios_rounded),
+          onPressed: () => Navigator.pop(context),
+          tooltip: 'Back',
+        ),
+      ),
       body: SingleChildScrollView(
         child: Center(
           child: Container(
-            constraints: const BoxConstraints(maxWidth: 400),
-            padding: const EdgeInsets.all(24),
-            margin: const EdgeInsets.symmetric(vertical: 40, horizontal: 16),
+            constraints: const BoxConstraints(maxWidth: 450), // Slightly wider for better form layout
+            padding: const EdgeInsets.all(30), // Increased padding
+            margin: const EdgeInsets.symmetric(vertical: 40, horizontal: 20), // Adjusted margin
             decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(12),
-              boxShadow: const [
+              color: Theme.of(context).cardTheme.color, // Use themed card color (white)
+              //borderRadius: Theme.of(context).cardTheme.shape?.borderRadius, // Use themed card border radius
+              boxShadow: [
                 BoxShadow(
-                  color: Colors.black12,
-                  blurRadius: 10,
-                  offset: Offset(0, 4),
+                  color: Colors.black.withOpacity(0.1),
+                  blurRadius: 15,
+                  offset: const Offset(0, 8),
                 ),
               ],
             ),
@@ -126,32 +162,52 @@ class _VetLoginPageState extends State<VetLoginPage> {
               key: _formKey,
               child: Column(
                 children: [
-                  const Text(
-                    "Vet Login",
-                    style: TextStyle(
-                      fontSize: 24,
-                      color: Colors.green, // You can use kPrimaryGreen here if defined or directly Colors.green
+                  Text(
+                    "Welcome Back, Veterinarian!",
+                    style: textTheme.headlineSmall?.copyWith(
+                      color: kPrimaryGreen, // Themed title color
                       fontWeight: FontWeight.bold,
                     ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 10),
+                  Text(
+                    "Sign in to access your dashboard.",
+                    style: textTheme.bodyMedium?.copyWith(color: Colors.black54),
+                    textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 30),
                   TextFormField(
                     controller: emailController,
-                    decoration: const InputDecoration(
+                    keyboardType: TextInputType.emailAddress,
+                    style: textTheme.bodyLarge, // Use themed text style
+                    decoration: InputDecoration(
                       labelText: "Email",
-                      border: OutlineInputBorder(),
-                      prefixIcon: Icon(Icons.email),
+                      prefixIcon: const Icon(Icons.email_outlined), // Modern icon
+                      // Other decoration properties handled by InputDecorationTheme in main.dart
                     ),
                     validator: _validateEmail,
                   ),
                   const SizedBox(height: 20),
                   TextFormField(
                     controller: passwordController,
-                    obscureText: true,
-                    decoration: const InputDecoration(
+                    obscureText: _obscurePassword,
+                    style: textTheme.bodyLarge, // Use themed text style
+                    decoration: InputDecoration(
                       labelText: "Password",
-                      border: OutlineInputBorder(),
-                      prefixIcon: Icon(Icons.lock),
+                      prefixIcon: const Icon(Icons.lock_outline_rounded), // Modern icon
+                      suffixIcon: IconButton(
+                        icon: Icon(
+                          _obscurePassword ? Icons.visibility_off_rounded : Icons.visibility_rounded,
+                          color: Colors.grey,
+                        ),
+                        onPressed: () {
+                          setState(() {
+                            _obscurePassword = !_obscurePassword;
+                          });
+                        },
+                      ),
+                      // Other decoration properties handled by InputDecorationTheme in main.dart
                     ),
                     validator: _validatePassword,
                   ),
@@ -159,16 +215,13 @@ class _VetLoginPageState extends State<VetLoginPage> {
                   SizedBox(
                     width: double.infinity,
                     child: isLoading // Show CircularProgressIndicator when loading
-                        ? const CircularProgressIndicator()
+                        ? Center(child: CircularProgressIndicator(color: kPrimaryGreen)) // Themed loading indicator
                         : ElevatedButton(
                       onPressed: loginUser,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.green, // You can use kPrimaryGreen here
-                        padding: const EdgeInsets.symmetric(vertical: 14),
-                      ),
-                      child: const Text(
+                      // Button styling is handled by ElevatedButtonThemeData in main.dart
+                      child: Text(
                         "Login",
-                        style: TextStyle(fontSize: 16, color: Colors.white), // Added white color for text
+                        style: textTheme.labelLarge, // Use themed labelLarge for button text
                       ),
                     ),
                   ),
@@ -176,25 +229,32 @@ class _VetLoginPageState extends State<VetLoginPage> {
                   if (responseMessage.isNotEmpty)
                     Text(
                       responseMessage,
-                      style: TextStyle(
-                        color: responseMessage.toLowerCase().contains('success') ? Colors.green : Colors.red,
+                      textAlign: TextAlign.center,
+                      style: textTheme.bodyMedium?.copyWith(
+                        color: responseMessage.toLowerCase().contains('success') ? Colors.green.shade700 : Colors.red.shade700,
+                        fontWeight: FontWeight.w500,
                       ),
                     ),
                   const SizedBox(height: 16),
-                  GestureDetector(
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const VetForgotPasswordPage(),
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: TextButton(
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const VetForgotPasswordPage(),
+                          ),
+                        );
+                      },
+                      style: TextButton.styleFrom(
+                        foregroundColor: kPrimaryGreen, // Themed text button color
+                      ),
+                      child: Text(
+                        "Forgot your password?",
+                        style: textTheme.bodyMedium?.copyWith(
+                          decoration: TextDecoration.underline,
                         ),
-                      );
-                    },
-                    child: const Text(
-                      "Forgot your password?",
-                      style: TextStyle(
-                        color: Colors.blue,
-                        decoration: TextDecoration.underline,
                       ),
                     ),
                   ),
@@ -202,9 +262,12 @@ class _VetLoginPageState extends State<VetLoginPage> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      const Text("Don’t have an account? "),
-                      GestureDetector(
-                        onTap: () {
+                      Text(
+                        "Don’t have an account? ",
+                        style: textTheme.bodyMedium, // Use themed text style
+                      ),
+                      TextButton(
+                        onPressed: () {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
@@ -212,12 +275,14 @@ class _VetLoginPageState extends State<VetLoginPage> {
                             ),
                           );
                         },
-                        child: const Text(
+                        style: TextButton.styleFrom(
+                          foregroundColor: kAccentGreen, // Use accent green for register link
+                        ),
+                        child: Text(
                           "Register here",
-                          style: TextStyle(
-                            color: Colors.blue,
-                            decoration: TextDecoration.underline,
+                          style: textTheme.bodyMedium?.copyWith(
                             fontWeight: FontWeight.w600,
+                            decoration: TextDecoration.underline,
                           ),
                         ),
                       ),

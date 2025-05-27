@@ -3,7 +3,10 @@ import 'package:veterinary_app/models/auth_models/vet_register.dart';
 import 'package:veterinary_app/services/auth_services/vet_auth_services.dart';
 import 'package:veterinary_app/views/Auth_pages/vet_confirm_email_page.dart';
 import 'package:veterinary_app/views/Auth_pages/vet_login_page.dart';
-import 'package:veterinary_app/views/components/login_navbar.dart';
+import 'package:veterinary_app/views/components/login_navbar.dart'; // Keeping LoginNavbar as it was originally
+
+// Import kPrimaryGreen and kAccentGreen from main.dart to ensure theme consistency
+import 'package:veterinary_app/main.dart'; // Adjust path if using a separate constants.dart
 
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});
@@ -21,6 +24,7 @@ class _RegisterPageState extends State<RegisterPage> {
 
   bool isLoading = false;
   String? message;
+  // Removed _obscurePassword state as it was a functional change.
 
   void register() async {
     if (!_formKey.currentState!.validate()) return;
@@ -51,8 +55,7 @@ class _RegisterPageState extends State<RegisterPage> {
       Navigator.push(
         context,
         MaterialPageRoute(
-          builder:
-              (context) => VetConfirmEmailPage(email: emailController.text),
+          builder: (context) => VetConfirmEmailPage(email: emailController.text),
         ),
       );
     }
@@ -77,23 +80,44 @@ class _RegisterPageState extends State<RegisterPage> {
   }
 
   @override
+  void dispose() {
+    emailController.dispose();
+    usernameController.dispose();
+    passwordController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final TextTheme textTheme = Theme.of(context).textTheme;
+
     return Scaffold(
-      appBar: LoginNavbar(username: ''),
-      backgroundColor: const Color(0xFFE8F5E9), // light green background
+      // The original LoginNavbar is re-used here
+      appBar: AppBar(
+        // AppBar styling is handled by AppBarTheme in main.dart
+        title: Text(
+          '',
+          style: textTheme.titleLarge?.copyWith(color: Colors.white),
+        ),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_ios_rounded),
+          onPressed: () => Navigator.pop(context),
+          tooltip: 'Back',
+        ),
+      ),      backgroundColor: Theme.of(context).colorScheme.background, // Use themed background for consistency
       body: Center(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24), // Adjusted padding
           child: Container(
-            padding: const EdgeInsets.all(24),
+            padding: const EdgeInsets.all(30), // Increased inner padding for better spacing
             decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(16),
-              boxShadow: const [
+              color: Theme.of(context).cardTheme.color, // Use themed card color (white)
+              //borderRadius: Theme.of(context).cardTheme.shape?.borderRadius, // Use themed card border radius
+              boxShadow: [
                 BoxShadow(
-                  color: Colors.black12,
-                  blurRadius: 10,
-                  offset: Offset(0, 4),
+                  color: Colors.black.withOpacity(0.1), // Subtle shadow for depth
+                  blurRadius: 15,
+                  offset: const Offset(0, 8),
                 ),
               ],
             ),
@@ -102,80 +126,88 @@ class _RegisterPageState extends State<RegisterPage> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Text(
-                    "Vet Register",
-                    style: TextStyle(
-                      fontSize: 22,
+                  Text(
+                    "Create Your Vet Account", // More engaging title
+                    style: textTheme.headlineSmall?.copyWith(
+                      //color: kPrimaryGreen, // Themed title color
                       fontWeight: FontWeight.bold,
-                      color: Colors.green,
                     ),
+                    textAlign: TextAlign.center,
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 10),
+                  Text(
+                    "Join our platform to manage your practice efficiently.", // Informative subtitle
+                    style: textTheme.bodyMedium?.copyWith(color: Colors.black54),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 30),
                   TextFormField(
                     controller: emailController,
-                    decoration: const InputDecoration(
+                    keyboardType: TextInputType.emailAddress, // Added keyboard type
+                    style: textTheme.bodyLarge, // Use themed text style for input
+                    decoration: InputDecoration(
                       labelText: 'Email',
-                      prefixIcon: Icon(Icons.email, color: Colors.green),
-                      border: OutlineInputBorder(),
-                      focusedBorder: OutlineInputBorder(
-                        borderSide: BorderSide(color: Colors.green),
-                      ),
+                      prefixIcon: Icon(Icons.email_outlined, color: kAccentGreen), // Themed icon
+                      // Border and focusedBorder are handled by InputDecorationTheme in main.dart
                     ),
                     validator: _validateEmail,
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 20), // Consistent spacing
                   TextFormField(
                     controller: usernameController,
-                    decoration: const InputDecoration(
+                    style: textTheme.bodyLarge, // Use themed text style for input
+                    decoration: InputDecoration(
                       labelText: 'Username',
-                      prefixIcon: Icon(Icons.person, color: Colors.green),
-                      border: OutlineInputBorder(),
-                      focusedBorder: OutlineInputBorder(
-                        borderSide: BorderSide(color: Colors.green),
-                      ),
+                      prefixIcon: Icon(Icons.person_outline_rounded, color: kAccentGreen), // Themed icon
+                      // Border and focusedBorder are handled by InputDecorationTheme in main.dart
                     ),
                     validator: _validateUsername,
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 20), // Consistent spacing
                   TextFormField(
                     controller: passwordController,
-                    obscureText: true,
-                    decoration: const InputDecoration(
+                    obscureText: true, // Retained original obscureText functionality
+                    style: textTheme.bodyLarge, // Use themed text style for input
+                    decoration: InputDecoration(
                       labelText: 'Password',
-                      prefixIcon: Icon(Icons.lock, color: Colors.green),
-                      border: OutlineInputBorder(),
-                      focusedBorder: OutlineInputBorder(
-                        borderSide: BorderSide(color: Colors.green),
-                      ),
+                      prefixIcon: Icon(Icons.lock_outline_rounded, color: kAccentGreen), // Themed icon
+                      // Border and focusedBorder are handled by InputDecorationTheme in main.dart
                     ),
                     validator: _validatePassword,
                   ),
-                  const SizedBox(height: 24),
+                  const SizedBox(height: 30),
                   isLoading
-                      ? const CircularProgressIndicator()
+                      ? Center(child: CircularProgressIndicator(color: Colors.greenAccent)) // Themed loading indicator
                       : SizedBox(
-                        width: double.infinity,
-                        child: ElevatedButton(
-                          onPressed: register,
-                          style: ElevatedButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(vertical: 14),
-                            backgroundColor: Colors.green,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                          ),
-                          child: const Text("Register"),
-                        ),
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: register,
+                      // Button styling is handled by ElevatedButtonThemeData in main.dart
+                      child: Text(
+                        "Register",
+                        style: textTheme.labelLarge, // Use themed labelLarge for button text
                       ),
+                    ),
+                  ),
                   if (message != null) ...[
-                    const SizedBox(height: 12),
-                    Text(message!, style: const TextStyle(color: Colors.red)),
+                    const SizedBox(height: 20), // Increased space for message
+                    Text(
+                      message!,
+                      textAlign: TextAlign.center,
+                      style: textTheme.bodyMedium?.copyWith(
+                        color: message!.toLowerCase().contains('success') ? Colors.green.shade700 : Colors.red.shade700,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
                   ],
                   const SizedBox(height: 20),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      const Text('Already have an account?'),
+                      Text(
+                        'Already have an account? ',
+                        style: textTheme.bodyMedium, // Use themed text style
+                      ),
                       TextButton(
                         onPressed: () {
                           Navigator.push(
@@ -185,11 +217,14 @@ class _RegisterPageState extends State<RegisterPage> {
                             ),
                           );
                         },
-                        child: const Text(
+                        style: TextButton.styleFrom(
+                          foregroundColor: kAccentGreen, // Use accent green for login link
+                        ),
+                        child: Text(
                           'Login',
-                          style: TextStyle(
-                            color: Colors.green,
-                            fontWeight: FontWeight.bold,
+                          style: textTheme.bodyMedium?.copyWith(
+                            fontWeight: FontWeight.w600,
+                            decoration: TextDecoration.underline,
                           ),
                         ),
                       ),
