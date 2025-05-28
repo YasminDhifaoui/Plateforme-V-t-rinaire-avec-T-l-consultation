@@ -17,6 +17,7 @@ using Org.BouncyCastle.Asn1.Pkcs;
 using Microsoft.AspNetCore.Authorization;
 using backend.Dtos.ClientDtos.ClientAuthDtos;
 using backend.Repo.AdminRepo.ClientsRepo;
+using System.Security.Cryptography;
 
 namespace backend.Controllers.ClientControllers
 {
@@ -449,6 +450,21 @@ namespace backend.Controllers.ClientControllers
             return StatusCode(StatusCodes.Status401Unauthorized, new ApiResponse { Status = "Error", Message = "login fail!" });
 
         }
+        private string GenerateRandomNumericOtp(int length)
+        {
+            using (var rng = new RNGCryptoServiceProvider())
+            {
+                var bytes = new byte[length];
+                rng.GetBytes(bytes);
+                var otp = new StringBuilder();
+                foreach (var b in bytes)
+                {
+                    otp.Append(b % 10); // Get a single digit (0-9)
+                }
+                return otp.ToString();
+            }
+        }
+
 
         [HttpPost]
         [Route("forgot-password")]
@@ -491,6 +507,17 @@ namespace backend.Controllers.ClientControllers
             byte[] encodedToken = Encoding.UTF8.GetBytes(token);
             var resetToken = WebEncoders.Base64UrlEncode(encodedToken);
             user.TokenCreationTime = DateTime.UtcNow;
+
+
+            string otpCode = GenerateRandomNumericOtp(6);
+
+            // Store both tokens and set OTP expiry on the user object
+            user.OtpCode = otpCode;
+            user.OtpExpiryTime = DateTime.UtcNow.AddMinutes(5); // OTP valid for 5 minutes (adjust as needed)
+            user.IsOtpUsed = false;
+            user.InternalResetToken = token; // *** THIS IS THE CRUCIAL LINE THAT WAS MISSING OR MISPLACED ***
+
+
             await _userManager.UpdateAsync(user);
 
             string Url = $"{_configuration["ClientResetPassUrl"]}/reset-password?email={model.Email}&token={resetToken}";
@@ -500,7 +527,9 @@ namespace backend.Controllers.ClientControllers
             var Variables = new Dictionary<string, string>();
             Variables["UserName"] = user.UserName;
             Variables["ResetPasswordUrl"] = Url;
-            Variables["Token"] = resetToken;
+            //Variables["Token"] = resetToken;
+            Variables["OtpCode"] = otpCode; // Send the short OTP code to the email template
+
 
             MailDataModel mailData = new MailDataModel()
             {
@@ -529,12 +558,43 @@ namespace backend.Controllers.ClientControllers
             return Ok(new ApiResponse { Status = "Success", Message = "Reset password URL has been sent to the email successfully!" });
 
         }
+        [HttpPost]
+        [Route("verify-otp-code")]
+        public async Task<IActionResult> VerifyOtpCode([FromBody] ClientVerifyOtpCodeDto model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(new ApiResponse { Status = "Error", Message = "Invalid input." });
+            }
+
+            var user = await _userManager.FindByEmailAsync(model.Email);
+            if (user == null)
+            {
+                // Generic error for security, don't reveal if user exists
+                return BadRequest(new ApiResponse { Status = "Error", Message = "Invalid email or verification code." });
+            }
+
+            // Validate OTP and expiry conditions
+            if (string.IsNullOrEmpty(user.OtpCode) || user.OtpCode != model.OtpCode ||
+                user.OtpExpiryTime == null || user.OtpExpiryTime < DateTime.UtcNow || user.IsOtpUsed)
+            {
+                _logger.LogWarning($"Invalid, expired, or used OTP verification attempt for user: {model.Email}. Code provided: {model.OtpCode}");
+                return BadRequest(new ApiResponse { Status = "Error", Message = "Invalid or expired verification code. Please request a new one." });
+            }
+
+            // OTP is valid but NOT invalidated here, as user still needs to provide new password.
+            // This endpoint is for UI to know if they can proceed to the next step.
+            return Ok(new ApiResponse { Status = "Success", Message = "Verification code is valid. You can now reset your password." });
+        }
+
+
+
 
         [HttpPost]
         [Route("reset-password")]
-        public async Task<IActionResult> ResetPasswordAsync([FromQuery] string email, [FromQuery] string token, [FromBody] ClientResetPasswordDto model)
+        public async Task<IActionResult> ResetPasswordAsync([FromBody] ClientResetPasswordDto model)
         {
-            var user = await _userManager.FindByEmailAsync(email);
+            var user = await _userManager.FindByEmailAsync(model.Email);
             if (user == null)
                 return StatusCode(StatusCodes.Status404NotFound, new ApiResponse
                 {
@@ -554,36 +614,45 @@ namespace backend.Controllers.ClientControllers
                     Status = "Error",
                     Message = "Password doesn't match its confirmation"
                 });
-            var isTokenNotExpired = IsTokenValidAsync(user.TokenCreationTime.AddMinutes(5));
-            if (!isTokenNotExpired)
+           
+            if (user.IsOtpUsed || string.IsNullOrEmpty(user.InternalResetToken))
+            {
+                _logger.LogWarning($"Attempt to reset password for user {model.Email} with already used OTP or missing internal token. IsOtpUsed: {user.IsOtpUsed}, InternalResetToken is null/empty: {string.IsNullOrEmpty(user.InternalResetToken)}");
                 return StatusCode(StatusCodes.Status403Forbidden, new ApiResponse
                 {
                     Status = "Error",
-                    Message = "Expired reset token."
+                    Message = "Password reset link/session expired or already used. Please request a new password reset."
                 });
-            var isTokenValid = await _userManager.VerifyUserTokenAsync(user, TokenOptions.DefaultProvider, UserManager<AppUser>.ResetPasswordTokenPurpose, token);
-            if (isTokenValid)
-                return StatusCode(StatusCodes.Status403Forbidden, new ApiResponse
-                {
-                    Status = "Error",
-                    Message = "Token is incorrect."
-                });
+            }
 
-            var decodedToken = WebEncoders.Base64UrlDecode(token);
-            string normalToken = Encoding.UTF8.GetString(decodedToken);
-
-            var result = await _userManager.ResetPasswordAsync(user, normalToken, model.NewPassword);
+            // Perform the actual password reset using the stored internal token
+            var result = await _userManager.ResetPasswordAsync(user, user.InternalResetToken, model.NewPassword);
 
             if (result.Succeeded)
-                return Ok(new ApiResponse { Status = "Success", Message = "Password has been reset successfully!" });
-
-            return StatusCode(StatusCodes.Status500InternalServerError, new ApiResponse
             {
-                Status = "Error",
-                Message = "Something went wrong"
-            });
+                // Invalidate the OTP and internal token after successful use
+                user.IsOtpUsed = true;
+                user.OtpCode = null; // Clear the OTP
+                user.InternalResetToken = null; // Clear the internal token
+                user.OtpExpiryTime = null; // Clear expiry time
+                await _userManager.UpdateAsync(user); // Save these changes
+
+                _logger.LogInformation($"Password successfully reset for user: {model.Email}");
+                return Ok(new ApiResponse { Status = "Success", Message = "Password has been reset successfully!" });
+            }
+            else
+            {
+                _logger.LogError($"Failed to reset password for user {model.Email}: {string.Join(", ", result.Errors.Select(e => e.Description))}");
+                return StatusCode(StatusCodes.Status500InternalServerError, new ApiResponse
+                {
+                    Status = "Error",
+                    Message = $"Failed to reset password: {string.Join(", ", result.Errors.Select(e => e.Description))}"
+                });
+            }
         }
-        private bool IsTokenValidAsync(DateTime? tokenCreationTime)
+
+    
+    private bool IsTokenValidAsync(DateTime? tokenCreationTime)
         {
             if (!tokenCreationTime.HasValue)
                 return false;

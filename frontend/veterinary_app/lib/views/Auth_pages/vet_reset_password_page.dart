@@ -1,18 +1,18 @@
 import 'package:flutter/material.dart';
-import 'package:veterinary_app/services/auth_services/vet_auth_services.dart';
-import 'vet_login_page.dart';
+import 'package:veterinary_app/views/Auth_pages/vet_login_page.dart';
+import 'package:veterinary_app/models/auth_models/vet_reset_password.dart'; // Import the correct Vet DTO
 
 // Import kPrimaryGreen and kAccentGreen from main.dart to ensure theme consistency
-import 'package:veterinary_app/main.dart'; // Adjust path if using a separate constants.dart file
+import 'package:veterinary_app/main.dart';
+
+import '../../services/auth_services/vet_auth_services.dart'; // Adjust path if using a separate constants.dart file
 
 class VetResetPasswordPage extends StatefulWidget {
   final String email;
-  final String token;
-
+  // Remove 'token' from the constructor as it's no longer passed or needed here
   const VetResetPasswordPage({
     super.key,
     required this.email,
-    required this.token,
   });
 
   @override
@@ -23,7 +23,7 @@ class _VetResetPasswordPageState extends State<VetResetPasswordPage> {
   final _formKey = GlobalKey<FormState>();
   final TextEditingController passwordController = TextEditingController();
   final TextEditingController confirmPasswordController = TextEditingController();
-  final ApiService _authService = ApiService();
+  final ApiService _authService = ApiService(); // Use your ApiService instance
 
   String responseMessage = '';
   bool isLoading = false;
@@ -43,7 +43,7 @@ class _VetResetPasswordPageState extends State<VetResetPasswordPage> {
 
   String? _validateConfirmPassword(String? value) {
     if (value == null || value.isEmpty) {
-      return 'Confirm password is required'; // Added a check for empty confirm password
+      return 'Confirm password is required';
     }
     if (value != passwordController.text) {
       return 'Passwords do not match';
@@ -76,12 +76,18 @@ class _VetResetPasswordPageState extends State<VetResetPasswordPage> {
       responseMessage = ''; // Clear previous message
     });
 
+    // Create the DTO object with email, new password, and confirm password
+    final resetDto = VetResetPasswordDto(
+      email: widget.email, // Use the email passed to this page
+      newPassword: passwordController.text.trim(),
+      confirmPassword: confirmPasswordController.text.trim(),
+    );
+
     try {
-      final result = await _authService.resetPassword(
-        email: widget.email,
-        token: widget.token,
-        newPassword: passwordController.text.trim(),
-      );
+      // Call the resetPassword service method with the DTO
+      // The `token` parameter is no longer needed here as the backend manages it internally
+      final result = await _authService.resetPassword(resetDto); // Pass the DTO object
+
       setState(() {
         responseMessage = result["message"] ?? "Unknown response";
       });
@@ -91,17 +97,22 @@ class _VetResetPasswordPageState extends State<VetResetPasswordPage> {
       if (result["success"] == true) {
         if (mounted) {
           // Navigate back to login page after success
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (context) => const VetLoginPage()),
-          );
+          // Use a slight delay to allow SnackBar to be seen
+          Future.delayed(const Duration(seconds: 2), () {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => const VetLoginPage()),
+            );
+          });
         }
       }
-    } catch (e) {
+    } catch (e, stacktrace) { // Added stacktrace for better debugging
       setState(() {
         responseMessage = 'Failed to reset password: ${e.toString()}';
       });
       _showSnackBar(responseMessage, isSuccess: false); // Show error snackbar
+      print('Vet Reset password error: $e'); // For debugging
+      print('Stacktrace: $stacktrace'); // For debugging
     } finally {
       if (mounted) {
         setState(() {
@@ -146,7 +157,7 @@ class _VetResetPasswordPageState extends State<VetResetPasswordPage> {
             padding: const EdgeInsets.all(30), // Consistent inner padding
             decoration: BoxDecoration(
               color: Theme.of(context).cardTheme.color, // Use themed card color (white)
-              //borderRadius: Theme.of(context).cardTheme.shape?.borderRadius, // Use themed card border radius
+              borderRadius: BorderRadius.circular(15), // Consistent rounded corners
               boxShadow: [
                 BoxShadow(
                   color: Colors.black.withOpacity(0.1), // Subtle shadow for depth
@@ -199,7 +210,16 @@ class _VetResetPasswordPageState extends State<VetResetPasswordPage> {
                           });
                         },
                       ),
-                      // Input decoration handled by InputDecorationTheme in main.dart
+                      border: OutlineInputBorder( // Explicitly define border for consistency
+                        borderRadius: BorderRadius.circular(10),
+                        borderSide: BorderSide(color: kPrimaryGreen.withOpacity(0.6)),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(10),
+                        borderSide: const BorderSide(color: kPrimaryGreen, width: 2),
+                      ),
+                      filled: true,
+                      fillColor: Colors.grey.shade100,
                     ),
                     validator: _validatePassword,
                   ),
@@ -222,7 +242,16 @@ class _VetResetPasswordPageState extends State<VetResetPasswordPage> {
                           });
                         },
                       ),
-                      // Input decoration handled by InputDecorationTheme in main.dart
+                      border: OutlineInputBorder( // Explicitly define border for consistency
+                        borderRadius: BorderRadius.circular(10),
+                        borderSide: BorderSide(color: kPrimaryGreen.withOpacity(0.6)),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(10),
+                        borderSide: const BorderSide(color: kPrimaryGreen, width: 2),
+                      ),
+                      filled: true,
+                      fillColor: Colors.grey.shade100,
                     ),
                     validator: _validateConfirmPassword,
                   ),
@@ -238,7 +267,15 @@ class _VetResetPasswordPageState extends State<VetResetPasswordPage> {
                         'Reset Password',
                         style: textTheme.labelLarge, // Use themed labelLarge for button text
                       ),
-                      // Button styling is handled by ElevatedButtonThemeData in main.dart
+                      style: ElevatedButton.styleFrom( // Explicitly define button style for consistency
+                        backgroundColor: kPrimaryGreen,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        elevation: 6,
+                      ),
                     ),
                   ),
                   const SizedBox(height: 20),

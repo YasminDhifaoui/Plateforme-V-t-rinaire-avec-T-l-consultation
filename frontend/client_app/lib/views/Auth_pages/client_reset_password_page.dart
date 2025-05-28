@@ -1,15 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:client_app/services/auth_services/client_auth_services.dart';
-import 'client_login_page.dart';
+import 'package:client_app/models/auth_models/client_reset_password.dart'; // Import the correct DTO
 
 // Import your blue color constants. Ensure these are correctly defined.
-import 'package:client_app/main.dart'; // Adjust path if using a separate constants.dart
+import 'package:client_app/main.dart';
+
+import 'client_login_page.dart'; // Adjust path if using a separate constants.dart
 
 class ClientResetPasswordPage extends StatefulWidget {
-  final String email;
-  final String token;
+  final String email; // This page only needs the email
 
-  const ClientResetPasswordPage({super.key, required this.email, required this.token});
+  // Remove 'token' from the constructor as it's no longer passed or needed here
+  const ClientResetPasswordPage({super.key, required this.email});
 
   @override
   State<ClientResetPasswordPage> createState() => _ClientResetPasswordPageState();
@@ -35,11 +37,6 @@ class _ClientResetPasswordPageState extends State<ClientResetPasswordPage> {
       return 'Password must be at least 6 characters';
     }
     // Add more complex regex for stronger passwords if needed
-    // Example: At least one uppercase, one lowercase, one digit, one special character
-    // RegExp regex = RegExp(r'^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[!@#\$&*~]).{8,}$');
-    // if (!regex.hasMatch(value)) {
-    //   return 'Password must contain at least one uppercase letter, one lowercase letter, one digit, and one special character.';
-    // }
     return null;
   }
 
@@ -78,12 +75,17 @@ class _ClientResetPasswordPageState extends State<ClientResetPasswordPage> {
       responseMessage = ''; // Clear previous message
     });
 
+    // Create the DTO object with email, new password, and confirm password
+    final resetDto = ClientResetPasswordDto(
+      email: widget.email, // Use the email passed to this page
+      newPassword: passwordController.text.trim(),
+      confirmPassword: confirmPasswordController.text.trim(),
+    );
+
     try {
-      final result = await _authService.resetPassword(
-        email: widget.email,
-        token: widget.token,
-        newPassword: passwordController.text.trim(),
-      );
+      // Call the resetPassword service method with the DTO
+      final result = await _authService.resetPassword(resetDto); // Pass the DTO object
+
       setState(() {
         responseMessage = result["message"] ?? "Unknown response";
       });
@@ -99,11 +101,13 @@ class _ClientResetPasswordPageState extends State<ClientResetPasswordPage> {
           );
         });
       }
-    } catch (e) {
+    } catch (e, stacktrace) { // Added stacktrace for better debugging
       setState(() {
         responseMessage = 'Failed to reset password: ${e.toString()}';
       });
       _showSnackBar(responseMessage, isSuccess: false);
+      print('Reset password error: $e'); // For debugging
+      print('Stacktrace: $stacktrace'); // For debugging
     } finally {
       setState(() {
         isLoading = false;
@@ -123,30 +127,30 @@ class _ClientResetPasswordPageState extends State<ClientResetPasswordPage> {
     final TextTheme textTheme = Theme.of(context).textTheme;
 
     return Scaffold(
-      backgroundColor: Colors.grey.shade50, // Consistent light background
+      backgroundColor: Colors.grey.shade50,
       appBar: AppBar(
-        backgroundColor: kPrimaryBlue, // Themed AppBar background
-        foregroundColor: Colors.white, // White icons and text
+        backgroundColor: kPrimaryBlue,
+        foregroundColor: Colors.white,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_rounded), // Modern back icon
+          icon: const Icon(Icons.arrow_back_ios_rounded),
           onPressed: () => Navigator.pop(context),
           tooltip: 'Back',
         ),
         title: Text(
-          'Reset Password', // Clearer, themed title
+          'Reset Password',
           style: textTheme.titleLarge?.copyWith(color: Colors.white),
         ),
         centerTitle: true,
-        elevation: 0, // No shadow
+        elevation: 0,
       ),
       body: Center(
-        child: SingleChildScrollView( // Use SingleChildScrollView for keyboard overflow
-          padding: const EdgeInsets.all(24.0), // Increased padding
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(24.0),
           child: Container(
-            padding: const EdgeInsets.all(24.0), // Increased inner padding
+            padding: const EdgeInsets.all(24.0),
             decoration: BoxDecoration(
-              color: Colors.white, // White background for the form card
-              borderRadius: BorderRadius.circular(15), // More rounded corners
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(15),
               boxShadow: [
                 BoxShadow(
                   color: Colors.black.withOpacity(0.1),
@@ -207,7 +211,7 @@ class _ClientResetPasswordPageState extends State<ClientResetPasswordPage> {
                     ),
                     validator: _validatePassword,
                   ),
-                  const SizedBox(height: 16), // Increased spacing
+                  const SizedBox(height: 16),
                   TextFormField(
                     controller: confirmPasswordController,
                     obscureText: _obscureConfirmPassword,
@@ -242,24 +246,24 @@ class _ClientResetPasswordPageState extends State<ClientResetPasswordPage> {
                   ),
                   const SizedBox(height: 30),
                   isLoading
-                      ? CircularProgressIndicator(color: kPrimaryBlue) // Themed loading indicator
+                      ? CircularProgressIndicator(color: kPrimaryBlue)
                       : SizedBox(
-                    width: double.infinity, // Make button full width
+                    width: double.infinity,
                     child: ElevatedButton.icon(
                       onPressed: submitResetPassword,
-                      icon: const Icon(Icons.check_circle_outline_rounded, color: Colors.white), // Modern check icon
+                      icon: const Icon(Icons.check_circle_outline_rounded, color: Colors.white),
                       label: Text(
                         'Reset Password',
                         style: textTheme.labelLarge,
                       ),
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: kPrimaryBlue, // Themed button
+                        backgroundColor: kPrimaryBlue,
                         foregroundColor: Colors.white,
                         padding: const EdgeInsets.symmetric(vertical: 16),
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12), // More rounded
+                          borderRadius: BorderRadius.circular(12),
                         ),
-                        elevation: 6, // Subtle shadow
+                        elevation: 6,
                       ),
                     ),
                   ),

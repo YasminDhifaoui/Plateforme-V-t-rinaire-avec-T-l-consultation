@@ -364,7 +364,7 @@ class _ProfilePageState extends State<ProfilePage> {
                 ),
                 onPressed: () {
                   // Ensure _profile and widget.jwtToken are not null before navigating
-                  if (_profile != null && widget.jwtToken.isNotEmpty) {
+                  /*if (_profile != null && widget.jwtToken.isNotEmpty) {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
@@ -379,7 +379,7 @@ class _ProfilePageState extends State<ProfilePage> {
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(content: Text('Profile data or token not available for password reset.')),
                     );
-                  }
+                  }*/
                 },
                 child: Text(
                   'Change Password',
