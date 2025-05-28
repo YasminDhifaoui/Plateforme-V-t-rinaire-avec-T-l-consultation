@@ -1,7 +1,7 @@
 import 'package:client_app/models/auth_models/client_login.dart';
 import 'package:client_app/services/auth_services/client_auth_services.dart';
 import 'package:client_app/views/Auth_pages/client_register_page.dart';
-import 'package:client_app/views/components/login_navbar.dart';
+import 'package:client_app/views/components/login_navbar.dart'; // Keep this import if LoginNavbar is custom and needed elsewhere
 import 'package:client_app/views/Auth_pages/verify_login_code_page.dart'; // Corrected import for VerifyLoginCodePage
 import 'package:client_app/views/Auth_pages/client_forgot_password_page.dart';
 import 'package:flutter/material.dart';
@@ -23,6 +23,8 @@ class _ClientLoginPageState extends State<ClientLoginPage> {
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
   final ApiService _authService = ApiService();
+  bool _obscurePassword = true; // For password visibility toggle
+
 
   String responseMessage = '';
   bool isLoading = false;
@@ -100,8 +102,6 @@ class _ClientLoginPageState extends State<ClientLoginPage> {
     final TextTheme textTheme = Theme.of(context).textTheme;
 
     return Scaffold(
-      // Assuming LoginNavbar is just a basic AppBar, we'll let the main theme handle its appearance.
-      // If LoginNavbar is a custom widget, ensure its background and text colors are aligned with the theme.
       appBar: AppBar(
         centerTitle: true,
         backgroundColor: kPrimaryBlue, // Explicitly use our primary blue
@@ -131,7 +131,6 @@ class _ClientLoginPageState extends State<ClientLoginPage> {
                       "Welcome Back!",
                       style: textTheme.headlineMedium?.copyWith(
                         color: kPrimaryBlue, // Use primary blue for the title
-                        fontWeight: FontWeight.bold,
                       ),
                     ),
                     const SizedBox(height: 10),
@@ -173,11 +172,22 @@ class _ClientLoginPageState extends State<ClientLoginPage> {
                     const SizedBox(height: 20),
                     TextFormField(
                       controller: passwordController,
-                      obscureText: true,
+                      obscureText: _obscurePassword, // <--- CORRECTED: Use the state variable here
                       decoration: InputDecoration(
                         labelText: "Password",
                         hintText: "********",
                         prefixIcon: const Icon(Icons.lock, color: kAccentBlue), // Blue icon
+                        suffixIcon: IconButton(
+                          icon: Icon(
+                            _obscurePassword ? Icons.visibility_off_rounded : Icons.visibility_rounded,
+                            color: Colors.grey,
+                          ),
+                          onPressed: () {
+                            setState(() {
+                              _obscurePassword = !_obscurePassword;
+                            });
+                          },
+                        ),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(10),
                           borderSide: BorderSide(color: kPrimaryBlue.withOpacity(0.6)),

@@ -1,25 +1,26 @@
+import 'package:client_app/views/profile_pages/profile_page.dart';
 import 'package:flutter/material.dart';
-import 'package:veterinary_app/main.dart'; // For kPrimaryGreen, kAccentGreen
-import 'package:veterinary_app/services/auth_services/token_service.dart';
-import 'package:veterinary_app/views/profile_pages/profile_page.dart';
+import 'package:client_app/main.dart'; // For kPrimaryBlue, kAccentBlue
+import 'package:client_app/services/auth_services/token_service.dart'; // Assuming you have a shared TokenService
 
-import '../../models/profile_models/VetChangePasswordModel.dart';
-import '../../services/profile_services/change_pass_service.dart';
+import '../../models/profile_models/client_change_password.dart';
+import '../../services/auth_services/client_auth_services.dart';
+import '../../services/profile_services/change_pass_service.dart'; // Your ApiService
 
-class VetChangePasswordPage extends StatefulWidget {
-  const VetChangePasswordPage({super.key});
+class ClientChangePasswordPage extends StatefulWidget {
+  const ClientChangePasswordPage({super.key});
 
   @override
-  State<VetChangePasswordPage> createState() => _VetChangePasswordPageState();
+  State<ClientChangePasswordPage> createState() => _ClientChangePasswordPageState();
 }
 
-class _VetChangePasswordPageState extends State<VetChangePasswordPage> {
+class _ClientChangePasswordPageState extends State<ClientChangePasswordPage> {
   final _formKey = GlobalKey<FormState>();
   final TextEditingController currentPasswordController = TextEditingController();
   final TextEditingController newPasswordController = TextEditingController();
   final TextEditingController confirmNewPasswordController = TextEditingController();
 
-  final changePassService _apiService = changePassService();
+  final changePassService _apiService = changePassService(); // Use the ApiService instance
 
   bool isLoading = false;
   String responseMessage = '';
@@ -41,6 +42,7 @@ class _VetChangePasswordPageState extends State<VetChangePasswordPage> {
     if (value.length < 6) {
       return 'Password must be at least 6 characters';
     }
+    // Add more complexity rules if needed
     return null;
   }
 
@@ -61,7 +63,7 @@ class _VetChangePasswordPageState extends State<VetChangePasswordPage> {
           message,
           style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Colors.white),
         ),
-        backgroundColor: isSuccess ? kPrimaryGreen : Colors.red.shade600,
+        backgroundColor: isSuccess ? kPrimaryBlue : Colors.red.shade600, // Use client theme colors
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
         margin: const EdgeInsets.all(10),
@@ -80,7 +82,7 @@ class _VetChangePasswordPageState extends State<VetChangePasswordPage> {
     });
 
     try {
-      final String? jwtToken = await TokenService.getToken();
+      final String? jwtToken = await TokenService.getToken(); // Retrieve JWT token
 
       if (jwtToken == null) {
         _showSnackBar('Authentication token not found. Please log in again.', isSuccess: false);
@@ -88,13 +90,13 @@ class _VetChangePasswordPageState extends State<VetChangePasswordPage> {
         return;
       }
 
-      final model = VetChangePasswordDto(
+      final model = ClientChangePasswordDto(
         currentPassword: currentPasswordController.text.trim(),
         newPassword: newPasswordController.text.trim(),
         confirmPassword: confirmNewPasswordController.text.trim(),
       );
 
-      final result = await _apiService.changeVetPassword(model, jwtToken);
+      final result = await _apiService.changeClientPassword(model, jwtToken); // Call the client-specific method
 
       setState(() {
         responseMessage = result["message"] ?? "Unknown response";
@@ -107,11 +109,11 @@ class _VetChangePasswordPageState extends State<VetChangePasswordPage> {
         newPasswordController.clear();
         confirmNewPasswordController.clear();
 
-        // Navigate to VetProfilePage and pass a success flag
+        // Navigate to ClientProfilePage and pass a success flag
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
-            builder: (context) => const VetProfilePage(
+            builder: (context) => const ProfilePage(
             ),
           ),
         );
@@ -123,7 +125,7 @@ class _VetChangePasswordPageState extends State<VetChangePasswordPage> {
         responseMessage = 'An error occurred: ${e.toString()}';
       });
       _showSnackBar(responseMessage, isSuccess: false);
-      print('Change password error: $e');
+      print('Client change password error: $e');
       print('Stacktrace: $stacktrace');
     } finally {
       setState(() {
@@ -182,13 +184,13 @@ class _VetChangePasswordPageState extends State<VetChangePasswordPage> {
                   Icon(
                     Icons.lock_open_rounded,
                     size: 70,
-                    color: kPrimaryGreen,
+                    color: kPrimaryBlue, // Use client theme color
                   ),
                   const SizedBox(height: 24),
                   Text(
                     'Update Your Password',
                     style: textTheme.headlineSmall?.copyWith(
-                      color: kPrimaryGreen,
+                      color: kPrimaryBlue, // Use client theme color
                       fontWeight: FontWeight.bold,
                     ),
                     textAlign: TextAlign.center,
@@ -206,7 +208,7 @@ class _VetChangePasswordPageState extends State<VetChangePasswordPage> {
                     style: textTheme.bodyLarge,
                     decoration: InputDecoration(
                       labelText: 'Current Password',
-                      prefixIcon: Icon(Icons.lock_outline_rounded, color: kAccentGreen),
+                      prefixIcon: Icon(Icons.lock_outline_rounded, color: kAccentBlue), // Use client theme color
                       suffixIcon: IconButton(
                         icon: Icon(
                           _obscureCurrentPassword ? Icons.visibility_off_rounded : Icons.visibility_rounded,
@@ -220,11 +222,11 @@ class _VetChangePasswordPageState extends State<VetChangePasswordPage> {
                       ),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(10),
-                        borderSide: BorderSide(color: kPrimaryGreen.withOpacity(0.6)),
+                        borderSide: BorderSide(color: kPrimaryBlue.withOpacity(0.6)), // Use client theme color
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(10),
-                        borderSide: const BorderSide(color: kPrimaryGreen, width: 2),
+                        borderSide: const BorderSide(color: kPrimaryBlue, width: 2), // Use client theme color
                       ),
                       filled: true,
                       fillColor: Colors.grey.shade100,
@@ -238,7 +240,7 @@ class _VetChangePasswordPageState extends State<VetChangePasswordPage> {
                     style: textTheme.bodyLarge,
                     decoration: InputDecoration(
                       labelText: 'New Password',
-                      prefixIcon: Icon(Icons.lock_open_rounded, color: kAccentGreen),
+                      prefixIcon: Icon(Icons.lock_open_rounded, color: kAccentBlue), // Use client theme color
                       suffixIcon: IconButton(
                         icon: Icon(
                           _obscureNewPassword ? Icons.visibility_off_rounded : Icons.visibility_rounded,
@@ -252,11 +254,11 @@ class _VetChangePasswordPageState extends State<VetChangePasswordPage> {
                       ),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(10),
-                        borderSide: BorderSide(color: kPrimaryGreen.withOpacity(0.6)),
+                        borderSide: BorderSide(color: kPrimaryBlue.withOpacity(0.6)), // Use client theme color
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(10),
-                        borderSide: const BorderSide(color: kPrimaryGreen, width: 2),
+                        borderSide: const BorderSide(color: kPrimaryBlue, width: 2), // Use client theme color
                       ),
                       filled: true,
                       fillColor: Colors.grey.shade100,
@@ -270,7 +272,7 @@ class _VetChangePasswordPageState extends State<VetChangePasswordPage> {
                     style: textTheme.bodyLarge,
                     decoration: InputDecoration(
                       labelText: 'Confirm New Password',
-                      prefixIcon: Icon(Icons.lock_outline_rounded, color: kAccentGreen),
+                      prefixIcon: Icon(Icons.lock_outline_rounded, color: kAccentBlue), // Use client theme color
                       suffixIcon: IconButton(
                         icon: Icon(
                           _obscureConfirmNewPassword ? Icons.visibility_off_rounded : Icons.visibility_rounded,
@@ -284,11 +286,11 @@ class _VetChangePasswordPageState extends State<VetChangePasswordPage> {
                       ),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(10),
-                        borderSide: BorderSide(color: kPrimaryGreen.withOpacity(0.6)),
+                        borderSide: BorderSide(color: kPrimaryBlue.withOpacity(0.6)), // Use client theme color
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(10),
-                        borderSide: const BorderSide(color: kPrimaryGreen, width: 2),
+                        borderSide: const BorderSide(color: kPrimaryBlue, width: 2), // Use client theme color
                       ),
                       filled: true,
                       fillColor: Colors.grey.shade100,
@@ -297,7 +299,7 @@ class _VetChangePasswordPageState extends State<VetChangePasswordPage> {
                   ),
                   const SizedBox(height: 30),
                   isLoading
-                      ? Center(child: CircularProgressIndicator(color: kPrimaryGreen))
+                      ? Center(child: CircularProgressIndicator(color: kPrimaryBlue)) // Use client theme color
                       : SizedBox(
                     width: double.infinity,
                     child: ElevatedButton.icon(
@@ -308,7 +310,7 @@ class _VetChangePasswordPageState extends State<VetChangePasswordPage> {
                         style: textTheme.labelLarge,
                       ),
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: kPrimaryGreen,
+                        backgroundColor: kPrimaryBlue, // Use client theme color
                         foregroundColor: Colors.white,
                         padding: const EdgeInsets.symmetric(vertical: 16),
                         shape: RoundedRectangleBorder(

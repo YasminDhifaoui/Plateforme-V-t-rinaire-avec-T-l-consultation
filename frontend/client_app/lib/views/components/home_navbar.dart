@@ -141,7 +141,7 @@ class _HomeNavbarState extends State<HomeNavbar> {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => ProfilePage(jwtToken: _jwtToken!),
+                  builder: (context) => ProfilePage(),
                 ),
               );
             } else {
@@ -158,7 +158,7 @@ class _HomeNavbarState extends State<HomeNavbar> {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => ProfilePage(jwtToken: _jwtToken!),
+                      builder: (context) => ProfilePage(),
                     ),
                   );
                 } else {
