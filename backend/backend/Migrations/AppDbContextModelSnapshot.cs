@@ -317,6 +317,12 @@ namespace backend.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<string>("InternalResetToken")
+                        .HasColumnType("text");
+
+                    b.Property<bool>("IsOtpUsed")
+                        .HasColumnType("boolean");
+
                     b.Property<string>("LastName")
                         .HasMaxLength(100)
                         .HasColumnType("character varying(100)");
@@ -337,6 +343,12 @@ namespace backend.Migrations
                     b.Property<string>("NormalizedUserName")
                         .HasMaxLength(256)
                         .HasColumnType("character varying(256)");
+
+                    b.Property<string>("OtpCode")
+                        .HasColumnType("text");
+
+                    b.Property<DateTime?>("OtpExpiryTime")
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("PasswordHash")
                         .HasColumnType("text");
@@ -427,6 +439,8 @@ namespace backend.Migrations
                         .HasColumnType("uuid");
 
                     b.HasKey("ClientId");
+
+                    b.HasIndex("AppUserId");
 
                     b.ToTable("clients");
                 });
@@ -666,6 +680,8 @@ namespace backend.Migrations
 
                     b.HasKey("VeterinaireId");
 
+                    b.HasIndex("AppUserId");
+
                     b.ToTable("veterinaires");
                 });
 
@@ -757,6 +773,17 @@ namespace backend.Migrations
                     b.Navigation("Owner");
                 });
 
+            modelBuilder.Entity("backend.Models.Client", b =>
+                {
+                    b.HasOne("backend.Models.AppUser", "AppUser")
+                        .WithMany()
+                        .HasForeignKey("AppUserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("AppUser");
+                });
+
             modelBuilder.Entity("backend.Models.Commande", b =>
                 {
                     b.HasOne("backend.Models.AppUser", "Client")
@@ -776,7 +803,7 @@ namespace backend.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("backend.Models.AppUser", "Veterinaire")
+                    b.HasOne("backend.Models.Veterinaire", "Veterinaire")
                         .WithMany()
                         .HasForeignKey("VeterinaireId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -834,6 +861,17 @@ namespace backend.Migrations
                         .IsRequired();
 
                     b.Navigation("Animal");
+                });
+
+            modelBuilder.Entity("backend.Models.Veterinaire", b =>
+                {
+                    b.HasOne("backend.Models.AppUser", "AppUser")
+                        .WithMany()
+                        .HasForeignKey("AppUserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("AppUser");
                 });
 #pragma warning restore 612, 618
         }

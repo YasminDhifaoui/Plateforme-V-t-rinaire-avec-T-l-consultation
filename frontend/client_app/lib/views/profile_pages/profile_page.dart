@@ -3,19 +3,27 @@ import 'package:client_app/utils/base_url.dart';
 import 'package:client_app/views/profile_pages/profile_edit_page.dart';
 import 'package:flutter/material.dart';
 import 'package:client_app/services/profile_services/profile_service.dart';
-import 'package:intl/intl.dart'; // Import intl package
-import 'package:client_app/services/animal_services/animal_service.dart'; // Import AnimalService
-import 'package:client_app/models/animals_models/animal.dart'; // Import Animal model
+import 'package:intl/intl.dart';
+import 'package:client_app/services/animal_services/animal_service.dart';
+import 'package:client_app/models/animals_models/animal.dart';
+import 'package:client_app/services/auth_services/token_service.dart'; // <--- Import TokenService
 
-// Import the blue color constants from main.dart
-import 'package:client_app/main.dart';
+import 'package:client_app/main.dart'; // For kPrimaryBlue, kAccentBlue
 
-import '../Auth_pages/client_reset_password_page.dart';
+import 'package:client_app/views/profile_pages/client_change_password_page.dart'; // <--- Import ClientChangePasswordPage
 
 class ProfilePage extends StatefulWidget {
-  final String jwtToken;
+  // Remove the jwtToken parameter from here
+  // final String jwtToken; // REMOVED
 
-  const ProfilePage({Key? key, required this.jwtToken}) : super(key: key);
+  // Add an optional parameter to receive the success flag for password change
+  final bool passwordChangedSuccessfully;
+
+  const ProfilePage({
+    Key? key,
+    // Key? key, required this.jwtToken // REMOVED
+    this.passwordChangedSuccessfully = false, // Default to false
+  }) : super(key: key);
 
   @override
   State<ProfilePage> createState() => _ProfilePageState();
@@ -23,12 +31,13 @@ class ProfilePage extends StatefulWidget {
 
 class _ProfilePageState extends State<ProfilePage> {
   ProfileModel? _profile;
-  List<Animal> _animals = []; // To store the user's animals
+  List<Animal> _animals = [];
   bool isLoading = true;
   String errorMessage = '';
+  String? _jwtToken; // <--- Store token here
 
   late ProfileService profileService;
-  final AnimalService _animalService = AnimalService(); // Initialize AnimalService
+  final AnimalService _animalService = AnimalService();
 
   @override
   void initState() {
@@ -36,21 +45,56 @@ class _ProfilePageState extends State<ProfilePage> {
     profileService = ProfileService(
       profileUrl: "${BaseUrl.api}/api/client/profile/see-profile",
     );
-    _fetchProfileAndAnimals(); // Fetch both profile and animals
+    _initializeProfileAndAnimals(); // Call a new method to handle token retrieval
   }
 
-  Future<void> _fetchProfileAndAnimals() async {
+  // New method to handle token retrieval and initial data fetch
+  Future<void> _initializeProfileAndAnimals() async {
     setState(() {
       isLoading = true;
       errorMessage = '';
     });
+
     try {
-      final profileData = await profileService.fetchProfile(widget.jwtToken);
-      final animalsData = await _animalService.getAnimalsList(); // Fetch animals
+      _jwtToken = await TokenService.getToken(); // Retrieve token here
+      if (_jwtToken == null) {
+        throw Exception('Authentication token missing. Please log in.');
+      }
+      await _fetchProfileAndAnimals(); // Now call the fetch method
+
+      // Check if password was changed successfully and show dialog
+      if (widget.passwordChangedSuccessfully) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          _showPasswordChangedSuccessDialog();
+        });
+      }
+    } catch (e) {
+      setState(() {
+        errorMessage = 'Initialization Error: $e';
+        isLoading = false;
+      });
+      _showSnackBar('Initialization Error: $e', isSuccess: false);
+    }
+  }
+
+  // Modified fetch method to use the internally stored token
+  Future<void> _fetchProfileAndAnimals() async {
+    if (_jwtToken == null) {
+      setState(() {
+        errorMessage = 'JWT Token is not available. Please log in.';
+        isLoading = false;
+      });
+      return;
+    }
+
+    try {
+      final profileData = await profileService.fetchProfile(_jwtToken!);
+      // Assuming getAnimalsList also uses the TokenService internally or doesn't need a token
+      final animalsData = await _animalService.getAnimalsList();
 
       setState(() {
         _profile = profileData;
-        _animals = animalsData; // Assign fetched animals
+        _animals = animalsData;
         isLoading = false;
       });
     } catch (e) {
@@ -58,8 +102,62 @@ class _ProfilePageState extends State<ProfilePage> {
         errorMessage = 'Failed to load profile or animals: $e';
         isLoading = false;
       });
+      _showSnackBar('Failed to load profile or animals: $e', isSuccess: false);
     }
   }
+
+  // New method to show the password changed success dialog
+  void _showPasswordChangedSuccessDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+          title: Row(
+            children: [
+              Icon(Icons.check_circle_outline_rounded, color: kPrimaryBlue, size: 30),
+              SizedBox(width: 10),
+              Text(
+                'Success!',
+                style: Theme.of(context).textTheme.headlineSmall?.copyWith(color: kPrimaryBlue),
+              ),
+            ],
+          ),
+          content: Text(
+            'Your password has been changed successfully.',
+            style: Theme.of(context).textTheme.bodyLarge,
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: Text(
+                'OK',
+                style: Theme.of(context).textTheme.labelLarge?.copyWith(color: kPrimaryBlue),
+              ),
+              onPressed: () {
+                Navigator.of(context).pop(); // Close the dialog
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _showSnackBar(String message, {bool isSuccess = true}) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          message,
+          style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Colors.white),
+        ),
+        backgroundColor: isSuccess ? kPrimaryBlue : Colors.red.shade600,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+        margin: const EdgeInsets.all(10),
+      ),
+    );
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -67,23 +165,22 @@ class _ProfilePageState extends State<ProfilePage> {
 
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: kPrimaryBlue, // Use primary blue
-        foregroundColor: Colors.white, // White icons/text
+        backgroundColor: kPrimaryBlue,
+        foregroundColor: Colors.white,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_rounded), // Modern back arrow
+          icon: const Icon(Icons.arrow_back_ios_rounded),
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
-          'My Profile', // More personal title
+          'My Profile',
           style: textTheme.titleLarge?.copyWith(color: Colors.white),
         ),
-        centerTitle: true, // Center the title
-        elevation: 0, // No shadow
+        centerTitle: true,
+        elevation: 0,
       ),
       body: isLoading
           ? Center(
-        child: CircularProgressIndicator(
-            color: kPrimaryBlue), // Themed loading indicator
+        child: CircularProgressIndicator(color: kPrimaryBlue),
       )
           : errorMessage.isNotEmpty
           ? Center(
@@ -93,7 +190,7 @@ class _ProfilePageState extends State<ProfilePage> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Icon(
-                Icons.error_outline_rounded, // Error icon
+                Icons.error_outline_rounded,
                 color: Colors.red.shade400,
                 size: 60,
               ),
@@ -101,17 +198,15 @@ class _ProfilePageState extends State<ProfilePage> {
               Text(
                 errorMessage,
                 textAlign: TextAlign.center,
-                style: textTheme.bodyLarge
-                    ?.copyWith(color: Colors.red.shade700),
+                style: textTheme.bodyLarge?.copyWith(color: Colors.red.shade700),
               ),
               const SizedBox(height: 20),
               ElevatedButton(
-                onPressed: _fetchProfileAndAnimals, // Retry fetching the profile and animals
+                onPressed: _initializeProfileAndAnimals, // Retry initialization
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: kPrimaryBlue, // Themed button
+                  backgroundColor: kPrimaryBlue,
                   foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 30, vertical: 12),
+                  padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 12),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(8),
                   ),
@@ -126,40 +221,34 @@ class _ProfilePageState extends State<ProfilePage> {
           ? Center(
         child: Text(
           'No profile data available.',
-          style: textTheme.bodyLarge
-              ?.copyWith(color: Colors.black54),
+          style: textTheme.bodyLarge?.copyWith(color: Colors.black54),
         ),
       )
           : SingleChildScrollView(
-        padding: const EdgeInsets.all(20), // Slightly reduced overall padding
+        padding: const EdgeInsets.all(20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Card(
-              elevation: 10, // Increased elevation for more depth
+              elevation: 10,
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(20), // More rounded corners
+                borderRadius: BorderRadius.circular(20),
               ),
-              // Use a very light blue for the card background
               child: Padding(
-                padding: const EdgeInsets.all(28), // Increased padding inside the card
+                padding: const EdgeInsets.all(28),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Profile header: picture + username + email + phone
                     Row(
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
                         Container(
-                          width: 90, // Larger profile picture
+                          width: 90,
                           height: 90,
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
-                            border: Border.all(
-                                color: kAccentBlue,
-                                width: 3), // Thicker, accent blue border
+                            border: Border.all(color: kAccentBlue, width: 3),
                             boxShadow: const [
-                              // Subtle shadow for the image
                               BoxShadow(
                                 color: Colors.black26,
                                 blurRadius: 6,
@@ -171,8 +260,7 @@ class _ProfilePageState extends State<ProfilePage> {
                             child: Image.asset(
                               'assets/images/pet_owner.png',
                               fit: BoxFit.cover,
-                              errorBuilder:
-                                  (context, error, stackTrace) {
+                              errorBuilder: (context, error, stackTrace) {
                                 return Icon(
                                   Icons.account_circle,
                                   size: 90,
@@ -182,29 +270,26 @@ class _ProfilePageState extends State<ProfilePage> {
                             ),
                           ),
                         ),
-                        const SizedBox(width: 24), // Increased spacing
+                        const SizedBox(width: 24),
                         Expanded(
                           child: Column(
-                            crossAxisAlignment:
-                            CrossAxisAlignment.start,
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               Text(
                                 _profile!.userName,
-                                style: textTheme.headlineSmall
-                                    ?.copyWith(
-                                  // Use theme for username
+                                style: textTheme.headlineSmall?.copyWith(
                                   color: kPrimaryBlue,
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
-                              const SizedBox(height: 8), // Spacing
+                              const SizedBox(height: 8),
                               _contactInfoRow(
                                 Icons.email_outlined,
                                 _profile!.email,
                                 textTheme,
                               ),
-                              const SizedBox(height: 6), // Spacing
+                              const SizedBox(height: 6),
                               _contactInfoRow(
                                 Icons.phone_outlined,
                                 _profile!.phoneNumber,
@@ -215,43 +300,31 @@ class _ProfilePageState extends State<ProfilePage> {
                         ),
                       ],
                     ),
-
-                    const SizedBox(height: 40), // More spacing before personal info
-
+                    const SizedBox(height: 40),
                     Text(
                       'Personal Information',
                       style: textTheme.titleLarge?.copyWith(
-                        // Use theme for section title
                         color: Colors.black87,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                    const SizedBox(height: 20), // Spacing
-
-                    _infoRow(context, Icons.person_outline,
-                        'First Name', _profile!.firstName),
-                    _themedDivider(), // Custom divider
-                    _infoRow(context, Icons.person_outline,
-                        'Last Name', _profile!.lastName),
+                    const SizedBox(height: 20),
+                    _infoRow(context, Icons.person_outline, 'First Name', _profile!.firstName),
                     _themedDivider(),
-                    _infoRow(context, Icons.transgender,
-                        'Gender', _profile!.gender),
+                    _infoRow(context, Icons.person_outline, 'Last Name', _profile!.lastName),
                     _themedDivider(),
-                    _infoRow(context, Icons.cake_outlined,
-                        'Date of Birth', _profile!.birthDate),
+                    _infoRow(context, Icons.transgender, 'Gender', _profile!.gender),
                     _themedDivider(),
-                    _infoRow(context, Icons.home_outlined,
-                        'Address', _profile!.address),
+                    _infoRow(context, Icons.cake_outlined, 'Date of Birth', _profile!.birthDate),
                     _themedDivider(),
-                    _infoRow(context, Icons.markunread_mailbox_outlined,
-                        'Zip Code', _profile!.zipCode),
+                    _infoRow(context, Icons.home_outlined, 'Address', _profile!.address),
+                    _themedDivider(),
+                    _infoRow(context, Icons.markunread_mailbox_outlined, 'Zip Code', _profile!.zipCode),
                   ],
                 ),
               ),
             ),
             const SizedBox(height: 30),
-
-            // --- My Animals Section ---
             Text(
               'My Animals',
               style: textTheme.titleLarge?.copyWith(
@@ -265,20 +338,17 @@ class _ProfilePageState extends State<ProfilePage> {
               padding: const EdgeInsets.all(8.0),
               child: Text(
                 'No animals registered yet.',
-                style: textTheme.bodyLarge
-                    ?.copyWith(color: Colors.black54),
+                style: textTheme.bodyLarge?.copyWith(color: Colors.black54),
               ),
             )
                 : ListView.builder(
-              shrinkWrap: true, // Important for nested list views
-              physics:
-              const NeverScrollableScrollPhysics(), // Disable scrolling for inner list
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
               itemCount: _animals.length,
               itemBuilder: (context, index) {
                 final animal = _animals[index];
                 return Card(
-                  margin: const EdgeInsets.symmetric(
-                      vertical: 8.0, horizontal: 0),
+                  margin: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 0),
                   elevation: 4,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10),
@@ -286,13 +356,11 @@ class _ProfilePageState extends State<ProfilePage> {
                   child: Padding(
                     padding: const EdgeInsets.all(16.0),
                     child: Column(
-                      crossAxisAlignment:
-                      CrossAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
                           animal.name,
-                          style: textTheme.titleMedium
-                              ?.copyWith(
+                          style: textTheme.titleMedium?.copyWith(
                             fontWeight: FontWeight.bold,
                             color: kAccentBlue,
                           ),
@@ -308,78 +376,60 @@ class _ProfilePageState extends State<ProfilePage> {
                 );
               },
             ),
-            // --- End My Animals Section ---
-
-            const SizedBox(height: 40), // Spacing before button
+            const SizedBox(height: 40),
             Center(
               child: ElevatedButton(
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: kPrimaryBlue, // Themed button
+                  backgroundColor: kPrimaryBlue,
                   foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 50,
-                      vertical: 18), // Larger button
+                  padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 18),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12), // More rounded
+                    borderRadius: BorderRadius.circular(12),
                   ),
-                  elevation: 8, // More prominent shadow
-                  shadowColor: kPrimaryBlue.withOpacity(
-                      0.4), // Themed shadow
+                  elevation: 8,
+                  shadowColor: kPrimaryBlue.withOpacity(0.4),
+                ),
+                onPressed: () {
+                  if (_profile != null && _jwtToken != null) {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => ProfileEditPage(
+                          profile: _profile!,
+                          jwtToken: _jwtToken!, // Pass the internally retrieved token
+                        ),
+                      ),
+                    ).then((_) => _initializeProfileAndAnimals()); // Refresh after edit
+                  } else {
+                    _showSnackBar('Profile data or token not available for editing.', isSuccess: false);
+                  }
+                },
+                child: Text(
+                  'Edit Profile',
+                  style: textTheme.labelLarge?.copyWith(fontSize: 18),
+                ),
+              ),
+            ),
+            const SizedBox(height: 20),
+            Center(
+              child: ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: kAccentBlue,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 16),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  elevation: 6,
+                  shadowColor: kAccentBlue.withOpacity(0.4),
                 ),
                 onPressed: () {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => ProfileEditPage(
-                        profile: _profile!,
-                        jwtToken: widget.jwtToken,
-                      ),
+                      builder: (context) => const ClientChangePasswordPage(), // Navigate to the client change password page
                     ),
-                  ).then(
-                          (_) => _fetchProfileAndAnimals()); // Refresh profile AND animals after edit
-                },
-                child: Text(
-                  'Edit Profile',
-                  style: textTheme.labelLarge
-                      ?.copyWith(fontSize: 18), // Use theme and adjust size
-                ),
-              ),
-            ),
-
-            // Inside your _ProfilePageState build method, within the main Column:
-
-            const SizedBox(height: 20), // Add some spacing
-            Center(
-              child: ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: kAccentBlue, // Use accent blue for this action
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 40, vertical: 16), // Slightly smaller than edit, but still prominent
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  elevation: 6, // Subtle shadow
-                  shadowColor: kAccentBlue.withOpacity(0.4),
-                ),
-                onPressed: () {
-                  // Ensure _profile and widget.jwtToken are not null before navigating
-                  if (_profile != null && widget.jwtToken.isNotEmpty) {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => ClientResetPasswordPage(
-                          email: _profile!.email, // Pass the user's email
-                          token: widget.jwtToken, // Pass the JWT token
-                        ),
-                      ),
-                    );
-                  } else {
-                    // Optionally show a snackbar if data is missing
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('Profile data or token not available for password reset.')),
-                    );
-                  }
+                  );
                 },
                 child: Text(
                   'Change Password',
@@ -387,19 +437,17 @@ class _ProfilePageState extends State<ProfilePage> {
                 ),
               ),
             ),
-            const SizedBox(height: 20), // Spacing after the button
-
+            const SizedBox(height: 20),
           ],
         ),
       ),
     );
   }
 
-  // Helper for contact info rows (email/phone)
   Widget _contactInfoRow(IconData icon, String value, TextTheme textTheme) {
     return Row(
       children: [
-        Icon(icon, size: 20, color: kAccentBlue), // Accent blue icon
+        Icon(icon, size: 20, color: kAccentBlue),
         const SizedBox(width: 8),
         Flexible(
           child: Text(
@@ -414,9 +462,7 @@ class _ProfilePageState extends State<ProfilePage> {
     );
   }
 
-  // Helper for general info rows
-  Widget _infoRow(
-      BuildContext context, IconData icon, String label, String value) {
+  Widget _infoRow(BuildContext context, IconData icon, String label, String value) {
     final TextTheme textTheme = Theme.of(context).textTheme;
     value = value.isEmpty ? 'Not provided' : value;
 
@@ -430,12 +476,12 @@ class _ProfilePageState extends State<ProfilePage> {
     }
 
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0), // Padding around each row
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(icon, color: kAccentBlue, size: 24), // Themed icon, slightly larger
-          const SizedBox(width: 20), // Increased spacing
+          Icon(icon, color: kAccentBlue, size: 24),
+          const SizedBox(width: 20),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -443,7 +489,6 @@ class _ProfilePageState extends State<ProfilePage> {
                 Text(
                   label,
                   style: textTheme.titleMedium?.copyWith(
-                    // Use theme for label
                     color: kPrimaryBlue,
                     fontWeight: FontWeight.w600,
                   ),
@@ -452,7 +497,6 @@ class _ProfilePageState extends State<ProfilePage> {
                 Text(
                   value,
                   style: textTheme.bodyLarge?.copyWith(
-                    // Use theme for value
                     color: Colors.black87,
                   ),
                 ),
@@ -464,9 +508,7 @@ class _ProfilePageState extends State<ProfilePage> {
     );
   }
 
-  // Helper for animal detail rows within the animal card
-  Widget _buildAnimalDetailRow(
-      TextTheme textTheme, IconData icon, String label, String value) {
+  Widget _buildAnimalDetailRow(TextTheme textTheme, IconData icon, String label, String value) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4.0),
       child: Row(
@@ -489,14 +531,13 @@ class _ProfilePageState extends State<ProfilePage> {
     );
   }
 
-  // Custom themed divider
   Widget _themedDivider() {
     return const Padding(
-      padding: EdgeInsets.symmetric(vertical: 10.0), // Spacing around divider
+      padding: EdgeInsets.symmetric(vertical: 10.0),
       child: Divider(
-        height: 1, // Actual height of the line
-        thickness: 0.8, // Thickness of the line
-        color: kAccentBlue, // Themed color for the divider
+        height: 1,
+        thickness: 0.8,
+        color: kAccentBlue,
       ),
     );
   }

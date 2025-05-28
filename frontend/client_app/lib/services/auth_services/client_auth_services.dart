@@ -5,7 +5,9 @@ import 'package:client_app/utils/base_url.dart';
 import 'package:http/http.dart' as http;
 import '../../models/auth_models/client_register.dart';
 import '../../models/auth_models/client_login.dart';
+import '../../models/auth_models/client_reset_password.dart';
 import '../../models/auth_models/client_verify_login.dart';
+import '../../models/auth_models/client_verify_otp_code.dart';
 
 class ApiService {
   static final String baseUrl = "${BaseUrl.api}/api/ClientAuthentification";
@@ -192,27 +194,57 @@ class ApiService {
       return {"success": false, "message": "Error: $e"};
     }
   }
+  Future<Map<String, dynamic>> verifyOtpCode(
+      ClientVerifyOtpCodeDto verifyOtpDto) async {
+    final url = Uri.parse("$baseUrl/verify-otp-code");
+
+    try {
+      final response = await http
+          .post(
+        url,
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode(verifyOtpDto.toJson()),
+      )
+          .timeout(const Duration(seconds: 10));
+
+      if (response.body.isEmpty) {
+        return {"success": false, "message": "Empty response from server"};
+      }
+
+      final data = jsonDecode(response.body);
+
+      if (response.statusCode == 200) {
+        return {
+          "success": true,
+          "message": data["message"] ?? "Verification code is valid."
+        };
+      } else {
+        return {
+          "success": false,
+          "message": data["message"] ?? "Invalid or expired verification code."
+        };
+      }
+    } catch (e, stacktrace) {
+      print('Error during verifyOtpCode: $e');
+      print('Stacktrace: $stacktrace');
+      return {"success": false, "message": "Error: $e"};
+    }
+  }
+
 
   /// Reset password
-  Future<Map<String, dynamic>> resetPassword({
-    required String email,
-    required String token,
-    required String newPassword,
-  }) async {
+  Future<Map<String, dynamic>> resetPassword(
+      ClientResetPasswordDto resetDto) async {
     final url = Uri.parse("$baseUrl/reset-password");
 
     try {
       final response = await http
           .post(
-            url,
-            headers: {"Content-Type": "application/json"},
-            body: jsonEncode({
-              "email": email,
-              "token": token,
-              "newPassword": newPassword,
-            }),
-          )
-          .timeout(const Duration(seconds: 10));
+        url,
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode(resetDto.toJson()), // Uses the new DTO
+      )
+          .timeout(const Duration(seconds: 20));
 
       if (response.body.isEmpty) {
         return {"success": false, "message": "Empty response from server"};

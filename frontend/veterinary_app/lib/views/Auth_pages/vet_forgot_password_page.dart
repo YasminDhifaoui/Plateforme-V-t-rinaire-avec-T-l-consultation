@@ -1,21 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:veterinary_app/models/auth_models/vet_forget_password.dart';
-import 'package:veterinary_app/services/auth_services/vet_auth_services.dart';
+import 'package:veterinary_app/views/Auth_pages/vet_login_page.dart';
+import 'package:veterinary_app/views/Auth_pages/vet_verify_otp_code_page.dart';
 import 'package:veterinary_app/views/components/login_navbar.dart'; // Keeping LoginNavbar as it was originally
-import 'vet_login_page.dart';
 
 // Import kPrimaryGreen and kAccentGreen from main.dart to ensure theme consistency
-import 'package:veterinary_app/main.dart'; // Adjust path if using a separate constants.dart file
+import 'package:veterinary_app/main.dart';
+
+import '../../services/auth_services/vet_auth_services.dart'; // Adjust path if using a separate constants.dart file
 
 class VetForgotPasswordPage extends StatefulWidget {
   const VetForgotPasswordPage({super.key});
 
   @override
   State<VetForgotPasswordPage> createState() =>
-      _ClientForgotPasswordPageState(); // Original state class name
+      _VetForgotPasswordPageState(); // Corrected state class name
 }
 
-class _ClientForgotPasswordPageState extends State<VetForgotPasswordPage> {
+class _VetForgotPasswordPageState extends State<VetForgotPasswordPage> { // Corrected state class name
   final _formKey = GlobalKey<FormState>();
   final TextEditingController emailController = TextEditingController();
 
@@ -64,14 +66,30 @@ class _ClientForgotPasswordPageState extends State<VetForgotPasswordPage> {
       setState(() {
         responseMessage = result["message"] ?? "Unknown response";
       });
-      _showSnackBar(responseMessage, isSuccess: responseMessage.toLowerCase().contains('success'));
-    } catch (e) {
+
+      // Check for success and navigate to OTP page
+      if (result["success"] == true) {
+        _showSnackBar(responseMessage, isSuccess: true);
+        // Redirect to OTP verification page on success
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => VetVerifyOtpCodePage(
+              email: emailController.text.trim(), // Pass the email to the OTP page
+            ),
+          ),
+        );
+      } else {
+        _showSnackBar(responseMessage, isSuccess: false);
+      }
+    } catch (e, stacktrace) { // Added stacktrace for better debugging
       setState(() {
         responseMessage =
         'Failed to send reset password email: ${e.toString()}';
       });
       _showSnackBar(responseMessage, isSuccess: false);
       print('Forgot password error: $e'); // For debugging
+      print('Stacktrace: $stacktrace'); // For debugging
     } finally {
       setState(() {
         isLoading = false;
@@ -94,7 +112,7 @@ class _ClientForgotPasswordPageState extends State<VetForgotPasswordPage> {
       appBar: AppBar(
         // AppBar styling is handled by AppBarTheme in main.dart
         title: Text(
-          '',
+          'Forgot Password', // Added clear title
           style: textTheme.titleLarge?.copyWith(color: Colors.white),
         ),
         leading: IconButton(
@@ -102,7 +120,8 @@ class _ClientForgotPasswordPageState extends State<VetForgotPasswordPage> {
           onPressed: () => Navigator.pop(context),
           tooltip: 'Back',
         ),
-      ),      backgroundColor: Theme.of(context).colorScheme.background, // Use themed background
+      ),
+      backgroundColor: Theme.of(context).colorScheme.background, // Use themed background
       body: Center(
         child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 24.0), // Adjusted vertical padding
@@ -110,7 +129,7 @@ class _ClientForgotPasswordPageState extends State<VetForgotPasswordPage> {
             padding: const EdgeInsets.all(30), // Increased inner padding
             decoration: BoxDecoration(
               color: Theme.of(context).cardTheme.color, // Use themed card color (white)
-              //borderRadius: Theme.of(context).cardTheme.shape?.borderRadius, // Use themed card border radius
+              borderRadius: BorderRadius.circular(15), // Consistent rounded corners
               boxShadow: [
                 BoxShadow(
                   color: Colors.black.withOpacity(0.1), // Subtle shadow for depth
@@ -140,7 +159,7 @@ class _ClientForgotPasswordPageState extends State<VetForgotPasswordPage> {
                   ),
                   const SizedBox(height: 10),
                   Text(
-                    'Enter your email address below to receive a password reset link.',
+                    'Enter your email address below to receive a password reset code.', // Updated text to 'code'
                     style: textTheme.bodyMedium?.copyWith(color: Colors.black54),
                     textAlign: TextAlign.center,
                   ),
@@ -152,7 +171,16 @@ class _ClientForgotPasswordPageState extends State<VetForgotPasswordPage> {
                     decoration: InputDecoration(
                       labelText: 'Email Address',
                       prefixIcon: Icon(Icons.email_outlined, color: kAccentGreen), // Themed icon
-                      // Input decoration handled by InputDecorationTheme in main.dart
+                      border: OutlineInputBorder( // Explicitly define border for consistency
+                        borderRadius: BorderRadius.circular(10),
+                        borderSide: BorderSide(color: kPrimaryGreen.withOpacity(0.6)),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(10),
+                        borderSide: const BorderSide(color: kPrimaryGreen, width: 2),
+                      ),
+                      filled: true,
+                      fillColor: Colors.grey.shade100,
                     ),
                     validator: _validateEmail,
                   ),
@@ -165,10 +193,18 @@ class _ClientForgotPasswordPageState extends State<VetForgotPasswordPage> {
                       onPressed: submitForgotPassword,
                       icon: const Icon(Icons.send_rounded, color: Colors.white), // Modern send icon
                       label: Text(
-                        'Send Reset Link',
+                        'Send Reset Code', // Updated button text to 'Code'
                         style: textTheme.labelLarge, // Use themed labelLarge for button text
                       ),
-                      // Button styling is handled by ElevatedButtonThemeData in main.dart
+                      style: ElevatedButton.styleFrom( // Explicitly define button style for consistency
+                        backgroundColor: kPrimaryGreen,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        elevation: 6,
+                      ),
                     ),
                   ),
                   const SizedBox(height: 20),

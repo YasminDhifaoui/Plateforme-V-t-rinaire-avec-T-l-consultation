@@ -2,10 +2,12 @@ import 'package:client_app/views/components/login_navbar.dart'; // Keep this imp
 import 'package:flutter/material.dart';
 import 'package:client_app/models/auth_models/client_forget_password.dart';
 import 'package:client_app/services/auth_services/client_auth_services.dart';
-import 'client_login_page.dart';
 
 // Import your blue color constants. Ensure these are correctly defined.
-import 'package:client_app/main.dart'; // Adjust path if using a separate constants.dart
+import 'package:client_app/main.dart';
+
+import 'client_login_page.dart';
+import 'client_verify_otp_code_page.dart'; // Adjust path if using a separate constants.dart
 
 class ClientForgotPasswordPage extends StatefulWidget {
   const ClientForgotPasswordPage({super.key});
@@ -65,14 +67,30 @@ class _ClientForgotPasswordPageState extends State<ClientForgotPasswordPage> {
       setState(() {
         responseMessage = result["message"] ?? "Unknown response";
       });
-      _showSnackBar(responseMessage, isSuccess: responseMessage.toLowerCase().contains('success'));
-    } catch (e) {
+
+      // Check for success and navigate
+      if (result["success"] == true) {
+        _showSnackBar(responseMessage, isSuccess: true);
+        // Redirect to OTP verification page on success
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => ClientVerifyOtpCodePage(
+              email: emailController.text.trim(), // Pass the email to the OTP page
+            ),
+          ),
+        );
+      } else {
+        _showSnackBar(responseMessage, isSuccess: false);
+      }
+    } catch (e, stacktrace) { // Added stacktrace for better debugging
       setState(() {
         responseMessage =
         'Failed to send reset password email: ${e.toString()}';
       });
       _showSnackBar(responseMessage, isSuccess: false);
       print('Forgot password error: $e'); // For debugging
+      print('Stacktrace: $stacktrace'); // For debugging
     } finally {
       setState(() {
         isLoading = false;
@@ -138,7 +156,7 @@ class _ClientForgotPasswordPageState extends State<ClientForgotPasswordPage> {
                   ),
                   const SizedBox(height: 20),
                   Text(
-                    'Enter your email address below to receive a password reset link.',
+                    'Enter your email address below to receive a password reset code.', // Changed 'link' to 'code' for OTP flow
                     style: textTheme.bodyMedium?.copyWith(color: Colors.black54),
                     textAlign: TextAlign.center,
                   ),
@@ -173,7 +191,7 @@ class _ClientForgotPasswordPageState extends State<ClientForgotPasswordPage> {
                       onPressed: submitForgotPassword,
                       icon: const Icon(Icons.send_rounded, color: Colors.white), // Modern send icon
                       label: Text(
-                        'Send Reset Link',
+                        'Send Reset Code', // Changed 'Link' to 'Code'
                         style: textTheme.labelLarge,
                       ),
                       style: ElevatedButton.styleFrom(

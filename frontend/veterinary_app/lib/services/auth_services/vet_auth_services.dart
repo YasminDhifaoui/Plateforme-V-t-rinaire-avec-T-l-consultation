@@ -7,6 +7,8 @@ import 'package:veterinary_app/utils/base_url.dart';
 
 import '../../models/auth_models/vet_register.dart';
 import '../../models/auth_models/vet_login.dart';
+import '../../models/auth_models/vet_reset_password.dart';
+import '../../models/auth_models/vet_verify_otp_code.dart';
 
 class ApiService {
   static final String baseUrl = "${BaseUrl.api}/api/VetAuthentification";
@@ -191,26 +193,55 @@ class ApiService {
       return {"success": false, "message": "Error: $e"};
     }
   }
+  Future<Map<String, dynamic>> verifyOtpCode(
+      VetVerifyOtpCodeDto verifyOtpDto) async { // Using VetVerifyOtpCodeDto
+    final url = Uri.parse("$baseUrl/verify-otp-code");
+
+    try {
+      final response = await http
+          .post(
+        url,
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode(verifyOtpDto.toJson()),
+      )
+          .timeout(const Duration(seconds: 10));
+
+      if (response.body.isEmpty) {
+        return {"success": false, "message": "Empty response from server"};
+      }
+
+      final data = jsonDecode(response.body);
+
+      if (response.statusCode == 200) {
+        return {
+          "success": true,
+          "message": data["message"] ?? "Verification code is valid."
+        };
+      } else {
+        return {
+          "success": false,
+          "message": data["message"] ?? "Invalid or expired verification code."
+        };
+      }
+    } catch (e, stacktrace) {
+      print('Error during verifyOtpCode (Vet): $e');
+      print('Stacktrace: $stacktrace');
+      return {"success": false, "message": "Error: $e"};
+    }
+  }
 
   /// Reset password
-  Future<Map<String, dynamic>> resetPassword({
-    required String email,
-    required String token,
-    required String newPassword,
-  }) async {
+  Future<Map<String, dynamic>> resetPassword(
+      VetResetPasswordDto resetDto) async { // Using VetResetPasswordDto
     final url = Uri.parse("$baseUrl/reset-password");
 
     try {
       final response = await http
           .post(
-            url,
-            headers: {"Content-Type": "application/json"},
-            body: jsonEncode({
-              "email": email,
-              "token": token,
-              "newPassword": newPassword,
-            }),
-          )
+        url,
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode(resetDto.toJson()), // Uses the new DTO
+      )
           .timeout(const Duration(seconds: 10));
 
       if (response.body.isEmpty) {
