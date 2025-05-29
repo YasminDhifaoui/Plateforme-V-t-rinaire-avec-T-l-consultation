@@ -228,7 +228,7 @@ class _RendezvousPageState extends State<RendezvousPage> {
               Divider(height: 1, thickness: 1, color: Colors.blueGrey.shade100), // Themed divider
               const SizedBox(height: 15),
 
-              _buildInfoRow(textTheme, Icons.person_pin, 'Vétérinaire', rv.vetName),
+              _buildInfoRow(textTheme, Icons.person_pin, 'Veterinary', rv.vetName),
               const SizedBox(height: 8),
               _buildInfoRow(textTheme, Icons.pets_rounded, 'Animal', rv.animalName),
               const SizedBox(height: 8),

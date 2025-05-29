@@ -2,11 +2,56 @@
 <html>
 <head>
     <title>{EmailSubject}</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f6f8fa;
+            margin: 0;
+            padding: 0;
+        }
+
+        .email-wrapper {
+            max-width: 600px;
+            margin: 40px auto;
+            background-color: #ffffff;
+            padding: 30px;
+            border-radius: 8px;
+            border: 1px solid #e0e0e0;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+        }
+
+            .email-wrapper p {
+                font-size: 16px;
+                line-height: 1.6;
+                color: #333333;
+            }
+
+            .email-wrapper strong {
+                color: #2c3e50;
+            }
+
+            .email-wrapper a {
+                display: inline-block;
+                margin-top: 20px;
+                padding: 12px 20px;
+                background-color: #007BFF;
+                color: #ffffff !important;
+                text-decoration: none;
+                border-radius: 4px;
+                font-weight: bold;
+            }
+
+                .email-wrapper a:hover {
+                    background-color: #0056b3;
+                }
+    </style>
 </head>
 <body>
-    <p>Hello, <strong>{UserName}</strong>,</p>
-    <p>Your email has been confirmed successfully</p>
-    <p>You can login via this link :</p>
-    <a href="{LoginUrl}">Login</a>
+    <div class="email-wrapper">
+        <p>Hello, <strong>{UserName}</strong>,</p>
+        <p>Your email has been confirmed successfully</p>
+        <!--<p>You can login via this link :</p>
+        <a href="{LoginUrl}">Login</a>-->
+    </div>
 </body>
 </html>

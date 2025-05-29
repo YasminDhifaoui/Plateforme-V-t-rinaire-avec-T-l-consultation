@@ -9,6 +9,5 @@
         public string Notes { get; set; }
         public Guid ClientId { get; set; }
         public IFormFile? Document { get; set; }
-       // public Guid RendezVousID { get; set; }
     }
 }

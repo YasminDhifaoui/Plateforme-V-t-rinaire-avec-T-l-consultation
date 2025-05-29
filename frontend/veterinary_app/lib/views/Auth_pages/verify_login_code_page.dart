@@ -4,6 +4,7 @@ import 'package:veterinary_app/models/auth_models/vet_verify_login.dart';
 import 'package:veterinary_app/services/auth_services/vet_auth_services.dart';
 import 'package:veterinary_app/services/auth_services/token_service.dart';
 // Removed unused LoginNavbar import as per your specified AppBar structure
+import '../../utils/app_colors.dart';
 import '../home_page.dart'; // Still needed as you navigate to it from here
 
 // Import kPrimaryGreen and kAccentGreen from main.dart to ensure theme consistency

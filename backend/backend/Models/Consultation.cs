@@ -30,11 +30,9 @@ namespace backend.Models
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
 
-
         [ForeignKey("Veterinaire")]
         public Guid VeterinaireId { get; set; }
         public Veterinaire Veterinaire { get; set; }
-
 
         [ForeignKey("Client")]
         public Guid ClientId { get; set; }

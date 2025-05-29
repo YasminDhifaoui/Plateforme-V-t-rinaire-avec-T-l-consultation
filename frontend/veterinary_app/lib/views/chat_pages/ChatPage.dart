@@ -6,6 +6,7 @@ import 'package:veterinary_app/utils/base_url.dart';
 import '../../models/chat_models/chat_model.dart';
 import '../../services/notification_handle/message_notifier.dart'; // Keep if used for unread count
 import '../../services/chat_services/chat_signal_service.dart';
+import '../../utils/app_colors.dart';
 import '../video_call_pages/video_call_screen.dart';
 
 // Import kPrimaryGreen and kAccentGreen from main.dart to ensure theme consistency

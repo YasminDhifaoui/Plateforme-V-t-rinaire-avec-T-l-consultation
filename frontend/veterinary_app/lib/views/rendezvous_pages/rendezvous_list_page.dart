@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:veterinary_app/models/rendezvous_models/rendezvous_model.dart';
 import 'package:veterinary_app/services/rendezvous_services/rendezvous_service.dart';
+import '../../utils/app_colors.dart';
 import '../components/home_navbar.dart';
 
 // Import kPrimaryGreen and kAccentGreen from main.dart to ensure theme consistency

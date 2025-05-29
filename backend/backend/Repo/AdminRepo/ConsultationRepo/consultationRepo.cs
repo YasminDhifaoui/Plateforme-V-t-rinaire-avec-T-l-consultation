@@ -69,7 +69,7 @@ namespace backend.Repo.AdminRepo.ConsultationRepo
                 CreatedAt = consultationDate,
                 UpdatedAt = consultationDate
             };
-
+            Console.WriteLine($"DEBUG: VeterinaireId being inserted into Consultation: {dto.VetId}");
             await _context.Consultations.AddAsync(consultation);
             await saveChanges();
             return consultation;

@@ -160,6 +160,7 @@ class _ConsultationListPageState extends State<ConsultationListPage> {
         allergies: '',
         anttecedentsmedicaux: '',
         ownerId: '',
+        ownerUsername: '',
       ),
     );
 
@@ -347,7 +348,52 @@ class _ConsultationListPageState extends State<ConsultationListPage> {
       ),
     );
   }
+  Future<void> _confirmDeleteConsultation(String consultationId) async {
+    final bool? confirm = await showDialog<bool>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Confirm Deletion'),
+          content: const Text('Are you sure you want to delete this consultation? This action cannot be undone.'),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(false), // User cancels
+              child: const Text('Cancel', style: TextStyle(color: Colors.grey)),
+            ),
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(true), // User confirms
+              child: const Text('Delete', style: TextStyle(color: Colors.red)),
+            ),
+          ],
+        );
+      },
+    );
 
+    if (confirm == true) {
+      // User confirmed, proceed with deletion
+      await _deleteConsultation(consultationId);
+    }
+  }
+
+
+
+  Future<void> _deleteConsultation(String consultationId) async {
+    try {
+      // Show a loading indicator if desired
+      _showSnackBar('Deleting consultation...', isSuccess: true); // Green for "in progress"
+
+      await ConsultationService.deleteConsultation(consultationId, widget.token);
+
+      // After successful deletion, refresh the list
+      setState(() {
+        _consultations = _fetchAndSortAndFilterConsultations();
+      });
+
+      _showSnackBar('Consultation deleted successfully!', isSuccess: true);
+    } catch (e) {
+      _showSnackBar('Failed to delete consultation: $e', isSuccess: false);
+    }
+  }
   // Helper for consistent info rows in the client dialog
   Widget _buildClientInfoRow(
       TextTheme textTheme, IconData icon, String label, String value) {
@@ -839,6 +885,11 @@ class _ConsultationListPageState extends State<ConsultationListPage> {
             minimumSize: Size.zero,
             tapTargetSize: MaterialTapTargetSize.shrinkWrap,
           ),
+        ),
+        IconButton(
+          icon: const Icon(Icons.delete, color: Colors.red), // Use red for delete
+          tooltip: 'Delete Consultation',
+          onPressed: () => _confirmDeleteConsultation(consult.id), // Call the new confirmation method
         ),
         const SizedBox(width: 10),
         TextButton.icon(

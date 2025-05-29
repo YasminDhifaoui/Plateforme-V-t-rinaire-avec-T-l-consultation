@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../models/conv_models/conv_model.dart';
 import '../../services/conv_services/conv_service.dart';
+import '../../utils/app_colors.dart';
 import '../chat_pages/ChatPage.dart';
 
 // Import kPrimaryGreen and kAccentGreen from main.dart to ensure theme consistency
