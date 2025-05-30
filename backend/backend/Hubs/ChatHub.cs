@@ -4,7 +4,7 @@ using backend.Models;
 using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc; // Required for HubException
 
 [Authorize]
 public class ChatHub : Hub
@@ -12,7 +12,7 @@ public class ChatHub : Hub
     private readonly AppDbContext _context;
 
     public ChatHub(AppDbContext context)
-    { 
+    {
         _context = context;
     }
 
@@ -40,7 +40,8 @@ public class ChatHub : Hub
         await base.OnDisconnectedAsync(exception);
     }
 
-    public async Task SendMessage(Guid receiverId, string message)
+    // Modified SendMessage to accept optional file parameters
+    public async Task SendMessage(Guid receiverId, string? message, string? fileUrl = null, string? fileName = null, string? fileType = null)
     {
         Console.WriteLine("SendMessage called");
 
@@ -58,12 +59,21 @@ public class ChatHub : Hub
             throw new HubException("Receiver not found");
         }
 
+        // Validate that either a text message or file data is provided
+        if (string.IsNullOrEmpty(message) && string.IsNullOrEmpty(fileUrl))
+        {
+            throw new HubException("Message or file must be provided.");
+        }
+
         var chatMessage = new ChatMessage
         {
             Id = Guid.NewGuid(),
             SenderId = senderId,
             ReceiverId = receiverId,
-            Message = message,
+            Message = message, // This will be null if only a file is sent
+            FileUrl = fileUrl,
+            FileName = fileName,
+            FileType = fileType,
             SentDate = DateTime.UtcNow
         };
 
@@ -76,16 +86,20 @@ public class ChatHub : Hub
             throw new HubException("Sender not found");
         }
 
+        // Construct the message object to send to clients, including file details
         var messageToSend = new
         {
             SenderId = senderId,
             SenderUsername = sender.UserName,
             Message = message,
+            FileUrl = fileUrl,
+            FileName = fileName,
+            FileType = fileType,
             SentAt = chatMessage.SentDate
         };
 
+        // Send the message to both sender and receiver groups
         await Clients.Group(receiverId.ToString()).SendAsync("ReceiveMessage", messageToSend);
         await Clients.Group(senderId.ToString()).SendAsync("ReceiveMessage", messageToSend);
     }
-
 }

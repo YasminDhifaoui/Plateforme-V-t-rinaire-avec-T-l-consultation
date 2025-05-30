@@ -1,14 +1,17 @@
 import 'dart:convert';
-import 'package:client_app/utils/base_url.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
+import '../../main.dart';
 import '../../models/chat_models/chat_model.dart';
 import '../../services/chat_services/chat_signal_service.dart';
+import '../../utils/base_url.dart';
 import '../video_call_pages/video_call_screen.dart';
 
-// Import your blue color constants. Ensure these are correctly defined.
-import 'package:client_app/main.dart'; // Adjust path if using a separate constants.dart
+// For file picking - changed to file_selector
+import 'package:file_selector/file_selector.dart';
+// For opening URLs (e.g., PDFs in browser)
+import 'package:url_launcher/url_launcher.dart';
 
 class ChatPage extends StatefulWidget {
   final String token;
@@ -29,9 +32,9 @@ class ChatPage extends StatefulWidget {
 class _ChatPageState extends State<ChatPage> {
   final TextEditingController _controller = TextEditingController();
   final ScrollController _scrollController = ScrollController();
+  final SignalService _signalService = SignalService();
 
   List<ChatMessage> _messages = [];
-  final SignalService _signalService = SignalService();
 
   String? _currentUserId;
   String? _currentUsername;
@@ -42,22 +45,29 @@ class _ChatPageState extends State<ChatPage> {
     _extractTokenDetails(widget.token);
     _signalService.connect(widget.token);
 
-    _signalService.onMessageReceived = (from, message) {
-      // Check if the sender is the current user (based on username from token)
-      // This prevents duplicating messages sent by self and received via SignalR
+    // Update onMessageReceived to handle new file parameters
+    _signalService.onMessageReceived = (from, message, fileUrl, fileName, fileType) {
+      // This check prevents duplicating messages sent by self and received via SignalR
+      // It compares the 'from' (senderUsername) with the current user's username
       if (from.trim().toLowerCase() == _currentUsername?.trim().toLowerCase()) {
         return;
       }
 
       setState(() {
-        _messages.add(ChatMessage(
-          senderName: _getDisplayName(from),
-          text: message,
-          isSender: false,
-          sentAt: DateTime.now(),
-        ));
-        _scrollToBottom();
+        _messages.add(
+          ChatMessage(
+            senderName: _getDisplayName(from),
+            text: message,
+            isSender: false,
+            sentAt: DateTime.now(),
+            fileUrl: fileUrl,
+            fileName: fileName,
+            fileType: fileType,
+          ),
+        );
       });
+
+      _scrollToBottom();
     };
 
     _fetchMessages();
@@ -72,68 +82,169 @@ class _ChatPageState extends State<ChatPage> {
       final payloadString = utf8.decode(base64Url.decode(payloadBase64));
       final decoded = json.decode(payloadString);
 
-      _currentUserId = decoded['Id']?.toString() ?? '';
-      _currentUsername = decoded['sub']?.toString() ?? '';
+      _currentUserId = decoded['Id']?.toString();
+      _currentUsername = decoded['sub']?.toString();
     } catch (e) {
       print("Error decoding token: $e");
     }
   }
 
   Future<void> _fetchMessages() async {
-    // Show a loading indicator or handle state if needed
-    // For now, directly fetching and updating
     try {
       final response = await http.get(
         Uri.parse(
-            '${BaseUrl.api}/api/chat/history/$_currentUserId/${widget.receiverId}'),
+          '${BaseUrl.api}/api/chat/history/$_currentUserId/${widget.receiverId}',
+        ),
         headers: {'Authorization': 'Bearer ${widget.token}'},
       );
 
       if (response.statusCode == 200) {
         setState(() {
           _messages = ChatMessage.chatMessagesFromJson(
-              response.body, _currentUserId ?? '');
-          _scrollToBottom();
+            response.body,
+            _currentUserId ?? '',
+          );
         });
+        _scrollToBottom();
       } else {
         print('Failed to fetch messages: ${response.statusCode}');
-        // Optionally show a SnackBar for error
         _showSnackBar('Failed to load chat history.', isSuccess: false);
       }
     } catch (e) {
       print('Error fetching messages: $e');
-      _showSnackBar('Network error. Could not load chat history.',
-          isSuccess: false);
+      _showSnackBar('Network error. Could not load chat history.', isSuccess: false);
     }
   }
 
-  String _getDisplayName(String senderId) {
-    // Assuming senderId from SignalR is the username
-    if (senderId.trim().toLowerCase() == widget.receiverUsername.trim().toLowerCase()) {
+  String _getDisplayName(String senderUsername) {
+    // Assuming senderUsername from SignalR is the username
+    if (senderUsername.trim().toLowerCase() == widget.receiverUsername.trim().toLowerCase()) {
       return widget.receiverUsername; // Display receiver's actual username
-    } else if (senderId.trim().toLowerCase() == _currentUsername?.trim().toLowerCase()) {
+    } else if (senderUsername.trim().toLowerCase() == _currentUsername?.trim().toLowerCase()) {
       return "You"; // Display "You" for current user's messages
     } else {
-      return senderId; // Fallback
+      return senderUsername; // Fallback
     }
   }
 
+  // Method to send a text message
   void _sendMessage(String message) {
-    final receiverId = widget.receiverId;
+    if (_currentUserId == null) {
+      _showSnackBar('User not authenticated. Cannot send message.', isSuccess: false);
+      return;
+    }
+    if (message.trim().isEmpty) return; // Don't send empty messages
 
-    _signalService.sendMessage(_currentUserId!, receiverId, message);
+    _signalService.sendMessage(widget.receiverId, message);
 
     setState(() {
-      _messages.add(ChatMessage(
-        senderName: "You", // Display "You" for self-sent messages
-        text: message,
-        isSender: true,
-        sentAt: DateTime.now(),
-      ));
-      _scrollToBottom();
+      _messages.add(
+        ChatMessage(
+          senderName: "You", // Display "You" for self-sent messages
+          text: message,
+          isSender: true,
+          sentAt: DateTime.now(),
+        ),
+      );
     });
 
     _controller.clear();
+    _scrollToBottom();
+  }
+
+  // New method to pick and send a file using file_selector
+  Future<void> _pickAndSendFile() async {
+    if (_currentUserId == null) {
+      _showSnackBar('User not authenticated. Cannot send file.', isSuccess: false);
+      return;
+    }
+
+    // Define allowed file types for file_selector
+    const XTypeGroup fileTypeGroup = XTypeGroup(
+      label: 'Files',
+      extensions: <String>['jpg', 'jpeg', 'png', 'gif', 'pdf', 'doc', 'docx', 'txt'],
+    );
+
+    // Use openFile from file_selector
+    final XFile? file = await openFile(acceptedTypeGroups: <XTypeGroup>[fileTypeGroup]);
+
+    if (file != null) {
+      String filePath = file.path;
+      String fileName = file.name;
+      String fileExtension = file.name.split('.').last.toLowerCase(); // Extract extension from name
+
+      _showSnackBar('Uploading file...', isSuccess: true); // Inform user about upload
+
+      // 1. Upload the file to your backend API
+      final uploadedFileUrl = await _uploadFileToServer(filePath, fileName);
+
+      if (uploadedFileUrl != null) {
+        // Determine file type for display purposes
+        String fileType;
+        if (['jpg', 'jpeg', 'png', 'gif'].contains(fileExtension)) {
+          fileType = 'image';
+        } else if (['pdf'].contains(fileExtension)) {
+          fileType = 'pdf';
+        } else if (['doc', 'docx', 'txt'].contains(fileExtension)) {
+          fileType = 'document';
+        } else {
+          fileType = 'other'; // Generic fallback for other file types
+        }
+
+        // 2. Send the message via SignalR with file details
+        _signalService.sendMessage(
+          widget.receiverId,
+          null, // No text message for file attachments
+          fileUrl: uploadedFileUrl,
+          fileName: fileName,
+          fileType: fileType,
+        );
+
+        setState(() {
+          _messages.add(
+            ChatMessage(
+              senderName: "You", // Display "You" for self-sent messages
+              text: null, // No text content for file messages
+              isSender: true,
+              sentAt: DateTime.now(),
+              fileUrl: uploadedFileUrl,
+              fileName: fileName,
+              fileType: fileType,
+            ),
+          );
+        });
+        _scrollToBottom();
+      } else {
+        _showSnackBar('File upload failed.', isSuccess: false);
+      }
+    }
+  }
+
+  // Method to upload file to your C# backend API
+  Future<String?> _uploadFileToServer(String filePath, String fileName) async {
+    try {
+      var request = http.MultipartRequest(
+        'POST',
+        Uri.parse('${BaseUrl.api}/api/Files/upload'), // Your file upload API endpoint
+      );
+      // Use http.MultipartFile.fromPath for file_selector as well
+      request.files.add(await http.MultipartFile.fromPath('file', filePath, filename: fileName));
+      request.headers['Authorization'] = 'Bearer ${widget.token}'; // Authenticate the upload request
+
+      var response = await request.send();
+
+      if (response.statusCode == 200) {
+        final responseBody = await response.stream.bytesToString();
+        final jsonResponse = json.decode(responseBody);
+        return jsonResponse['fileUrl'] as String?; // Assuming your API returns the URL in 'fileUrl'
+      } else {
+        print('File upload failed with status: ${response.statusCode}. Response: ${await response.stream.bytesToString()}');
+        return null;
+      }
+    } catch (e) {
+      print('Error uploading file: $e');
+      return null;
+    }
   }
 
   void _scrollToBottom() {
@@ -156,7 +267,7 @@ class _ChatPageState extends State<ChatPage> {
           message,
           style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Colors.white),
         ),
-        backgroundColor: isSuccess ? kPrimaryBlue : Colors.red.shade600,
+        backgroundColor: isSuccess ? kAccentBlue : Colors.red.shade600,
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
         margin: const EdgeInsets.all(10),
@@ -176,7 +287,7 @@ class _ChatPageState extends State<ChatPage> {
   Widget _buildMessageBubble(ChatMessage message, TextTheme textTheme) {
     final alignment =
     message.isSender ? Alignment.centerRight : Alignment.centerLeft;
-    final bubbleColor = message.isSender ? kPrimaryBlue : Colors.grey.shade200;
+    final bubbleColor = message.isSender ? kAccentBlue : Colors.grey.shade200;
     final textColor = message.isSender ? Colors.white : Colors.black87;
     final senderNameColor = message.isSender ? Colors.white70 : Colors.black54;
 
@@ -192,15 +303,16 @@ class _ChatPageState extends State<ChatPage> {
       bottomRight: Radius.circular(16),
     );
 
-    return Align(
-      alignment: alignment,
-      child: Column(
-        crossAxisAlignment: message.isSender
-            ? CrossAxisAlignment.end
-            : CrossAxisAlignment.start,
-        children: [
-          Container(
-            margin: const EdgeInsets.symmetric(vertical: 4, horizontal: 10),
+    final formattedTime = DateFormat('hh:mm a').format(message.sentAt);
+
+    return Column(
+      crossAxisAlignment:
+      message.isSender ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+      children: [
+        Align(
+          alignment: alignment,
+          child: Container(
+            margin: const EdgeInsets.symmetric(vertical: 6, horizontal: 10),
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
               color: bubbleColor,
@@ -224,27 +336,152 @@ class _ChatPageState extends State<ChatPage> {
                       fontWeight: FontWeight.w600, color: senderNameColor),
                 ),
                 const SizedBox(height: 4),
-                Text(
-                  message.text,
-                  style: textTheme.bodyMedium?.copyWith(color: textColor),
-                ),
+                // Conditional rendering based on message type (text or file)
+                if (message.text != null && message.text!.isNotEmpty)
+                  Text(
+                    message.text!,
+                    style: textTheme.bodyMedium?.copyWith(color: textColor),
+                  ),
+                if (message.fileUrl != null && message.fileUrl!.isNotEmpty)
+                  _buildFileContent(message, textColor, textTheme), // Helper function for file content
               ],
             ),
           ),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 14.0),
-            child: Text(
-              message.sentAt != null
-                  ? DateFormat('hh:mm a').format(message.sentAt!)
-                  : "Unknown time",
-              style: textTheme.bodySmall?.copyWith(color: Colors.grey.shade600),
-            ),
+        ),
+        Padding(
+          padding: EdgeInsets.only(
+            left: message.isSender ? 0 : 20,
+            right: message.isSender ? 20 : 0,
+            bottom: 4,
           ),
-          const SizedBox(height: 4),
-        ],
-      ),
+          child: Text(
+            formattedTime,
+            style: textTheme.bodySmall?.copyWith(color: Colors.grey.shade600),
+          ),
+        ),
+      ],
     );
   }
+
+  // Helper widget to display file content within the message bubble
+  Widget _buildFileContent(ChatMessage message, Color textColor, TextTheme textTheme) {
+    if (message.fileType == 'image' && message.fileUrl != null) {
+      // For images, display the image directly
+      return GestureDetector(
+        onTap: () {
+          // Implement image viewer (e.g., show in dialog or new screen)
+          showDialog(
+            context: context,
+            builder: (context) => Dialog(
+              backgroundColor: Colors.transparent,
+              elevation: 0,
+              child: Stack(
+                alignment: Alignment.center,
+                children: [
+                  Image.network(
+                    '${BaseUrl.api}${message.fileUrl!}', // Prepend base URL
+                    fit: BoxFit.contain,
+                    errorBuilder: (context, error, stackTrace) =>
+                    const Icon(Icons.broken_image, color: Colors.white, size: 50),
+                  ),
+                  Positioned(
+                    top: 10,
+                    right: 10,
+                    child: IconButton(
+                      icon: const Icon(Icons.close, color: Colors.white),
+                      onPressed: () => Navigator.of(context).pop(),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(8),
+          child: Image.network(
+            '${BaseUrl.api}${message.fileUrl!}', // Prepend base URL
+            width: 200, // Max width for image in chat bubble
+            height: 200, // Max height
+            fit: BoxFit.cover,
+            loadingBuilder: (context, child, loadingProgress) {
+              if (loadingProgress == null) return child;
+              return SizedBox(
+                width: 200,
+                height: 200,
+                child: Center(
+                  child: CircularProgressIndicator(
+                    value: loadingProgress.expectedTotalBytes != null
+                        ? loadingProgress.cumulativeBytesLoaded /
+                        loadingProgress.expectedTotalBytes!
+                        : null,
+                    color: textColor,
+                  ),
+                ),
+              );
+            },
+            errorBuilder: (context, error, stackTrace) =>
+                Container(
+                  width: 200,
+                  height: 200,
+                  color: Colors.grey[300],
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.broken_image, color: Colors.red, size: 40),
+                      Text('Image failed to load', style: textTheme.bodySmall?.copyWith(color: Colors.red)),
+                    ],
+                  ),
+                ),
+          ),
+        ),
+      );
+    } else if (message.fileUrl != null) {
+      // For documents (PDF, DOC, TXT, etc.), show an icon and filename
+      IconData fileIcon;
+      switch (message.fileType) {
+        case 'pdf':
+          fileIcon = Icons.picture_as_pdf_rounded;
+          break;
+        case 'document':
+          fileIcon = Icons.insert_drive_file_rounded;
+          break;
+        default:
+          fileIcon = Icons.attach_file_rounded;
+      }
+
+      return InkWell(
+        onTap: () async {
+          // Open the file URL (e.g., in a browser or external app)
+          final url = '${BaseUrl.api}${message.fileUrl!}'; // Prepend base URL
+          if (await canLaunchUrl(Uri.parse(url))) {
+            await launchUrl(Uri.parse(url), mode: LaunchMode.platformDefault);
+          } else {
+            _showSnackBar('Could not open file.', isSuccess: false);
+          }
+        },
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(fileIcon, color: textColor, size: 24),
+            const SizedBox(width: 8),
+            Flexible(
+              child: Text(
+                message.fileName ?? 'File',
+                style: textTheme.bodyMedium?.copyWith(
+                  color: textColor,
+                  decoration: TextDecoration.underline, // Indicate it's clickable
+                ),
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+    return const SizedBox.shrink(); // Should not happen if logic is correct
+  }
+
 
   Widget _buildMessageInput(TextTheme textTheme) {
     return SafeArea(
@@ -279,14 +516,24 @@ class _ChatPageState extends State<ChatPage> {
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(24),
-                    borderSide: BorderSide(color: kPrimaryBlue, width: 1.5),
+                    borderSide: BorderSide(color: kAccentBlue, width: 1.5),
+                  ),
+                  // Add an attachment icon here
+                  prefixIcon: IconButton(
+                    icon: const Icon(Icons.attach_file_rounded, color: kAccentBlue),
+                    onPressed: _pickAndSendFile, // Call the new file picking method
                   ),
                 ),
+                onSubmitted: (text) {
+                  if (text.trim().isNotEmpty) {
+                    _sendMessage(text.trim());
+                  }
+                },
               ),
             ),
             const SizedBox(width: 8),
             CircleAvatar(
-              backgroundColor: kPrimaryBlue, // Themed send button
+              backgroundColor: kAccentBlue, // Themed send button
               radius: 24, // Slightly larger
               child: IconButton(
                 icon: const Icon(Icons.send_rounded, color: Colors.white), // Modern send icon
@@ -296,7 +543,7 @@ class _ChatPageState extends State<ChatPage> {
                   }
                 },
               ),
-            )
+            ),
           ],
         ),
       ),
@@ -308,9 +555,9 @@ class _ChatPageState extends State<ChatPage> {
     final TextTheme textTheme = Theme.of(context).textTheme;
 
     return Scaffold(
-      backgroundColor: Colors.grey.shade50, // Consistent light background
+      backgroundColor: Theme.of(context).colorScheme.background, // Use themed background
       appBar: AppBar(
-        backgroundColor: kPrimaryBlue, // Themed AppBar background
+        backgroundColor: kAccentBlue, // Themed AppBar background
         foregroundColor: Colors.white, // White icons and text
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios_rounded), // Modern back icon
@@ -322,7 +569,7 @@ class _ChatPageState extends State<ChatPage> {
             CircleAvatar(
               backgroundColor: Colors.white,
               radius: 18, // Smaller avatar in app bar
-              child: Icon(Icons.person_rounded, color: kPrimaryBlue, size: 20), // Themed person icon
+              child: Icon(Icons.person_rounded, color: kAccentBlue, size: 20), // Themed person icon
             ),
             const SizedBox(width: 10),
             Flexible(
@@ -353,7 +600,7 @@ class _ChatPageState extends State<ChatPage> {
               },
               child: Container(
                 decoration: BoxDecoration(
-                  color: kAccentBlue, // Use kAccentBlue for video call button
+                  color: kAccentBlue, // Use kAccentGreen for video call button
                   shape: BoxShape.circle,
                   boxShadow: const [
                     BoxShadow(

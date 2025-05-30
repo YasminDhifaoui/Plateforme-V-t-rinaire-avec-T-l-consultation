@@ -356,7 +356,6 @@ class _VaccinationByAnimalPageState extends State<VaccinationByAnimalPage> {
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.background,
       appBar: HomeNavbar(
-        username: widget.animalName,
         onLogout: () {
           Navigator.popUntil(context, (route) => route.isFirst);
         },
