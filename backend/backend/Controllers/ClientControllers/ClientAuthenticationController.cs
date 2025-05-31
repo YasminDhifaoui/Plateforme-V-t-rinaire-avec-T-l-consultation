@@ -165,13 +165,13 @@ namespace backend.Controllers.ClientControllers
             user.TwoFactorCode = token;
             await _context.SaveChangesAsync();
 
-            string confirmationUrl = $"{_configuration["ApiUrls:ConfirmClientEmailUrl"]}/?email={user.Email}&code={token}";
+            //string confirmationUrl = $"{_configuration["ApiUrls:ConfirmClientEmailUrl"]}/?email={user.Email}&code={token}";
 
             var Variables = new Dictionary<string, string>
             {
                 { "UserName", user.UserName },
                 { "Code", token },
-                { "ConfirmationUrl", confirmationUrl },
+                //{ "ConfirmationUrl", confirmationUrl },
             };
 
             MailDataModel mailData = new()
@@ -249,12 +249,12 @@ namespace backend.Controllers.ClientControllers
             user.EmailConfirmed = true;
             await _context.SaveChangesAsync();
 
-            string LoginUrl = $"{_configuration["ApiUrls:ClientLoginUrl"]}";
+            //string LoginUrl = $"{_configuration["ApiUrls:ClientLoginUrl"]}";
 
             var Variables = new Dictionary<string, string>
              {
                  { "UserName", user.UserName },
-                 {"LoginUrl" , LoginUrl}
+                 //{"LoginUrl" , LoginUrl}
              };
 
             MailDataModel mailData = new()
@@ -327,7 +327,7 @@ namespace backend.Controllers.ClientControllers
                 Variables["UserName"] = user.UserName;
                 Variables["AuthentificationCode"] = TwoFactorTokenAsyncToken;
                 Variables["TokenLifeSpan"] = _configuration.GetSection("2FA:TokenLifeSpan").Get<int>().ToString();
-                Variables["ConfirmLoginCode"] = _configuration["ApiUrls:ClientConfirmLoginCode"]!;
+                //Variables["ConfirmLoginCode"] = _configuration["ApiUrls:ClientConfirmLoginCode"]!;
 
                 var client = _context.clients.FirstOrDefault(x => x.AppUserId == user.Id);
 
@@ -520,13 +520,12 @@ namespace backend.Controllers.ClientControllers
 
             await _userManager.UpdateAsync(user);
 
-            string Url = $"{_configuration["ClientResetPassUrl"]}/reset-password?email={model.Email}&token={resetToken}";
-            //string Url = $"clientapp://reset-password?email={model.Email}&token={resetToken}";
+            //string Url = $"{_configuration["ClientResetPassUrl"]}/reset-password?email={model.Email}&token={resetToken}";
 
 
             var Variables = new Dictionary<string, string>();
             Variables["UserName"] = user.UserName;
-            Variables["ResetPasswordUrl"] = Url;
+            //Variables["ResetPasswordUrl"] = Url;
             //Variables["Token"] = resetToken;
             Variables["OtpCode"] = otpCode; // Send the short OTP code to the email template
 

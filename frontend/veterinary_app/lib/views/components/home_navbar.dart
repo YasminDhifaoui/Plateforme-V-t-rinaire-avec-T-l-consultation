@@ -3,6 +3,7 @@ import 'package:veterinary_app/services/auth_services/token_service.dart';
 import 'package:veterinary_app/views/profile_pages/profile_page.dart';
 
 import '../../services/notification_handle/message_notifier.dart';
+import '../../utils/app_colors.dart';
 import '../conv_pages/conv_page.dart';
 
 // Import kPrimaryGreen and kAccentGreen from main.dart to ensure theme consistency

@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:signalr_core/signalr_core.dart';
 import 'package:veterinary_app/services/video_call_services/signalr_tc_service.dart';
+import 'package:veterinary_app/utils/app_colors.dart';
 import 'package:veterinary_app/views/video_call_pages/incoming_call_screen.dart';
 import 'views/Auth_pages/vet_login_page.dart'; // Make sure this import is correct
 import 'views/Auth_pages/vet_register_page.dart';
@@ -14,9 +15,7 @@ final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
 FlutterLocalNotificationsPlugin();
 
 // Define your primary green color centrally
-const Color kPrimaryGreen = Color(0xFF00A86B);
 // Define a secondary accent green for highlights/details
-const Color kAccentGreen = Color(0xFF4CAF50); // A slightly lighter, vibrant green
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();

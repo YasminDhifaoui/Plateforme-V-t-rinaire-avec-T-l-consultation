@@ -19,7 +19,7 @@ namespace backend.Repo.ClientRepo.VetRepo
                  .Select(user => new VetCDto
                  {
                      Id = user.Id,
-                     Username = user.UserName,
+                     UserName = user.UserName,
                      Address = user.Address,
                      PhoneNumber = user.PhoneNumber,
                      Email = user.Email

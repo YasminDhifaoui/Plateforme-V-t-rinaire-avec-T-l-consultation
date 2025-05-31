@@ -22,7 +22,7 @@ namespace backend.Repo.ClientRepo.RendezVousRepo
                 {
                     Id = r.Id,
                     Date = r.Date,
-                    VetName = r.Veterinaire.FirstName + " " + r.Veterinaire.LastName,
+                    VetName = r.Veterinaire.UserName,
                     AnimalName = r.Animal.Nom,
                     Status = r.Status 
                 })

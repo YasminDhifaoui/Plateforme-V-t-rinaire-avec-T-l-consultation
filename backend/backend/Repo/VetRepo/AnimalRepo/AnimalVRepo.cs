@@ -21,6 +21,7 @@ namespace backend.Repo.VetRepo.AnimalRepo
 
             var animalIds = await _context.RendezVous
                                     .Where(r => r.VeterinaireId == vetId)
+                                    .Include(r => r.Client)
                                     .Select(r => r.AnimalId)
                                     .Distinct()
                                     .ToListAsync();
@@ -36,6 +37,8 @@ namespace backend.Repo.VetRepo.AnimalRepo
                   Race = a.Race,
                   Age = a.Age,
                   Sexe = a.Sexe,
+                  Owner = a.Owner,
+                  OwnerUsername = a.Owner.UserName,
                   Allergies = a.Allergies,
                   Anttecedentsmedicaux = a.AnttecedentsMedicaux,
               }).ToListAsync();

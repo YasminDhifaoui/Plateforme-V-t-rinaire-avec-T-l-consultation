@@ -157,7 +157,7 @@ class _AddRendezvousPageState extends State<AddRendezvousPage> {
     try {
       await AddRendezvousService().addRendezvous(data);
       _showSnackBar('Appointment added successfully!', isSuccess: true);
-      Navigator.pop(context); // Go back to the previous page (RendezvousPage)
+      Navigator.pop(context,true); // Go back to the previous page (RendezvousPage)
     } catch (e) {
       _showSnackBar('Error adding appointment: ${e.toString()}', isSuccess: false);
     }
@@ -229,10 +229,10 @@ class _AddRendezvousPageState extends State<AddRendezvousPage> {
                       ),
                     ),
                     const SizedBox(height: 10),
-                    _buildInfoRow(textTheme, Icons.person_outline, 'Name', '${vet.firstName} ${vet.lastName}'),
-                    _buildInfoRow(textTheme, Icons.badge_outlined, 'Username', vet.username),
+                    _buildInfoRow(textTheme, Icons.badge_outlined, 'Name', vet.username),
                     _buildInfoRow(textTheme, Icons.email_outlined, 'Email', vet.email),
                     _buildInfoRow(textTheme, Icons.phone_outlined, 'Phone', vet.phoneNumber),
+                    _buildInfoRow(textTheme, Icons.place_outlined, 'Address', vet.address),
                   ],
                 ),
               ),

@@ -6,10 +6,9 @@ import '../../utils/base_url.dart';
 
 class SignalRTCService {
   static HubConnection? connection;
-  static String? callerUserId; // Stored when an incoming call arrives or when accepting a call.
-  static String? targetUserId; // Stored when initiating a call.
+  static String? callerUserId;
+  static String? targetUserId;
 
-  // --- StreamControllers for different events ---
   static final _incomingCallStreamController = StreamController<String>.broadcast();
   static final _callAcceptedStreamController = StreamController<String>.broadcast(); // Pass calleeId or callerId
   static final _callRejectedStreamController = StreamController<String>.broadcast();
@@ -18,7 +17,6 @@ class SignalRTCService {
   static final _receiveAnswerStreamController = StreamController<Map<String, dynamic>>.broadcast();
   static final _receiveIceCandidateStreamController = StreamController<Map<String, dynamic>>.broadcast();
 
-  // --- Public Streams to listen to ---
   static Stream<String> get incomingCallStream => _incomingCallStreamController.stream;
   static Stream<String> get callAcceptedStream => _callAcceptedStreamController.stream;
   static Stream<String> get callRejectedStream => _callRejectedStreamController.stream;
@@ -128,7 +126,6 @@ class SignalRTCService {
       targetUserId = null;
     });
 
-    // Add logging for connection state changes
     connection!.onclose((error) {
       print('[SignalRTCService] Connection closed: $error');
     });
@@ -142,7 +139,6 @@ class SignalRTCService {
     });
   }
 
-  // Call Management Methods
   static Future<void> initiateCall(String targetId) async {
     if (connection?.state == HubConnectionState.connected) {
       print('[SignalRTCService] Initiating call to: $targetId');
@@ -184,11 +180,9 @@ class SignalRTCService {
     } else {
       print('[SignalRTCService] Cannot send end call signal: Not connected to SignalR hub.');
     }
-    // Note: The `CallEnded` handler will clear `callerUserId`/`targetUserId`
-    // when the other side acknowledges or if the local `endCall` is directly called.
+
   }
 
-  // WebRTC Signaling Methods
   static Future<void> sendOffer(String targetId, Map<String, dynamic> offer) async {
     if (connection?.state == HubConnectionState.connected) {
       print('[SignalRTCService] Sending offer to: $targetId');
@@ -228,12 +222,10 @@ class SignalRTCService {
     } else {
       print('[SignalRTCService] Connection was not active or initialized, skipping stop.');
     }
-    // Clear stored IDs
     callerUserId = null;
     targetUserId = null;
   }
 
-  // Dispose all stream controllers
   static Future<void> dispose() async {
     print('[SignalRTCService] Disposing all StreamControllers.');
     await _incomingCallStreamController.close();
@@ -243,7 +235,6 @@ class SignalRTCService {
     await _receiveOfferStreamController.close();
     await _receiveAnswerStreamController.close();
     await _receiveIceCandidateStreamController.close();
-    // Ensure disconnect is also called to stop the underlying hub connection
     await disconnect();
     print('[SignalRTCService] SignalRTCService disposed completely.');
   }

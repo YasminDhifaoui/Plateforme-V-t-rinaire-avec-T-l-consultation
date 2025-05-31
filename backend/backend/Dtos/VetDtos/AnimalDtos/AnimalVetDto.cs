@@ -1,4 +1,7 @@
-﻿namespace backend.Dtos.VetDtos.AnimalDtos
+﻿using backend.Models;
+using Microsoft.EntityFrameworkCore;
+
+namespace backend.Dtos.VetDtos.AnimalDtos
 {
     public class AnimalVetDto
     {
@@ -11,6 +14,9 @@
         public string Allergies { get; set; } = string.Empty;
         public string Anttecedentsmedicaux { get; set; } = string.Empty;
         public Guid OwnerId { get; set; }
+        public AppUser Owner { get; set; }
+        public string OwnerUsername { get; set; } 
+
         public DateTime CreatedAt { get; set; }
         public DateTime UpdatedAt { get; set; }
     }

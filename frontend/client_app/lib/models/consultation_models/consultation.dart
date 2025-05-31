@@ -1,3 +1,5 @@
+import '../vet_models/veterinaire.dart';
+
 class Consultation {
   final String id;
   final String date;
@@ -8,6 +10,7 @@ class Consultation {
   final String documentPath;
   final String vetName;
   final String petName;
+  final Veterinaire veterinaire;
 
   Consultation({
     required this.id,
@@ -19,6 +22,7 @@ class Consultation {
     required this.documentPath,
     required this.vetName,
     required this.petName,
+    required this.veterinaire,
   });
 
   factory Consultation.fromJson(Map<String, dynamic> json) {
@@ -31,7 +35,9 @@ class Consultation {
       notes: json['notes'] ?? '',
       documentPath: json['documentPath'] ?? '',
       vetName: json['veterinaireName'] ?? '', // match backend field
-      petName: json['animalName'] ?? '', // match backend field
+      petName: json['animalName'] ?? '',
+      veterinaire: Veterinaire.fromJson(json['veterinaire'] as Map<String, dynamic>),
+
     );
   }
 
@@ -46,6 +52,7 @@ class Consultation {
       'documentPath': documentPath,
       'veterinaireName': vetName,
       'animalName': petName,
+      'Veterinaire': Veterinaire,
     };
   }
 }

@@ -2,11 +2,67 @@
 <html>
 <head>
     <title>{EmailSubject}</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f6f9;
+            margin: 0;
+            padding: 0;
+        }
+
+        .email-container {
+            max-width: 600px;
+            margin: 40px auto;
+            background-color: #ffffff;
+            padding: 30px;
+            border-radius: 8px;
+            border: 1px solid #e0e0e0;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+        }
+
+        p {
+            font-size: 16px;
+            color: #333333;
+            line-height: 1.5;
+            margin: 16px 0;
+        }
+
+        strong {
+            color: #2c3e50;
+        }
+
+        a {
+            color: #007bff;
+            text-decoration: none;
+        }
+
+            a:hover {
+                text-decoration: underline;
+            }
+
+        .button {
+            display: inline-block;
+            padding: 10px 16px;
+            background-color: #007bff;
+            color: #ffffff !important;
+            text-decoration: none;
+            border-radius: 5px;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+
+            .button:hover {
+                background-color: #0056b3;
+            }
+    </style>
 </head>
 <body>
-    <p>Hello, <strong>{UserName}</strong>,</p>
-    <p>You Confirmation code is  {Code}</p>
-    <p>Please confirm your email by clicking the link below:</p>
-    <p><a href="{ConfirmationUrl}">Confirm Your Email</a></p>
+    <div class="email-container">
+        <p>Hello, <strong>{UserName}</strong>,</p>
+        <p>You Confirmation code is <strong>{Code}</strong></p>
+
+        <!-- <p>Please confirm your email by clicking the link below:</p>
+        <p><a href="{ConfirmationUrl}" class="button">Confirm Your Email</a></p> -->
+    </div>
 </body>
 </html>

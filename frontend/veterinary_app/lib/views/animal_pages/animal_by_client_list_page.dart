@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:veterinary_app/models/animal_models/animal_model.dart';
 import '../../services/animal_services/animals_vet_service.dart';
+import '../../utils/app_colors.dart';
 import '../components/home_navbar.dart';
 import '../vaccination_pages/vaccination_by_animal_page.dart';
 
@@ -252,7 +253,7 @@ class _AnimalByClientListPageState extends State<AnimalByClientListPage> {
                                         builder: (context) =>
                                             VaccinationByAnimalPage(
                                               token: widget.token,
-                                              animalId: animal.id ?? '',
+                                              animalId: animal.id ?? '', animalName: animal.name,
                                             ),
                                       ),
                                     );

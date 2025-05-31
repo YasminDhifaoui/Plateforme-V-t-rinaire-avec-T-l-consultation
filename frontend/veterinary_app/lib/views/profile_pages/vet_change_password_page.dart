@@ -5,6 +5,7 @@ import 'package:veterinary_app/views/profile_pages/profile_page.dart';
 
 import '../../models/profile_models/VetChangePasswordModel.dart';
 import '../../services/profile_services/change_pass_service.dart';
+import '../../utils/app_colors.dart';
 
 class VetChangePasswordPage extends StatefulWidget {
   const VetChangePasswordPage({super.key});

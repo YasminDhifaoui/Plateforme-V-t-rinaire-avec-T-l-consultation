@@ -5,7 +5,8 @@ import 'package:veterinary_app/views/Auth_pages/vet_login_page.dart';
 import 'package:veterinary_app/views/Auth_pages/vet_reset_password_page.dart';
 import 'package:veterinary_app/models/auth_models/vet_forget_password.dart';
 
-import '../../services/auth_services/vet_auth_services.dart'; // Needed for resending OTP
+import '../../services/auth_services/vet_auth_services.dart';
+import '../../utils/app_colors.dart'; // Needed for resending OTP
 
 class VetVerifyOtpCodePage extends StatefulWidget {
   final String email; // Receives email from the previous page

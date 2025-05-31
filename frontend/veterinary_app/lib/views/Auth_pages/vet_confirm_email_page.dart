@@ -5,7 +5,9 @@ import 'package:veterinary_app/views/Auth_pages/vet_login_page.dart';
 import 'package:veterinary_app/views/components/login_navbar.dart';
 
 // Import kPrimaryGreen and kAccentGreen from main.dart to ensure theme consistency
-import 'package:veterinary_app/main.dart'; // Adjust path if using a separate constants.dart file
+import 'package:veterinary_app/main.dart';
+
+import '../../utils/app_colors.dart'; // Adjust path if using a separate constants.dart file
 
 class VetConfirmEmailPage extends StatefulWidget {
   final String? email;

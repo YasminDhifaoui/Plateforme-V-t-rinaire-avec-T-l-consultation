@@ -20,7 +20,7 @@ class Veterinaire {
   factory Veterinaire.fromJson(Map<String, dynamic> json) {
     return Veterinaire(
       id: json['id'].toString(), // 👈 convert to String safely
-      username: json['username']?.toString() ?? '',
+      username: json['userName']?.toString() ?? '',
       email: json['email']?.toString() ?? '',
       phoneNumber: json['phoneNumber']?.toString() ?? '',
       address: json['address']?.toString() ?? '',

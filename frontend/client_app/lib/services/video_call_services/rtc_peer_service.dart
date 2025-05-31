@@ -1,7 +1,7 @@
 import 'package:flutter_webrtc/flutter_webrtc.dart';
 
 class RTCPeerService {
-  // Singleton instance
+
   static final RTCPeerService _instance = RTCPeerService._internal();
   factory RTCPeerService() => _instance;
   RTCPeerService._internal();
@@ -24,8 +24,7 @@ class RTCPeerService {
   final Map<String, dynamic> _configuration = {
     'iceServers': [
       {'urls': 'stun:stun.l.google.com:19302'},
-      // Add your TURN servers here if needed for robust NAT traversal
-      // {'urls': 'turn:YOUR_TURN_SERVER_URL', 'username': 'user', 'credential': 'password'},
+
     ]
   };
 

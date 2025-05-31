@@ -43,10 +43,10 @@ namespace backend.Controllers.AdminControllers
         [Route("add-consultation")]
         public async Task<IActionResult> AddConsultation([FromForm] AddConsultationDto dto)
         {
-            var client = await _context.Animals.FindAsync(dto.ClientId);
+            var client = await _context.clients.FindAsync(dto.ClientId);
             if (client == null)
                 return BadRequest("Client not found");
-            var vet = await _context.veterinaires.FirstOrDefaultAsync(vet => vet.AppUserId == dto.VetId);
+            var vet = await _context.veterinaires.FindAsync(dto.VetId);
             if (vet == null)
                 return BadRequest("Vet not found");
 
@@ -64,10 +64,10 @@ namespace backend.Controllers.AdminControllers
         [Route("update-consultation/{id}")]
         public async Task<IActionResult> UpdateConsultation(Guid id, [FromForm] UpdateConsultationDto dto)
         {
-            var client = await _context.Animals.FindAsync(dto.ClientId);
+            var client = await _context.clients.FindAsync(dto.ClientId);
             if (client == null)
                 return BadRequest("Client not found");
-            var vet = await _context.veterinaires.FirstOrDefaultAsync(vet => vet.AppUserId == dto.VetId);
+            var vet = await _context.veterinaires.FindAsync(dto.VetId);
             if (vet == null)
                 return BadRequest("Vet not found");
             if (!ModelState.IsValid)

@@ -77,7 +77,7 @@ class ConsultationService {
   }
 
   /// DELETE consultation
-  /*static Future<void> deleteConsultation(String id, String token) async {
+  static Future<void> deleteConsultation(String id, String token) async {
     final uri = Uri.parse(
       '$_baseUrl/api/vet/consultationsvet/delete-consultation/$id',
     );
@@ -88,5 +88,5 @@ class ConsultationService {
       print(response.body);
       throw Exception('Failed to delete consultation');
     }
-  }*/
+  }
 }

@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 // Import kPrimaryGreen and kAccentGreen from main.dart to ensure theme consistency
-import 'package:veterinary_app/main.dart'; // Adjust path if using a separate constants.dart file
+import 'package:veterinary_app/main.dart';
+
+import 'app_colors.dart'; // Adjust path if using a separate constants.dart file
 
 class LogoutHelper {
   static Future<void> handleLogout(BuildContext context) async {

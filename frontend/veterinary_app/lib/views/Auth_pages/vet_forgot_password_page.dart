@@ -7,7 +7,8 @@ import 'package:veterinary_app/views/components/login_navbar.dart'; // Keeping L
 // Import kPrimaryGreen and kAccentGreen from main.dart to ensure theme consistency
 import 'package:veterinary_app/main.dart';
 
-import '../../services/auth_services/vet_auth_services.dart'; // Adjust path if using a separate constants.dart file
+import '../../services/auth_services/vet_auth_services.dart';
+import '../../utils/app_colors.dart'; // Adjust path if using a separate constants.dart file
 
 class VetForgotPasswordPage extends StatefulWidget {
   const VetForgotPasswordPage({super.key});
