@@ -25,6 +25,8 @@ dependencies:
   file_selector: ^1.0.0
 
   image_picker: ^1.1.2 # Use the latest version
+  image_gallery_saver_plus: ^4.0.1 # Use the latest stable version
+
 
   flutter_launcher_icons: "^0.13.1"
   cupertino_icons: ^1.0.8
