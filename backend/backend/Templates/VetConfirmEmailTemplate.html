@@ -2,11 +2,60 @@
 <html>
 <head>
     <title>{EmailSubject}</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f6f8;
+            margin: 0;
+            padding: 0;
+        }
+
+        .email-container {
+            max-width: 600px;
+            margin: 40px auto;
+            background-color: #ffffff;
+            padding: 30px;
+            border: 1px solid #dcdcdc;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+        }
+
+        p {
+            font-size: 16px;
+            color: #333;
+            line-height: 1.6;
+            margin: 16px 0;
+        }
+
+        strong {
+            color: #2c3e50;
+        }
+
+        .button {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 10px 18px;
+            background-color: #007bff;
+            color: #ffffff !important;
+            text-decoration: none;
+            border-radius: 4px;
+            font-weight: 600;
+        }
+
+            .button:hover {
+                background-color: #0056b3;
+            }
+    </style>
 </head>
 <body>
-    <p>Hello, <strong>{UserName}</strong>,</p>
-    <p>Your email has been confirmed successfully</p>
-    <p>You can login via this link :</p>
-    <a href="{LoginUrl}">Login</a>
+    <div class="email-container">
+        <p>Hello, <strong>{UserName}</strong>,</p>
+        <p>Your email has been confirmed successfully</p>
+
+        <!--
+        <p>You can login via this link :</p>
+        <a href="{LoginUrl}" class="button">Login</a>
+        -->
+    </div>
 </body>
 </html>

@@ -55,7 +55,7 @@ public class AnimalsVetController : ControllerBase
     {
         var vetId = Guid.Parse(User.FindFirst("Id")?.Value);
 
-        var rendezVous = _rendezVousRepo.GetRendezVousByAnimalIdAndVetId(id, vetId);
+        var rendezVous =await _rendezVousRepo.GetRendezVousByAnimalIdAndVetId(id, vetId);
         if (rendezVous == null)
             return BadRequest("This animal did not have a rendez-vous with this veterinarian.");
 

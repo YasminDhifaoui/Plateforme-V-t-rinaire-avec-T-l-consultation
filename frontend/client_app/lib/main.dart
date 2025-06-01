@@ -149,7 +149,6 @@ class _AppWrapperState extends State<AppWrapper> with WidgetsBindingObserver {
       print('[AppWrapper.initSignalRAndListenGlobally] ERROR during SignalRTCService initialization or stream setup: $e');
     }
   }
-
   void _navigateToIncomingCallScreen(String callerId) {
     bool isIncomingCallScreenActive = false;
     navigatorKey.currentState?.popUntil((route) {
@@ -160,7 +159,8 @@ class _AppWrapperState extends State<AppWrapper> with WidgetsBindingObserver {
     });
 
     if (!isIncomingCallScreenActive && navigatorKey.currentState != null) {
-      print('[AppWrapper._navigateToIncomingCallScreen] Pushing IncomingCallScreen for $callerId.');
+      print(
+          '[AppWrapper._navigateToIncomingCallScreen] Pushing IncomingCallScreen for $callerId.');
       navigatorKey.currentState!.push(
         MaterialPageRoute(
           builder: (context) => IncomingCallScreen(
@@ -171,7 +171,8 @@ class _AppWrapperState extends State<AppWrapper> with WidgetsBindingObserver {
         ),
       );
     } else {
-      print('[AppWrapper._navigateToIncomingCallScreen] IncomingCallScreen is already active or navigator is null. Not pushing again.');
+      print(
+          '[AppWrapper._navigateToIncomingCallScreen] IncomingCallScreen is already active or navigator is null. Not pushing again.');
     }
   }
 

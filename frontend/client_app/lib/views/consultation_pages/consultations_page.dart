@@ -6,12 +6,16 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:dio/dio.dart';
 import 'package:permission_handler/permission_handler.dart';
+import '../../models/vet_models/veterinaire.dart';
+import '../../services/auth_services/token_service.dart';
 import '../../services/consultation_services/consultation_service.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 // Import your blue color constants. Ensure these are correctly defined.
 // If your colors are in a different file (e.g., constants.dart), adjust this import:
 import 'package:client_app/main.dart';
+
+import '../chat_pages/ChatPage.dart';
 
 // Enum for sorting options
 enum SortOrder { newest, oldest }
@@ -169,6 +173,279 @@ class _ConsultationsPageState extends State<ConsultationsPage> {
     setState(() {
       _filteredConsultations = tempFilteredList;
     });
+  }
+
+// Inside _ConsultationsPageState class
+
+// Make sure your _showVetDetails method now accepts the VetAppUser object
+  Future<void> _showVetDetails(Veterinaire vetAppUser) async {
+    // First, get the current client's token
+    final token = await TokenService.getToken();
+    if (token == null) {
+      _showSnackBar('Authentication token not available. Please log in.', isSuccess: false);
+      return;
+    }
+
+    // You might not need to fetch full vet details again if VetAppUser is enough,
+    // or you could call a service here if you need more fields than available in VetAppUser
+    // For now, we'll just use the provided VetAppUser data directly.
+
+    final TextTheme textTheme = Theme.of(context).textTheme;
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        backgroundColor: Theme.of(context).cardColor,
+        title: Column( // <--- Change to Column to stack elements vertically
+          crossAxisAlignment: CrossAxisAlignment.start, // Align content to the left
+          mainAxisSize: MainAxisSize.min, // Take only necessary vertical space
+          children: [
+            Row( // Row for the icon and the fixed "Vétérinaire:" label
+              children: [
+                Icon(Icons.person, color: kPrimaryBlue),
+                const SizedBox(width: 10),
+                Text(
+                  "Vétérinaire:", // Keep this on its own line
+                  style: textTheme.titleLarge?.copyWith(
+                    color: kPrimaryBlue,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 5), // Small space between label and name
+            Text(
+              vetAppUser.username, // The actual long username
+              style: textTheme.titleLarge?.copyWith(
+                color: kPrimaryBlue,
+                fontWeight: FontWeight.bold,
+              ),
+              softWrap: true, // Allow the text to wrap
+              overflow: TextOverflow.visible, // Make sure it's visible, as it's allowed to wrap
+              // maxLines: null, // Allow unlimited lines or set a specific max if needed
+            ),
+          ],
+        ),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+
+              _buildInfoRow(textTheme,  "Email", vetAppUser.email),
+              _buildInfoRow(textTheme,  "Phone", vetAppUser.phoneNumber),
+              // Add other relevant AppUser details if available in VetAppUser
+            ],
+          ),
+        ),
+        actions: [
+          TextButton.icon(
+            icon: Icon(Icons.chat_bubble_outline_rounded, color: kPrimaryBlue),
+            label: Text("Chat with ${vetAppUser.username}",
+                style: textTheme.labelMedium?.copyWith(color: kPrimaryBlue)),
+            onPressed: () async {
+              Navigator.pop(context);
+              final token = await TokenService.getToken();
+              if (token == null) {
+                _showSnackBar('Authentication token not available. Please log in.', isSuccess: false);
+                return;
+              }
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => ChatPage(
+                    token: token,
+                    receiverId: vetAppUser.id, // Use the AppUser.Id for chat
+                    receiverUsername: vetAppUser.username,
+                  ),
+                ),
+              );
+            },
+            style: TextButton.styleFrom(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+            ),
+          ),
+          TextButton(
+            child: Text("Close", style: textTheme.labelMedium?.copyWith(color: Colors.grey.shade700)),
+            onPressed: () => Navigator.pop(context),
+            style: TextButton.styleFrom(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+// And your _showConsultationDetails will call _showVetDetails with the nested object
+  void _showConsultationDetails(Consultation consult) {
+    final TextTheme textTheme = Theme.of(context).textTheme;
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          backgroundColor: Theme.of(context).cardColor,
+          title: Row(
+            children: [
+              Icon(Icons.medical_services, color: kPrimaryBlue),
+              const SizedBox(width: 10),
+              Text(
+                'Consultation Details',
+                style: textTheme.titleLarge?.copyWith(
+                  color: kPrimaryBlue,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
+          ),
+          content: SingleChildScrollView(
+            child: ListBody(
+              children: [
+                _buildConsultationDetailRow(
+                    textTheme, 'Vétérinaire:', consult.vetName),
+                // ... other consultation details ...
+                _buildConsultationDetailRow(
+                    textTheme, 'Date:', formatDate(consult.date)),
+                _buildConsultationDetailRow(
+                    textTheme, 'Diagnostic:', consult.diagnostic),
+                _buildConsultationDetailRow(
+                    textTheme, 'Treatment:', consult.treatment),
+                _buildConsultationDetailRow(
+                    textTheme, 'Prescription:', consult.prescription),
+                _buildConsultationDetailRow(
+                    textTheme, 'Notes:', consult.notes),
+                // ... document section ...
+
+                if (consult.documentPath.isNotEmpty) ...[
+                  const SizedBox(height: 10),
+                  Divider(height: 1, thickness: 1, color: Colors.blueGrey.shade100),
+                  const SizedBox(height: 10),
+                  Row(
+                    children: [
+                      Icon(Icons.attach_file, color: kPrimaryBlue),
+                      const SizedBox(width: 8),
+                      Flexible(
+                        child: Text(
+                          extractFileName(consult.documentPath),
+                          softWrap: true,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: textTheme.bodyMedium?.copyWith(fontStyle: FontStyle.italic, color: Colors.black54),
+                        ),
+                      ),
+                      IconButton(
+                        icon: Icon(Icons.remove_red_eye_rounded, color: kAccentBlue),
+                        tooltip: 'View Document',
+                        onPressed: () async {
+                          try {
+                            final Uri uri = Uri.parse(
+                              '${BaseUrl.api}/${consult.documentPath}',
+                            );
+                            if (!await launchUrl(
+                              uri,
+                              mode: LaunchMode.externalApplication,
+                            )) {
+                              _showSnackBar(
+                                'Could not open document. Check if you have an app to handle this file type.',
+                                isSuccess: false,
+                              );
+                            }
+                          } catch (e) {
+                            _showSnackBar(
+                              'Error viewing document: ${e.toString()}',
+                              isSuccess: false,
+                            );
+                          }
+                        },
+                      ),
+                    ],
+                  ),
+                ],
+              ],
+            ),
+          ),
+          actions: [
+            // "See Vet Details" Button
+            TextButton.icon(
+              icon: Icon(Icons.person_outline, color: kPrimaryBlue),
+              label: Text("See Vet Details",
+                  style: textTheme.labelMedium?.copyWith(color: kPrimaryBlue)),
+              onPressed: () {
+                Navigator.pop(context); // Close consultation details dialog
+                _showVetDetails(consult.veterinaire); // <--- Pass the new nested object
+              },
+              style: TextButton.styleFrom(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+              ),
+            ),
+            // "Chat with Vet" Button
+            TextButton.icon(
+              icon: Icon(Icons.chat_bubble_outline_rounded, color: kAccentBlue),
+              label: Text("Chat with Vet",
+                  style: textTheme.labelMedium?.copyWith(color: kAccentBlue)),
+              onPressed: () async {
+                Navigator.pop(context); // Close consultation details dialog
+                final token = await TokenService.getToken();
+                if (token == null) {
+                  _showSnackBar('Authentication token not available. Please log in.', isSuccess: false);
+                  return;
+                }
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => ChatPage(
+                      token: token,
+                      receiverId: consult.veterinaire.id, // Use the AppUser.Id for chat
+                      receiverUsername: consult.veterinaire.username, // Use the vet's username for chat
+                    ),
+                  ),
+                );
+              },
+              style: TextButton.styleFrom(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+              ),
+            ),
+            // Close button
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: Text('Close', style: textTheme.labelLarge?.copyWith(color: Colors.grey.shade700)),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+// Ensure this helper method is also in your _ConsultationsPageState
+  Widget _buildConsultationDetailRow(TextTheme textTheme, String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4.0),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            "$label",
+            style: textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              value,
+              style: textTheme.bodyLarge,
+              overflow: TextOverflow.ellipsis,
+              maxLines: 2,
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   void _filterConsultations() {
@@ -419,107 +696,104 @@ class _ConsultationsPageState extends State<ConsultationsPage> {
                           borderRadius: BorderRadius.circular(15),
                         ),
                         color: Colors.white,
-                        child: Padding(
-                          padding: const EdgeInsets.all(18.0), // Increased padding
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Row(
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                children: [
-                                  Icon(Icons.calendar_month_rounded, size: 20, color: kAccentBlue),
-                                  const SizedBox(width: 10),
-                                  Text(
-                                    formatDate(consultation.date),
-                                    style: textTheme.titleMedium?.copyWith(
-                                      fontWeight: FontWeight.bold,
-                                      color: kPrimaryBlue,
-                                    ),
-                                  ),
-                                  const Spacer(),
-                                ],
-                              ),
-                              const SizedBox(height: 8), // Added spacing below date
-                              // VETERINARIAN NAME DISPLAY - RESTORED AND STYLED
-                              Row(
-                                children: [
-                                  Icon(Icons.person_pin, size: 20, color: kAccentBlue), // Consistent icon size
-                                  const SizedBox(width: 10),
-                                  Text(
-                                    'Vétérinaire: ${consultation.vetName}',
-                                    style: textTheme.titleSmall?.copyWith(
-                                      fontWeight: FontWeight.w600,
-                                      color: Colors.black87,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: 12),
-                              Divider(height: 1, thickness: 1, color: Colors.blueGrey.shade100),
-                              const SizedBox(height: 12),
-
-                              _buildInfoRow(textTheme, 'Diagnostic:', consultation.diagnostic),
-                              _buildInfoRow(textTheme, 'Treatment:', consultation.treatment),
-                              _buildInfoRow(textTheme, 'Prescription:', consultation.prescription),
-                              _buildInfoRow(textTheme, 'Notes:', consultation.notes),
-
-                              if (consultation.documentPath.isNotEmpty) ...[
-                                const SizedBox(height: 10),
-                                Divider(height: 1, thickness: 1, color: Colors.blueGrey.shade100),
-                                const SizedBox(height: 10),
+                        // Add InkWell here to make the whole card tappable
+                        child: InkWell(
+                          onTap: () => _showConsultationDetails(consultation), // <--- This is the key line!
+                          borderRadius: BorderRadius.circular(15), // Match Card's border radius
+                          child: Padding(
+                            padding: const EdgeInsets.all(18.0), // Increased padding
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
                                 Row(
+                                  crossAxisAlignment: CrossAxisAlignment.center,
                                   children: [
-                                    Icon(Icons.attach_file, color: kPrimaryBlue),
-                                    const SizedBox(width: 8),
-                                    Flexible(
-                                      child: Text(
-                                        extractFileName(consultation.documentPath),
-                                        softWrap: true,
-                                        maxLines: 2,
-                                        overflow: TextOverflow.ellipsis,
-                                        style: textTheme.bodyMedium?.copyWith(fontStyle: FontStyle.italic, color: Colors.black54),
+                                    Icon(Icons.calendar_month_rounded, size: 20, color: kAccentBlue),
+                                    const SizedBox(width: 10),
+                                    Text(
+                                      formatDate(consultation.date),
+                                      style: textTheme.titleMedium?.copyWith(
+                                        fontWeight: FontWeight.bold,
+                                        color: kPrimaryBlue,
                                       ),
                                     ),
-                                    IconButton(
-                                      icon: Icon(Icons.download_rounded, color: kAccentBlue),
-                                      tooltip: 'Download Document',
-                                      onPressed: () {
-                                        downloadFile(
-                                          '${BaseUrl.api}/${consultation.documentPath}',
-                                          extractFileName(consultation.documentPath),
-                                          context,
-                                        );
-                                      },
-                                    ),
-                                    IconButton(
-                                      icon: Icon(Icons.remove_red_eye_rounded, color: kAccentBlue),
-                                      tooltip: 'View Document',
-                                      onPressed: () async {
-                                        try {
-                                          final Uri uri = Uri.parse(
-                                            '${BaseUrl.api}/${consultation.documentPath}',
-                                          );
-                                          if (!await launchUrl(
-                                            uri,
-                                            mode: LaunchMode.externalApplication,
-                                          )) {
-                                            _showSnackBar(
-                                              'Could not open document. Check if you have an app to handle this file type.',
-                                              isSuccess: false,
-                                            );
-                                          }
-                                        } catch (e) {
-                                          _showSnackBar(
-                                            'Error viewing document: ${e.toString()}',
-                                            isSuccess: false,
-                                          );
-                                        }
-                                      },
+                                    const Spacer(), // Pushes content to the ends
+                                  ],
+                                ),
+                                const SizedBox(height: 8), // Added spacing below date
+                                // VETERINARIAN NAME DISPLAY
+                                Row(
+                                  children: [
+                                    Icon(Icons.person_pin, size: 20, color: kAccentBlue), // Consistent icon size
+                                    const SizedBox(width: 10),
+                                    Text(
+                                      'Vétérinaire: ${consultation.vetName}', // Displaying vetName from backend
+                                      style: textTheme.titleSmall?.copyWith(
+                                        fontWeight: FontWeight.w600,
+                                        color: Colors.black87,
+                                      ),
                                     ),
                                   ],
                                 ),
+                                const SizedBox(height: 12),
+                                Divider(height: 1, thickness: 1, color: Colors.blueGrey.shade100),
+                                const SizedBox(height: 12),
+
+                                // Information Rows
+                                _buildInfoRow(textTheme, 'Diagnostic:', consultation.diagnostic),
+                                _buildInfoRow(textTheme, 'Treatment:', consultation.treatment),
+                                _buildInfoRow(textTheme, 'Prescription:', consultation.prescription),
+                                _buildInfoRow(textTheme, 'Notes:', consultation.notes),
+
+                                // Document Section (only if documentPath is not empty)
+                                if (consultation.documentPath.isNotEmpty) ...[
+                                  const SizedBox(height: 10),
+                                  Divider(height: 1, thickness: 1, color: Colors.blueGrey.shade100),
+                                  const SizedBox(height: 10),
+                                  Row(
+                                    children: [
+                                      Icon(Icons.attach_file, color: kPrimaryBlue),
+                                      const SizedBox(width: 8),
+                                      Flexible(
+                                        child: Text(
+                                          extractFileName(consultation.documentPath),
+                                          softWrap: true,
+                                          maxLines: 2,
+                                          overflow: TextOverflow.ellipsis,
+                                          style: textTheme.bodyMedium?.copyWith(fontStyle: FontStyle.italic, color: Colors.black54),
+                                        ),
+                                      ),
+                                      // Icon button to view/download document
+                                      IconButton(
+                                        icon: Icon(Icons.remove_red_eye_rounded, color: kAccentBlue),
+                                        tooltip: 'View Document',
+                                        onPressed: () async {
+                                          try {
+                                            final Uri uri = Uri.parse(
+                                              '${BaseUrl.api}/${consultation.documentPath}',
+                                            );
+                                            if (!await launchUrl(
+                                              uri,
+                                              mode: LaunchMode.externalApplication,
+                                            )) {
+                                              _showSnackBar(
+                                                'Could not open document. Check if you have an app to handle this file type.',
+                                                isSuccess: false,
+                                              );
+                                            }
+                                          } catch (e) {
+                                            _showSnackBar(
+                                              'Error viewing document: ${e.toString()}',
+                                              isSuccess: false,
+                                            );
+                                          }
+                                        },
+                                      ),
+                                    ],
+                                  ),
+                                ],
                               ],
-                            ],
+                            ),
                           ),
                         ),
                       );

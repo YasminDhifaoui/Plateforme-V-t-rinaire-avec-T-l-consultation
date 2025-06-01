@@ -110,11 +110,11 @@ class _HomeNavbarState extends State<HomeNavbar> {
                 top: 8,
                 child: Container(
                   padding: const EdgeInsets.all(3),
-                  decoration: BoxDecoration(
+                  /*decoration: BoxDecoration(
                     color: Colors.redAccent, // Bright red badge
                     borderRadius: BorderRadius.circular(10),
                     border: Border.all(color: Colors.white, width: 1.5), // White border
-                  ),
+                  ),*/
                   constraints: const BoxConstraints(
                     minWidth: 18,
                     minHeight: 18,

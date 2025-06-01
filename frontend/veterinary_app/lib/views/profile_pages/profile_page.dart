@@ -10,7 +10,9 @@ import 'package:veterinary_app/views/Auth_pages/vet_reset_password_page.dart';
 
 // Import kPrimaryGreen and kAccentGreen from main.dart to ensure theme consistency
 import 'package:veterinary_app/main.dart';
-import 'package:veterinary_app/views/profile_pages/vet_change_password_page.dart'; // Adjust path if using a separate constants.dart file
+import 'package:veterinary_app/views/profile_pages/vet_change_password_page.dart';
+
+import '../../utils/app_colors.dart'; // Adjust path if using a separate constants.dart file
 
 class VetProfilePage extends StatefulWidget {
   const VetProfilePage({super.key});

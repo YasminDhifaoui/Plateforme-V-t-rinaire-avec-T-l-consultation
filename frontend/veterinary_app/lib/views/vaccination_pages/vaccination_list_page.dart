@@ -3,7 +3,7 @@ import 'package:intl/intl.dart';
 import 'package:veterinary_app/models/vaccination_models/vaccination_model.dart';
 import 'package:veterinary_app/services/vaccination_services/vaccination_service.dart';
 import 'package:veterinary_app/services/animal_services/animals_vet_service.dart';
-import 'package:veterinary_app/services/client_services/client_service.dart'; // Keep this import, just in case ClientModel is used elsewhere
+import 'package:veterinary_app/services/client_services/client_service.dart';
 import 'package:veterinary_app/models/animal_models/animal_model.dart';
 import 'package:veterinary_app/models/client_models/client_model.dart';
 import 'package:veterinary_app/views/components/home_navbar.dart';
@@ -13,7 +13,7 @@ import 'package:veterinary_app/utils/app_colors.dart';
 class DisplayVaccination {
   final VaccinationModel vaccination;
   final AnimalModel? animal;
-  final ClientModel? owner; // This will now come directly from animal.owner
+  final ClientModel? owner;
 
   DisplayVaccination({
     required this.vaccination,
@@ -22,8 +22,8 @@ class DisplayVaccination {
   });
 
   String get vaccineName => vaccination.name.isNotEmpty ? vaccination.name : "Unknown Vaccine";
-  String get animalName => animal?.name ?? 'Unknown'; // Using 'nom' from AnimalModel
-  String get ownerName => owner?.username ?? 'Unknown'; // Using owner.username from ClientModel
+  String get animalName => animal?.name ?? 'Unknown';
+  String get ownerName => owner?.username ?? 'Unknown';
   DateTime get date => vaccination.date;
 
   String get searchableContent {
@@ -52,19 +52,24 @@ class VaccinationListPage extends StatefulWidget {
 class _VaccinationListPageState extends State<VaccinationListPage> {
   final VaccinationService _service = VaccinationService();
   final AnimalsVetService _animalService = AnimalsVetService();
-  // Removed ClientService for getAllClients, as it's no longer needed for owner lookup here.
-  // Kept ClientService import in case it's used elsewhere for other client operations.
 
   late Future<List<DisplayVaccination>> _processedVaccinationsFuture;
+  // This _dateController and _selectedDateTime are for the *page* itself,
+  // potentially if you had a date filter on the main page.
+  // For the ADD dialog, we'll use local variables within the dialog's StatefulBuilder.
+  final TextEditingController _dateController = TextEditingController(); // For the main page's date field, if any
+  DateTime? _selectedDateTime; // For the main page's date field, if any
+
 
   String _searchQuery = '';
   final TextEditingController _searchController = TextEditingController();
   bool _isAscendingSort = false;
 
+  // These controllers are for the ADD vaccination dialog
   final TextEditingController _newVaccineNameController = TextEditingController();
-  final TextEditingController _newDateController = TextEditingController();
-  String? _newSelectedAnimalId;
-  DateTime? _newSelectedDate;
+  // Removed _newDateController here as it will be managed locally in the dialog
+  // Removed _newSelectedDate here as it will be managed locally in the dialog
+  String? _newSelectedAnimalId; // This one is fine to keep as a state variable if you manage dropdown state centrally
 
 
   @override
@@ -84,45 +89,39 @@ class _VaccinationListPageState extends State<VaccinationListPage> {
   void dispose() {
     _searchController.dispose();
     _newVaccineNameController.dispose();
-    _newDateController.dispose();
+    _dateController.dispose(); // Dispose the main page's date controller
+    // No need to dispose _newDateController if it's local to the dialog
     super.dispose();
   }
 
-  // --- Data Fetching and Processing ---
   Future<List<DisplayVaccination>> _fetchAndProcessVaccinations() async {
     try {
       final List<dynamic> results = await Future.wait([
         _service.getAllVaccinations(widget.token),
         _animalService.getAnimalsList(widget.token),
-        // Removed _clientService.getAllClients(widget.token) as it's no longer necessary for owner lookup
       ]);
 
       final List<VaccinationModel> vaccinations = results[0] as List<VaccinationModel>;
       final List<AnimalModel> animals = results[1] as List<AnimalModel>;
-      // final List<ClientModel> clients = results[2] as List<ClientModel>; // No longer needed
 
       print('--- Data Fetch Status ---');
       print('Vaccinations fetched: ${vaccinations.length}');
       print('Animals fetched: ${animals.length}');
-      // print('Clients fetched: ${clients.length}'); // No longer needed
 
       final Map<String, AnimalModel> animalMap = {for (var a in animals) a.id: a};
-
-      // Removed clientMapById and clientMapByUsername as direct owner object is available
 
       List<DisplayVaccination> displayList = vaccinations.map((vaccination) {
         final AnimalModel? animal = animalMap[vaccination.animalId];
 
         ClientModel? owner;
         if (animal != null) {
-          // *** Direct Assignment: Use the nested owner object if present ***
-          owner = animal.owner; // Direct assignment from AnimalModel's parsed owner
+          owner = animal.owner;
 
           print('--- Processing Vaccination ---');
           print('Vaccination ID: ${vaccination.id}');
           print('Animal ID from Vaccination: ${vaccination.animalId}');
-          print('Animal Name: ${animal.name}'); // Using 'nom' from AnimalModel
-          print('Animal\'s ownerId field: ${animal.ownerId}'); // Still useful for debug/info
+          print('Animal Name: ${animal.name}');
+          print('Animal\'s ownerId field: ${animal.ownerId}');
           print('Resolved Owner Username: ${owner?.username ?? 'NOT FOUND (Nested owner was null)'}');
 
         } else {
@@ -134,11 +133,10 @@ class _VaccinationListPageState extends State<VaccinationListPage> {
         return DisplayVaccination(
           vaccination: vaccination,
           animal: animal,
-          owner: owner, // This will now be the directly found owner
+          owner: owner,
         );
       }).toList();
 
-      // 1. Filter based on search query
       if (_searchQuery.isNotEmpty) {
         final queryLower = _searchQuery.toLowerCase();
         displayList = displayList.where((displayItem) {
@@ -146,7 +144,6 @@ class _VaccinationListPageState extends State<VaccinationListPage> {
         }).toList();
       }
 
-      // 2. Sort the list based on _isAscendingSort (old to new or new to old)
       if (_isAscendingSort) {
         displayList.sort((a, b) => a.date.compareTo(b.date));
       } else {
@@ -159,11 +156,6 @@ class _VaccinationListPageState extends State<VaccinationListPage> {
     }
   }
 
-  // ... (rest of your methods remain the same) ...
-  // Ensure that in DisplayVaccination, animalName uses animal.nom, not animal.name
-  // And ownerName uses owner.username, which it already does.
-
-  // --- Helper for showing snackbar messages ---
   void _showSnackBar(String message, {bool isSuccess = true}) {
     if (context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -175,13 +167,11 @@ class _VaccinationListPageState extends State<VaccinationListPage> {
     }
   }
 
-  // --- Helper for formatting date ---
   String _formatDate(DateTime date) {
     final formatter = DateFormat('dd/MM/yyyy HH:mm');
     return formatter.format(date);
   }
 
-  // --- Common Dialog Detail Row Widget ---
   Widget _buildDialogDetailRow(TextTheme textTheme, String label, String value) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4.0),
@@ -206,7 +196,6 @@ class _VaccinationListPageState extends State<VaccinationListPage> {
     );
   }
 
-  // --- Dialogs ---
   void _showAnimalDetailsDialog(AnimalModel? animal) {
     final TextTheme textTheme = Theme.of(context).textTheme;
     showDialog(
@@ -220,7 +209,7 @@ class _VaccinationListPageState extends State<VaccinationListPage> {
               Icon(Icons.pets, color: kPrimaryGreen),
               const SizedBox(width: 10),
               Text(
-                'Animal Details: ${animal?.name ?? 'Unknown'}', // Changed to animal?.nom
+                'Animal Details: ${animal?.name ?? 'Unknown'}',
                 style: textTheme.titleLarge?.copyWith(color: kPrimaryGreen),
               ),
             ],
@@ -236,7 +225,7 @@ class _VaccinationListPageState extends State<VaccinationListPage> {
                 _buildDialogDetailRow(textTheme, 'Sex:', animal.sexe),
                 _buildDialogDetailRow(textTheme, 'Allergies:', animal.allergies.isNotEmpty ? animal.allergies : 'None'),
                 _buildDialogDetailRow(textTheme, 'Medical History:', animal.anttecedentsmedicaux.isNotEmpty ? animal.anttecedentsmedicaux : 'None'),
-                _buildDialogDetailRow(textTheme, 'Owner:', animal.owner?.username ?? 'N/A'), // Display owner from nested object
+                _buildDialogDetailRow(textTheme, 'Owner:', animal.owner?.username ?? 'N/A'),
               ],
             ),
           ),
@@ -331,17 +320,158 @@ class _VaccinationListPageState extends State<VaccinationListPage> {
     );
   }
 
+  // This _selectDateTime is for the main page's date field, if you had one.
+  // It uses _selectedDateTime and _dateController which are state variables of VaccinationListPage.
+  // We need a *different* version for the Add/Update dialogs.
+  /*
+  Future<void> _selectDateTime() async {
+    DateTime initialDate = _selectedDateTime ?? DateTime.now();
+
+    final DateTime? pickedDate = await showDatePicker(
+      context: context,
+      initialDate: initialDate,
+      firstDate: DateTime.now(),
+      lastDate: DateTime(2100),
+      builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: ColorScheme.light(
+              primary: kPrimaryGreen,
+              onPrimary: Colors.white,
+              onSurface: Colors.black87,
+            ),
+            textButtonTheme: TextButtonThemeData(
+              style: TextButton.styleFrom(
+                foregroundColor: kPrimaryGreen,
+              ),
+            ),
+          ),
+          child: child!,
+        );
+      },
+    );
+
+    if (pickedDate != null) {
+      final TimeOfDay? pickedTime = await showTimePicker(
+        context: context,
+        initialTime: TimeOfDay.fromDateTime(initialDate),
+        builder: (context, child) {
+          return Theme(
+            data: Theme.of(context).copyWith(
+              colorScheme: ColorScheme.light(
+                primary: kPrimaryGreen,
+                onPrimary: Colors.white,
+                onSurface: Colors.black87,
+              ),
+              textButtonTheme: TextButtonThemeData(
+                style: TextButton.styleFrom(
+                  foregroundColor: kPrimaryGreen,
+                ),
+              ),
+            ),
+            child: child!,
+          );
+        },
+      );
+
+      if (pickedTime != null) {
+        final selectedDateTime = DateTime(
+          pickedDate.year,
+          pickedDate.month,
+          pickedDate.day,
+          pickedTime.hour,
+          pickedTime.minute,
+        );
+
+        setState(() {
+          _selectedDateTime = selectedDateTime;
+          _dateController.text = DateFormat('dd MMM yyyy HH:mm').format(selectedDateTime);
+        });
+      }
+    }
+  }
+  */
+
   Future<void> _showUpdateVaccinationDialog(DisplayVaccination displayVaccination) async {
     final formKey = GlobalKey<FormState>();
     final TextEditingController vaccineNameController = TextEditingController(text: displayVaccination.vaccineName);
-    DateTime? selectedDate = displayVaccination.date;
-    final TextEditingController dateController = TextEditingController(text: _formatDate(displayVaccination.date).split(' ')[0]);
+    // Use a local variable for the selected date in the dialog
+    DateTime? dialogSelectedDate = displayVaccination.date;
+    final TextEditingController dateController = TextEditingController(text: _formatDate(displayVaccination.date)); // Initialize with full date and time
 
     await showDialog(
       context: context,
       builder: (context) {
         return StatefulBuilder(
           builder: (context, setStateDialog) {
+            // Local function for date/time picking within this dialog's scope
+            Future<void> selectDateTimeForDialog() async {
+              DateTime initialDialogDate = dialogSelectedDate ?? DateTime.now();
+
+              final DateTime? pickedDate = await showDatePicker(
+                context: context,
+                initialDate: initialDialogDate,
+                firstDate: DateTime.now(),
+                lastDate: DateTime(2100),
+                builder: (context, child) {
+                  return Theme(
+                    data: Theme.of(context).copyWith(
+                      colorScheme: ColorScheme.light(
+                        primary: kPrimaryGreen,
+                        onPrimary: Colors.white,
+                        onSurface: Colors.black87,
+                      ),
+                      textButtonTheme: TextButtonThemeData(
+                        style: TextButton.styleFrom(
+                          foregroundColor: kPrimaryGreen,
+                        ),
+                      ),
+                    ),
+                    child: child!,
+                  );
+                },
+              );
+
+              if (pickedDate != null) {
+                final TimeOfDay? pickedTime = await showTimePicker(
+                  context: context,
+                  initialTime: TimeOfDay.fromDateTime(initialDialogDate),
+                  builder: (context, child) {
+                    return Theme(
+                      data: Theme.of(context).copyWith(
+                        colorScheme: ColorScheme.light(
+                          primary: kPrimaryGreen,
+                          onPrimary: Colors.white,
+                          onSurface: Colors.black87,
+                        ),
+                        textButtonTheme: TextButtonThemeData(
+                          style: TextButton.styleFrom(
+                            foregroundColor: kPrimaryGreen,
+                          ),
+                        ),
+                      ),
+                      child: child!,
+                    );
+                  },
+                );
+
+                if (pickedTime != null) {
+                  final selectedDateTime = DateTime(
+                    pickedDate.year,
+                    pickedDate.month,
+                    pickedDate.day,
+                    pickedTime.hour,
+                    pickedTime.minute,
+                  );
+
+                  setStateDialog(() { // Use setStateDialog to update dialog's state
+                    dialogSelectedDate = selectedDateTime;
+                    dateController.text = DateFormat('dd MMM yyyy HH:mm').format(selectedDateTime);
+                  });
+                }
+              }
+            }
+
             return AlertDialog(
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
               backgroundColor: Theme.of(context).cardColor,
@@ -374,49 +504,19 @@ class _VaccinationListPageState extends State<VaccinationListPage> {
                     ),
                     const SizedBox(height: 12),
                     TextFormField(
-                      controller: dateController,
+                      controller: dateController, // Use the local dateController
                       readOnly: true,
                       decoration: InputDecoration(
-                        labelText: 'Date (YYYY-MM-DD)',
+                        labelText: 'Date and Time (YYYY-MM-DD HH:MM)', // Updated label
                         labelStyle: TextStyle(color: kPrimaryGreen),
                         suffixIcon: Icon(Icons.calendar_today, color: kPrimaryGreen),
                         enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Colors.grey.shade300)),
                         focusedBorder: OutlineInputBorder(borderSide: BorderSide(color: kPrimaryGreen, width: 2)),
                       ),
-                      onTap: () async {
-                        DateTime? pickedDate = await showDatePicker(
-                          context: context,
-                          initialDate: selectedDate ?? DateTime.now(),
-                          firstDate: DateTime(2000),
-                          lastDate: DateTime(2100),
-                          builder: (context, child) {
-                            return Theme(
-                              data: Theme.of(context).copyWith(
-                                colorScheme: ColorScheme.light(
-                                  primary: kPrimaryGreen,
-                                  onPrimary: Colors.white,
-                                  onSurface: Colors.black,
-                                ),
-                                textButtonTheme: TextButtonThemeData(
-                                  style: TextButton.styleFrom(
-                                    foregroundColor: kPrimaryGreen,
-                                  ),
-                                ),
-                              ),
-                              child: child!,
-                            );
-                          },
-                        );
-                        if (pickedDate != null) {
-                          setStateDialog(() {
-                            selectedDate = pickedDate;
-                            dateController.text = pickedDate.toLocal().toString().split(' ')[0];
-                          });
-                        }
-                      },
+                      onTap: selectDateTimeForDialog, // Call the local dialog function
                       validator: (value) {
                         if (value == null || value.isEmpty) {
-                          return 'Please enter Date';
+                          return 'Please select Date and Time';
                         }
                         return null;
                       },
@@ -431,11 +531,12 @@ class _VaccinationListPageState extends State<VaccinationListPage> {
                 ),
                 ElevatedButton(
                   onPressed: () async {
-                    if (formKey.currentState!.validate() && selectedDate != null) {
+                    // Check form validation and that the dialogSelectedDate is not null
+                    if (formKey.currentState!.validate() && dialogSelectedDate != null) {
                       final dto = {
                         'AnimalId': displayVaccination.vaccination.animalId,
                         'Name': vaccineNameController.text,
-                        'Date': selectedDate!.toIso8601String(),
+                        'Date': dialogSelectedDate!.toIso8601String(), // Use dialogSelectedDate here
                       };
                       try {
                         await _service.updateVaccination(
@@ -445,12 +546,14 @@ class _VaccinationListPageState extends State<VaccinationListPage> {
                         );
                         if (context.mounted) Navigator.of(context).pop();
                         _showSnackBar('Vaccination updated successfully');
-                        setState(() {
+                        setState(() { // This setState is for the main page to refresh its list
                           _processedVaccinationsFuture = _fetchAndProcessVaccinations();
                         });
                       } catch (e) {
                         _showSnackBar('Failed to update vaccination: $e', isSuccess: false);
                       }
+                    } else {
+                      _showSnackBar('Please ensure all fields are filled and valid.', isSuccess: false);
                     }
                   },
                   style: ElevatedButton.styleFrom(
@@ -518,15 +621,84 @@ class _VaccinationListPageState extends State<VaccinationListPage> {
   void _showAddVaccinationDialog() {
     final addFormKey = GlobalKey<FormState>();
     _newVaccineNameController.clear();
-    _newDateController.clear();
     _newSelectedAnimalId = null;
-    _newSelectedDate = null;
+    // These will be managed locally within the dialog's StatefulBuilder
+    TextEditingController addDialogDateController = TextEditingController();
+    DateTime? addDialogSelectedDate;
 
     showDialog(
       context: context,
       builder: (context) {
         return StatefulBuilder(
           builder: (context, setStateDialog) {
+            // Local function for date/time picking within this dialog's scope
+            Future<void> selectDateTimeForAddDialog() async {
+              DateTime initialAddDialogDate = addDialogSelectedDate ?? DateTime.now();
+
+              final DateTime? pickedDate = await showDatePicker(
+                context: context,
+                initialDate: initialAddDialogDate,
+                firstDate: DateTime.now(),
+                lastDate: DateTime(2100),
+                builder: (context, child) {
+                  return Theme(
+                    data: Theme.of(context).copyWith(
+                      colorScheme: ColorScheme.light(
+                        primary: kPrimaryGreen,
+                        onPrimary: Colors.white,
+                        onSurface: Colors.black87,
+                      ),
+                      textButtonTheme: TextButtonThemeData(
+                        style: TextButton.styleFrom(
+                          foregroundColor: kPrimaryGreen,
+                        ),
+                      ),
+                    ),
+                    child: child!,
+                  );
+                },
+              );
+
+              if (pickedDate != null) {
+                final TimeOfDay? pickedTime = await showTimePicker(
+                  context: context,
+                  initialTime: TimeOfDay.fromDateTime(initialAddDialogDate),
+                  builder: (context, child) {
+                    return Theme(
+                      data: Theme.of(context).copyWith(
+                        colorScheme: ColorScheme.light(
+                          primary: kPrimaryGreen,
+                          onPrimary: Colors.white,
+                          onSurface: Colors.black87,
+                        ),
+                        textButtonTheme: TextButtonThemeData(
+                          style: TextButton.styleFrom(
+                            foregroundColor: kPrimaryGreen,
+                          ),
+                        ),
+                      ),
+                      child: child!,
+                    );
+                  },
+                );
+
+                if (pickedTime != null) {
+                  final selectedDateTime = DateTime(
+                    pickedDate.year,
+                    pickedDate.month,
+                    pickedDate.day,
+                    pickedTime.hour,
+                    pickedTime.minute,
+                  );
+
+                  setStateDialog(() { // Use setStateDialog to update dialog's state
+                    addDialogSelectedDate = selectedDateTime;
+                    addDialogDateController.text = DateFormat('dd MMM yyyy HH:mm').format(selectedDateTime);
+                  });
+                }
+              }
+            }
+
             return AlertDialog(
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
               backgroundColor: Theme.of(context).cardColor,
@@ -594,7 +766,7 @@ class _VaccinationListPageState extends State<VaccinationListPage> {
                               items: animals.map<DropdownMenuItem<String>>((AnimalModel animal) {
                                 return DropdownMenuItem<String>(
                                   value: animal.id,
-                                  child: Text(animal.name), // Use animal.nom for display
+                                  child: Text(animal.name),
                                 );
                               }).toList(),
                             );
@@ -603,49 +775,27 @@ class _VaccinationListPageState extends State<VaccinationListPage> {
                       ),
                       const SizedBox(height: 12),
                       TextFormField(
-                        controller: _newDateController,
+                        controller: addDialogDateController, // Use the local dialog controller
                         readOnly: true,
                         decoration: InputDecoration(
-                          labelText: 'Date (YYYY-MM-DD)',
+                          labelText: 'Select Date and Time',
                           labelStyle: TextStyle(color: kPrimaryGreen),
-                          suffixIcon: Icon(Icons.calendar_today, color: kPrimaryGreen),
-                          enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Colors.grey.shade300)),
-                          focusedBorder: OutlineInputBorder(borderSide: BorderSide(color: kPrimaryGreen, width: 2)),
+                          prefixIcon: Icon(Icons.calendar_today_rounded, color: kPrimaryGreen),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(10),
+                            borderSide: BorderSide(color: kPrimaryGreen.withOpacity(0.6)),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(10),
+                            borderSide: const BorderSide(color: kPrimaryGreen, width: 2),
+                          ),
+                          filled: true,
+                          fillColor: Colors.white,
                         ),
-                        onTap: () async {
-                          DateTime? pickedDate = await showDatePicker(
-                            context: context,
-                            initialDate: _newSelectedDate ?? DateTime.now(),
-                            firstDate: DateTime(2000),
-                            lastDate: DateTime(2100),
-                            builder: (context, child) {
-                              return Theme(
-                                data: Theme.of(context).copyWith(
-                                  colorScheme: ColorScheme.light(
-                                    primary: kPrimaryGreen,
-                                    onPrimary: Colors.white,
-                                    onSurface: Colors.black,
-                                  ),
-                                  textButtonTheme: TextButtonThemeData(
-                                    style: TextButton.styleFrom(
-                                      foregroundColor: kPrimaryGreen,
-                                    ),
-                                  ),
-                                ),
-                                child: child!,
-                              );
-                            },
-                          );
-                          if (pickedDate != null) {
-                            setStateDialog(() {
-                              _newSelectedDate = pickedDate;
-                              _newDateController.text = pickedDate.toLocal().toString().split(' ')[0];
-                            });
-                          }
-                        },
+                        onTap: selectDateTimeForAddDialog, // Call the local dialog function
                         validator: (value) {
                           if (value == null || value.isEmpty) {
-                            return 'Please enter Date';
+                            return 'Please select Date and Time';
                           }
                           return null;
                         },
@@ -661,22 +811,29 @@ class _VaccinationListPageState extends State<VaccinationListPage> {
                 ),
                 ElevatedButton(
                   onPressed: () async {
-                    if (addFormKey.currentState!.validate() && _newSelectedAnimalId != null && _newSelectedDate != null) {
+                    // Critical: Check addDialogSelectedDate instead of _newSelectedDate
+                    if (addFormKey.currentState!.validate() && _newSelectedAnimalId != null && addDialogSelectedDate != null) {
                       final dto = {
                         'AnimalId': _newSelectedAnimalId,
                         'Name': _newVaccineNameController.text,
-                        'Date': _newSelectedDate!.toIso8601String(),
+                        'Date': addDialogSelectedDate!.toIso8601String(), // Use addDialogSelectedDate
                       };
                       try {
                         await _service.addVaccination(widget.token, dto);
                         if (context.mounted) Navigator.of(context).pop();
                         _showSnackBar('Vaccination added successfully');
-                        setState(() {
+                        setState(() { // This setState is for the main page to refresh its list
                           _processedVaccinationsFuture = _fetchAndProcessVaccinations();
                         });
                       } catch (e) {
                         _showSnackBar('Failed to add vaccination: $e', isSuccess: false);
                       }
+                    } else {
+                      _showSnackBar('Please ensure all fields are filled and valid.', isSuccess: false);
+                      print('Add Dialog Validation Failed:');
+                      print('Form Valid: ${addFormKey.currentState!.validate()}');
+                      print('Animal Selected: $_newSelectedAnimalId');
+                      print('Date Selected: $addDialogSelectedDate');
                     }
                   },
                   style: ElevatedButton.styleFrom(
@@ -733,33 +890,28 @@ class _VaccinationListPageState extends State<VaccinationListPage> {
                     controller: _searchController,
                     decoration: InputDecoration(
                       hintText: 'Search vaccinations (vaccine, animal, owner, date)',
-                      prefixIcon: Icon(Icons.search, color: kPrimaryGreen),
+                      prefixIcon: Icon(Icons.search, color: kPrimaryGreen), // Assuming kPrimaryGreen for search icon
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(10),
-                        borderSide: BorderSide(color: kPrimaryGreen),
+                        borderSide: BorderSide(color: kPrimaryGreen.withOpacity(0.6)),
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(10),
-                        borderSide: BorderSide(color: kPrimaryGreen, width: 2),
+                        borderSide: const BorderSide(color: kPrimaryGreen, width: 2),
                       ),
-                      contentPadding: const EdgeInsets.symmetric(vertical: 10, horizontal: 15),
                     ),
                   ),
                 ),
                 const SizedBox(width: 10),
                 IconButton(
-                  icon: Icon(
-                    _isAscendingSort ? Icons.arrow_upward : Icons.arrow_downward,
-                    color: kPrimaryGreen,
-                    size: 28,
-                  ),
-                  tooltip: _isAscendingSort ? 'Sort by Date (Oldest First)' : 'Sort by Date (Newest First)',
+                  icon: Icon(_isAscendingSort ? Icons.arrow_upward : Icons.arrow_downward),
                   onPressed: () {
                     setState(() {
                       _isAscendingSort = !_isAscendingSort;
-                      _processedVaccinationsFuture = _fetchAndProcessVaccinations();
+                      _processedVaccinationsFuture = _fetchAndProcessVaccinations(); // Re-fetch to apply sort
                     });
                   },
+                  tooltip: _isAscendingSort ? 'Sort by date (newest first)' : 'Sort by date (oldest first)',
                 ),
               ],
             ),
@@ -771,159 +923,122 @@ class _VaccinationListPageState extends State<VaccinationListPage> {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return const Center(child: CircularProgressIndicator());
                 } else if (snapshot.hasError) {
-                  return Center(
-                    child: Text(
-                      'Error: ${snapshot.error}',
-                      style: textTheme.titleMedium?.copyWith(color: Colors.redAccent),
-                    ),
-                  );
+                  return Center(child: Text('Error: ${snapshot.error}'));
                 } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
                   return Center(
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(
-                          Icons.vaccines_outlined,
-                          size: 80,
-                          color: Colors.grey[400],
-                        ),
+                        Icon(Icons.vaccines_rounded, size: 80, color: Colors.grey[400]),
+                        const SizedBox(height: 10),
+                        Text('No vaccinations found.', style: textTheme.headlineSmall?.copyWith(color: Colors.grey[600])),
                         const SizedBox(height: 20),
-                        Text(
-                          _searchQuery.isNotEmpty
-                              ? 'No matching vaccinations found.'
-                              : 'No vaccinations found. Add a new one!',
-                          style: textTheme.titleMedium?.copyWith(color: Colors.grey[600]),
-                          textAlign: TextAlign.center,
+                        ElevatedButton.icon(
+                          onPressed: _showAddVaccinationDialog,
+                          icon: const Icon(Icons.add_circle_outline, color: Colors.white),
+                          label: Text('Add New Vaccination', style: textTheme.labelLarge?.copyWith(color: Colors.white)),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: kPrimaryGreen,
+                            foregroundColor: Colors.white,
+                          ),
                         ),
                       ],
                     ),
                   );
                 } else {
-                  final vaccinations = snapshot.data!;
+                  final filteredVaccinations = snapshot.data!;
                   return ListView.builder(
-                    itemCount: vaccinations.length,
+                    padding: const EdgeInsets.all(12.0),
+                    itemCount: filteredVaccinations.length,
                     itemBuilder: (context, index) {
-                      final displayVaccination = vaccinations[index];
+                      final displayVaccination = filteredVaccinations[index];
                       return Card(
-                        margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                        elevation: 4,
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-                        child: InkWell(
-                          onTap: () => _showVaccinationDetailsDialog(displayVaccination),
-                          borderRadius: BorderRadius.circular(15),
-                          child: Padding(
-                            padding: const EdgeInsets.all(16.0),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Expanded(
-                                      child: Text(
-                                        'Vaccine: ${displayVaccination.vaccineName}',
-                                        style: textTheme.titleMedium?.copyWith(
-                                          fontWeight: FontWeight.bold,
-                                          color: kPrimaryGreen,
-                                        ),
-                                        overflow: TextOverflow.ellipsis,
-                                      ),
-                                    ),
-                                    const SizedBox(width: 10),
-                                    Text(
-                                      _formatDate(displayVaccination.date),
-                                      style: textTheme.bodySmall?.copyWith(color: Colors.grey[600]),
-                                    ),
-                                  ],
+                        elevation: 5,
+                        margin: const EdgeInsets.symmetric(vertical: 8),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        child: Padding(
+                          padding: const EdgeInsets.all(16.0),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                displayVaccination.vaccineName,
+                                style: textTheme.titleMedium?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                  color: kPrimaryGreen,
                                 ),
-                                const Divider(height: 15, thickness: 1),
-                                Text(
-                                  'Animal: ${displayVaccination.animalName}',
-                                  style: textTheme.bodyLarge,
-                                ),
-                                const SizedBox(height: 4),
-                                Text(
-                                  'Owner: ${displayVaccination.ownerName}',
-                                  style: textTheme.bodyLarge,
-                                ),
-                                const SizedBox(height: 10),
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.end,
-                                  children: [
-                                    TextButton.icon(
-                                      icon: const Icon(Icons.pets_outlined, size: 20),
-                                      label: const Text('Animal'),
-                                      onPressed: () => _showAnimalDetailsDialog(displayVaccination.animal),
-                                      style: TextButton.styleFrom(
-                                        foregroundColor: Colors.teal,
-                                        padding: EdgeInsets.zero,
-                                        minimumSize: Size.zero,
-                                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                                      ),
+                              ),
+                              const Divider(height: 20, thickness: 1),
+                              Row(
+                                children: [
+                                  Icon(Icons.pets, color: kAccentGreen, size: 20),
+                                  const SizedBox(width: 8),
+                                  Expanded(
+                                    child: Text(
+                                      'Animal: ${displayVaccination.animalName}',
+                                      style: textTheme.bodyLarge,
                                     ),
-                                    const SizedBox(width: 10),
-                                    TextButton.icon(
-                                      icon: const Icon(Icons.person_outline, size: 20),
-                                      label: const Text('Owner'),
-                                      onPressed: () => _showClientDetailsDialog(displayVaccination.owner),
-                                      style: TextButton.styleFrom(
-                                        foregroundColor: Colors.deepPurple,
-                                        padding: EdgeInsets.zero,
-                                        minimumSize: Size.zero,
-                                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                                      ),
+                                  ),
+                                  IconButton(
+                                    icon: Icon(Icons.info_outline, color: kAccentGreen),
+                                    onPressed: () => _showAnimalDetailsDialog(displayVaccination.animal),
+                                    tooltip: 'View Animal Details',
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 4),
+                              Row(
+                                children: [
+                                  Icon(Icons.person, color: kAccentGreen, size: 20),
+                                  const SizedBox(width: 8),
+                                  Expanded(
+                                    child: Text(
+                                      'Owner: ${displayVaccination.ownerName}',
+                                      style: textTheme.bodyLarge,
                                     ),
-                                    const SizedBox(width: 10),
-                                    PopupMenuButton<String>(
-                                      onSelected: (value) async {
-                                        switch (value) {
-                                          case 'see_animal':
-                                            _showAnimalDetailsDialog(displayVaccination.animal);
-                                            break;
-                                          case 'see_client':
-                                            _showClientDetailsDialog(displayVaccination.owner);
-                                            break;
-                                          case 'see_details':
-                                            _showVaccinationDetailsDialog(displayVaccination);
-                                            break;
-                                          case 'update':
-                                            await _showUpdateVaccinationDialog(displayVaccination);
-                                            break;
-                                          case 'delete':
-                                            await _showDeleteVaccinationDialog(displayVaccination.vaccination.id);
-                                            break;
-                                        }
-                                      },
-                                      itemBuilder: (context) => [
-                                        const PopupMenuItem(
-                                          value: 'see_animal',
-                                          child: Text('See Animal'),
-                                        ),
-                                        const PopupMenuItem(
-                                          value: 'see_client',
-                                          child: Text('See Client'),
-                                        ),
-                                        const PopupMenuItem(
-                                          value: 'see_details',
-                                          child: Text('See Details'),
-                                        ),
-                                        const PopupMenuItem(
-                                          value: 'update',
-                                          child: Text('Update'),
-                                        ),
-                                        const PopupMenuItem(
-                                          value: 'delete',
-                                          child: Text('Delete'),
-                                        ),
-                                      ],
-                                      offset: const Offset(0, 40),
-                                      icon: Icon(Icons.more_vert, color: Colors.grey[700]),
-                                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                                  ),
+                                  IconButton(
+                                    icon: Icon(Icons.info_outline, color: kAccentGreen),
+                                    onPressed: () => _showClientDetailsDialog(displayVaccination.owner),
+                                    tooltip: 'View Owner Details',
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 4),
+                              Row(
+                                children: [
+                                  Icon(Icons.calendar_today, color: kAccentGreen, size: 20),
+                                  const SizedBox(width: 8),
+                                  Expanded(
+                                    child: Text(
+                                      'Date: ${_formatDate(displayVaccination.date)}',
+                                      style: textTheme.bodyLarge,
                                     ),
-                                  ],
-                                ),
-                              ],
-                            ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 12),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.end,
+                                children: [
+                                  IconButton(
+                                    icon: Icon(Icons.info_outline, color: kPrimaryGreen),
+                                    onPressed: () => _showVaccinationDetailsDialog(displayVaccination),
+                                    tooltip: 'More Details',
+                                  ),
+                                  IconButton(
+                                    icon: Icon(Icons.edit, color: kAccentGreen),
+                                    onPressed: () => _showUpdateVaccinationDialog(displayVaccination),
+                                    tooltip: 'Edit Vaccination',
+                                  ),
+                                  IconButton(
+                                    icon: Icon(Icons.delete_forever, color: Colors.red),
+                                    onPressed: () => _showDeleteVaccinationDialog(displayVaccination.vaccination.id),
+                                    tooltip: 'Delete Vaccination',
+                                  ),
+                                ],
+                              ),
+                            ],
                           ),
                         ),
                       );
@@ -935,25 +1050,16 @@ class _VaccinationListPageState extends State<VaccinationListPage> {
           ),
         ],
       ),
-      floatingActionButton: Column(
-        mainAxisAlignment: MainAxisAlignment.end,
-        crossAxisAlignment: CrossAxisAlignment.end,
-        children: [
-          FloatingActionButton.extended(
-            heroTag: 'addBtn',
-            onPressed: () {
-              _showAddVaccinationDialog();
-            },
-            icon: const Icon(Icons.add),
-            label: const Text('Add Vaccination'),
-            backgroundColor: kPrimaryGreen,
-            foregroundColor: Colors.white,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
-          ),
-          const SizedBox(height: 12),
-
-        ],
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: _showAddVaccinationDialog,
+        label: Text('Add New Vaccination', style: textTheme.titleMedium?.copyWith(color: Colors.white)),
+        icon: const Icon(Icons.add, color: Colors.white),
+        backgroundColor: kPrimaryGreen,
+        foregroundColor: Colors.white,
+        elevation: 8,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
       ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
     );
   }
 }

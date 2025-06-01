@@ -7,7 +7,9 @@ import 'package:veterinary_app/views/Auth_pages/vet_forgot_password_page.dart';
 // import 'package:veterinary_app/views/components/login_navbar.dart'; // Removed custom LoginNavbar, using standard AppBar
 
 // Assuming kPrimaryGreen and kAccentGreen are defined in main.dart
-import 'package:veterinary_app/main.dart'; // Adjust path if using a separate constants.dart
+import 'package:veterinary_app/main.dart';
+
+import '../../utils/app_colors.dart'; // Adjust path if using a separate constants.dart
 
 class VetLoginPage extends StatefulWidget {
   // NEW: Callback from MyHomePage/AppWrapper

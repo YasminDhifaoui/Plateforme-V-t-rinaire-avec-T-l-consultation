@@ -5,7 +5,9 @@ import '../../models/profile_models/profile_model.dart';
 import '../../services/profile_services/edit_profile_service.dart';
 
 // Import kPrimaryGreen and kAccentGreen from main.dart to ensure theme consistency
-import 'package:veterinary_app/main.dart'; // Adjust path if using a separate constants.dart file
+import 'package:veterinary_app/main.dart';
+
+import '../../utils/app_colors.dart'; // Adjust path if using a separate constants.dart file
 
 class ProfileEditPage extends StatefulWidget {
   final ProfileModel profile;

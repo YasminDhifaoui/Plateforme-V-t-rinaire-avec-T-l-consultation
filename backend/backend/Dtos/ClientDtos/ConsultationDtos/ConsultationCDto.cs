@@ -1,4 +1,6 @@
-﻿namespace backend.Dtos.ClientDtos.ConsultationDtos
+﻿using backend.Models;
+
+namespace backend.Dtos.ClientDtos.ConsultationDtos
 {
     public class ConsultationCDto
     {
@@ -12,5 +14,7 @@
         public DateTime CreatedAt { get; set; }
         public DateTime UpdatedAt { get; set; }
         public string VeterinaireName { get; set; }
+        
+        public AppUser Veterinaire { get; set; }
     }
 }

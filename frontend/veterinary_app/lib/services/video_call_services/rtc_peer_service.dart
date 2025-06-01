@@ -44,7 +44,6 @@ class RTCPeerService {
   Function(RTCPeerConnectionState)? onPeerConnectionStateChange;
   Function(String)? onError; // General error callback
 
-  // MODIFIED: initRenderers to handle re-initialization of existing renderers
   Future<void> initRenderers() async {
     print('[RTCPeerService] Initializing/re-initializing renderers.');
 
@@ -56,9 +55,7 @@ class RTCPeerService {
       remoteRenderer.srcObject = null;
     }
 
-    // Re-initialize renderers (call initialize again)
-    // It's safe to call initialize() on already initialized renderers.
-    // If they were previously disposed, this will re-enable them.
+
     await localRenderer.initialize();
     await remoteRenderer.initialize();
     print('[RTCPeerService] Renderers initialized.');
@@ -67,11 +64,7 @@ class RTCPeerService {
   Future<void> initWebRTC() async {
     print('[RTCPeerService] Initializing WebRTC...');
     try {
-      // Ensure renderers are ready before proceeding
-      await initRenderers(); // Call this first to make sure renderers are initialized
-
-      // Ensure existing connection is properly closed before creating a new one
-      if (_peerConnection != null) {
+      await initRenderers();  if (_peerConnection != null) {
         if (_peerConnection!.connectionState != RTCPeerConnectionState.RTCPeerConnectionStateClosed) {
           print('[RTCPeerService] Closing existing peer connection...');
           await _peerConnection!.close();

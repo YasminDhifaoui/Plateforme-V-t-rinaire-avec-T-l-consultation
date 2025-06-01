@@ -28,8 +28,16 @@ namespace backend.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
+                    b.Property<string>("FileName")
+                        .HasColumnType("text");
+
+                    b.Property<string>("FileType")
+                        .HasColumnType("text");
+
+                    b.Property<string>("FileUrl")
+                        .HasColumnType("text");
+
                     b.Property<string>("Message")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<Guid>("ReceiverId")

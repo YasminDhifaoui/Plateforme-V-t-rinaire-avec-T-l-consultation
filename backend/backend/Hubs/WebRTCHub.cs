@@ -2,14 +2,11 @@
 using Microsoft.AspNetCore.SignalR;
 using System.Collections.Concurrent;
 using System.Text.Json;
-using System.Linq; // Ensure this is present for .Any()
 
 [Authorize]
 public class WebRTCHub : Hub
 {
-    // Stores userId -> connectionId mapping
     private static readonly ConcurrentDictionary<string, string> _userConnections = new();
-    // Stores active calls: CallerId -> TargetId
     private static readonly ConcurrentDictionary<string, string> _activeCalls = new();
 
     public override async Task OnConnectedAsync()
@@ -38,21 +35,19 @@ public class WebRTCHub : Hub
             string? partnerIdInCall = null;
             string? callKeyToRemove = null;
 
-            // Case 1: Current user (userId) is the caller in an active call (userId is the key)
             if (_activeCalls.TryGetValue(userId, out var targetOfThisUser) && targetOfThisUser != null)
             {
                 partnerIdInCall = targetOfThisUser;
                 callKeyToRemove = userId;
                 Console.WriteLine($"[Hub] OnDisconnected: User {userId} (disconnected) was the caller to {partnerIdInCall}.");
             }
-            // Case 2: Current user (userId) is the callee/target in an active call (userId is the value)
             else
             {
                 var activeCallEntry = _activeCalls.FirstOrDefault(x => x.Value == userId);
                 if (activeCallEntry.Key != null)
                 {
                     callKeyToRemove = activeCallEntry.Key;
-                    partnerIdInCall = activeCallEntry.Key; // The partner is the caller
+                    partnerIdInCall = activeCallEntry.Key;
                     Console.WriteLine($"[Hub] OnDisconnected: User {userId} (disconnected) was the callee from {partnerIdInCall}.");
                 }
             }
@@ -90,7 +85,6 @@ public class WebRTCHub : Hub
         await base.OnDisconnectedAsync(exception);
     }
 
-    // Initiate a call
     public async Task InitiateCall(string targetUserId)
     {
         var callerId = Context.User?.FindFirst("Id")?.Value;
@@ -102,7 +96,6 @@ public class WebRTCHub : Hub
             return;
         }
 
-        // Prevent self-calling
         if (callerId == targetUserId)
         {
             Console.WriteLine($"[Hub] InitiateCall: Self-calling blocked for {callerId}.");
@@ -110,8 +103,6 @@ public class WebRTCHub : Hub
             return;
         }
 
-        // Check if caller or target is already in a call (as key or value)
-        // CORRECTED LINES HERE:
         if (_activeCalls.ContainsKey(callerId) || _activeCalls.Any(x => x.Value == callerId) ||
             _activeCalls.ContainsKey(targetUserId) || _activeCalls.Any(x => x.Value == targetUserId))
         {
@@ -120,7 +111,6 @@ public class WebRTCHub : Hub
             return;
         }
 
-        // Check if target user is connected
         if (_userConnections.TryGetValue(targetUserId, out string? targetConnectionId))
         {
             if (_activeCalls.TryAdd(callerId, targetUserId))
@@ -141,7 +131,6 @@ public class WebRTCHub : Hub
         }
     }
 
-    // Accept an incoming call
     public async Task AcceptCall(string callerUserId)
     {
         var calleeId = Context.User?.FindFirst("Id")?.Value;
@@ -149,7 +138,6 @@ public class WebRTCHub : Hub
 
         if (calleeId == null) { Console.WriteLine("[Hub] AcceptCall: Callee ID is null."); return; }
 
-        // Verify the call is still active and matches the expected participants
         if (!_activeCalls.TryGetValue(callerUserId, out var currentTarget) || currentTarget != calleeId)
         {
             Console.WriteLine($"[Hub] AcceptCall: Call not active or mismatch. CallerKey={callerUserId}, ExpectedTarget={calleeId}, ActualTarget={currentTarget ?? "null"}");
@@ -170,7 +158,6 @@ public class WebRTCHub : Hub
         }
     }
 
-    // Reject an incoming call
     public async Task RejectCall(string callerUserId, string reason)
     {
         var calleeId = Context.User?.FindFirst("Id")?.Value;
@@ -178,7 +165,6 @@ public class WebRTCHub : Hub
 
         if (calleeId == null) { Console.WriteLine("[Hub] RejectCall: Callee ID is null."); return; }
 
-        // Try to remove the call from active calls, considering the callerUserId is the key
         if (_activeCalls.TryRemove(callerUserId, out _))
         {
             Console.WriteLine($"[Hub] RejectCall: Active call from {callerUserId} removed.");
@@ -199,7 +185,6 @@ public class WebRTCHub : Hub
         }
     }
 
-    // End an ongoing call
     public async Task EndCall(string otherUserId, string reason)
     {
         var userId = Context.User?.FindFirst("Id")?.Value;
@@ -211,20 +196,18 @@ public class WebRTCHub : Hub
         string? callKeyToNotifyOther = null;
         string? otherUserToNotify = null;
 
-        // Scenario 1: Current user is the caller in the map (userId -> otherUserId)
         if (_activeCalls.TryGetValue(userId, out var target) && target == otherUserId)
         {
             removed = _activeCalls.TryRemove(userId, out _);
-            callKeyToNotifyOther = userId; // The caller (who ended)
-            otherUserToNotify = otherUserId; // The callee (to notify)
+            callKeyToNotifyOther = userId; 
+            otherUserToNotify = otherUserId; 
             Console.WriteLine($"[Hub] EndCall: User {userId} (caller) ended call with {otherUserId}.");
         }
-        // Scenario 2: Current user is the target in the map (otherUserId -> userId)
         else if (_activeCalls.TryGetValue(otherUserId, out var caller) && caller == userId)
         {
             removed = _activeCalls.TryRemove(otherUserId, out _);
-            callKeyToNotifyOther = otherUserId; // The caller (whose call entry is being removed)
-            otherUserToNotify = otherUserId; // The caller (to notify)
+            callKeyToNotifyOther = otherUserId;
+            otherUserToNotify = otherUserId;
             Console.WriteLine($"[Hub] EndCall: User {userId} (callee) ended call from {otherUserId}.");
         }
 
@@ -247,7 +230,6 @@ public class WebRTCHub : Hub
         }
     }
 
-    // Send WebRTC offer
     public async Task SendOffer(string targetUserId, JsonElement offer)
     {
         var callerId = Context.User?.FindFirst("Id")?.Value;
@@ -255,7 +237,6 @@ public class WebRTCHub : Hub
 
         if (callerId == null) { Console.WriteLine("[Hub] SendOffer: Caller ID is null."); return; }
 
-        // Validate that there's an active call between these two users
         if (!_activeCalls.TryGetValue(callerId, out var currentTarget) || currentTarget != targetUserId)
         {
             Console.WriteLine($"[Hub] SendOffer: No active call for {callerId} to {targetUserId}. Current active call: {callerId} -> {currentTarget ?? "null"}");
@@ -276,7 +257,6 @@ public class WebRTCHub : Hub
         }
     }
 
-    // Send WebRTC answer
     public async Task SendAnswer(string callerUserId, JsonElement answer)
     {
         var calleeId = Context.User?.FindFirst("Id")?.Value;
@@ -284,7 +264,6 @@ public class WebRTCHub : Hub
 
         if (calleeId == null) { Console.WriteLine("[Hub] SendAnswer: Callee ID is null."); return; }
 
-        // Validate that there's an active call between these two users
         if (!_activeCalls.TryGetValue(callerUserId, out var currentTarget) || currentTarget != calleeId)
         {
             Console.WriteLine($"[Hub] SendAnswer: No active call for {calleeId} to {callerUserId}. Current active call: {callerUserId} -> {currentTarget ?? "null"}");
@@ -305,7 +284,6 @@ public class WebRTCHub : Hub
         }
     }
 
-    // Relay ICE candidate between peers
     public async Task SendIceCandidate(string targetUserId, JsonElement candidate)
     {
         var senderId = Context.User?.FindFirst("Id")?.Value;
@@ -313,8 +291,6 @@ public class WebRTCHub : Hub
 
         if (senderId == null) { Console.WriteLine("[Hub] SendIceCandidate: Sender ID is null."); return; }
 
-        // While not strictly necessary to check _activeCalls for every candidate,
-        // it can help prevent relaying candidates for non-existent calls.
         bool callActive = (_activeCalls.TryGetValue(senderId, out var target) && target == targetUserId) ||
                           (_activeCalls.Any(x => x.Key == targetUserId && x.Value == senderId));
 

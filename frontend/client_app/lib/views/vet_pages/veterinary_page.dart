@@ -435,15 +435,30 @@ class _VetListPageState extends State<VetListPage> {
                 const SizedBox(height: 12),
                 SizedBox(
                   width: double.infinity,
+                  // The button in your dialog that navigates to AddRendezvousPage
+
                   child: ElevatedButton.icon(
-                    onPressed: () {
-                      Navigator.pop(dialogContext);
-                      Navigator.push(
+                    onPressed: () async { // <-- Make the onPressed an 'async' function
+                      Navigator.pop(dialogContext); // Close the current dialog first
+
+                      // Await the result from AddRendezvousPage
+                      final result = await Navigator.push(
                         context,
                         MaterialPageRoute(
                           builder: (context) => AddRendezvousPage(vet: vet),
                         ),
                       );
+
+                      // Check if the result indicates success (e.g., if 'true' was returned)
+                      if (result == true) {
+                        // Assuming this code is in your RendezvousListPage's State or a parent that manages it.
+                        // You need to call the method that refreshes your appointments list.
+                        // This typically involves setting the state of the FutureBuilder's future.
+
+                        _showSnackBar('Appointments list refreshing...', isSuccess: true); // User feedback
+
+
+                      }
                     },
                     icon: Icon(Icons.calendar_today_rounded),
                     label: Text('Make Appointment', style: textTheme.labelLarge),
