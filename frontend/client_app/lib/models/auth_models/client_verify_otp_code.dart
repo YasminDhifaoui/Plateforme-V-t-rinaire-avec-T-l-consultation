@@ -1,5 +1,4 @@
 // lib/models/auth_models/client_verify_otp_code.dart
-import 'dart:convert';
 
 class ClientVerifyOtpCodeDto {
   final String email;

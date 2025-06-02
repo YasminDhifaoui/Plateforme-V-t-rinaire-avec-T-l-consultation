@@ -102,7 +102,7 @@ class _PetListPageState extends State<PetListPage> {
 
   // Helper for info rows in pet details dialog
   Widget _buildInfoRow(TextTheme textTheme, String label, String value) {
-    if (value == null || value.isEmpty || value == 'N/A') { // Handle 'N/A' as well
+    if (value.isEmpty || value == 'N/A') { // Handle 'N/A' as well
       return const SizedBox.shrink();
     }
     return Padding(

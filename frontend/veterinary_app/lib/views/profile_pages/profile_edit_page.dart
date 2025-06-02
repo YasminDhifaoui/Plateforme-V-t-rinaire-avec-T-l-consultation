@@ -211,15 +211,13 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
                         );
                       },
                     );
-                    if (pickedDate != null) {
-                      setState(() {
-                        _selectedBirthDate = pickedDate;
-                        _birthDateController.text = DateFormat(
-                          'dd/MM/yyyy',
-                        ).format(pickedDate);
-                      });
-                    }
-                  },
+                    setState(() {
+                      _selectedBirthDate = pickedDate;
+                      _birthDateController.text = DateFormat(
+                        'dd/MM/yyyy',
+                      ).format(pickedDate!);
+                    });
+                                    },
                   decoration: InputDecoration(
                     labelText: "Birth Date",
                     prefixIcon: Icon(Icons.calendar_today_rounded, color: kAccentGreen), // Modern icon, themed color

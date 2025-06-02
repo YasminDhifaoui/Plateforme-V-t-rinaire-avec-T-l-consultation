@@ -2,7 +2,6 @@ import 'dart:async'; // Import for StreamSubscription
 import 'package:flutter/material.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart';
 import 'package:permission_handler/permission_handler.dart';
-
 import '../../services/auth_services/token_service.dart';
 import '../../services/video_call_services/rtc_peer_service.dart';
 import '../../services/video_call_services/signalr_tc_service.dart';
@@ -30,38 +29,47 @@ class _VideoCallScreenState extends State<VideoCallScreen> {
   String? _callStatusMessage;
   bool _isCallActive = false;
   String? _authToken;
-  // bool _isDisposed = false; // REMOVE THIS FLAG - it's causing issues.
-  // We will rely on mounted check and a single dispose trigger.
 
   // State for controls
   bool _isAudioMuted = false;
   bool _isVideoOff = false;
 
   // Stream subscriptions to manage
-  late List<StreamSubscription> _subscriptions; // Corrected: Now initialized in initState
+  late List<StreamSubscription> _subscriptions;
 
-  late RTCVideoRenderer _localRenderer;
-  late RTCVideoRenderer _remoteRenderer;
+  // --- THESE ARE NOW OWNED BY THE UI ---
+  // They are instantiated ONCE in initState of this widget.
+  // Their srcObject will be updated by the service's callbacks.
+  late RTCVideoRenderer _localVideoRenderer;
+  late RTCVideoRenderer _remoteVideoRenderer;
+  // --- END UI OWNERSHIP ---
+
 
   @override
   void initState() {
     super.initState();
     print('[_VideoCallScreenState] - initState started.');
 
-    // --- FIX IS HERE ---
     _subscriptions = []; // Initialize the list of subscriptions
-    // --- END FIX ---
 
-    // IMPORTANT: Get fresh references from the service's getters each time
-    _localRenderer = _rtcService.localRenderer;
-    _remoteRenderer = _rtcService.remoteRenderer;
-
-    // This call is now a no-op in RTCPeerService, but harmless to keep
-    _rtcService.initRenderers().catchError((e) {
-      _handleError('Failed to initialize renderers: $e');
-    });
+    // Initialize the UI's own renderers
+    _localVideoRenderer = RTCVideoRenderer();
+    _remoteVideoRenderer = RTCVideoRenderer();
+    _initializeRenderersUI(); // Call the new initialization method
 
     _retrieveAuthTokenAndInitCall();
+  }
+
+  // New method to initialize UI's own renderers
+  Future<void> _initializeRenderersUI() async {
+    print('[_VideoCallScreenState] Initializing UI-owned renderers.');
+    try {
+      await _localVideoRenderer.initialize();
+      await _remoteVideoRenderer.initialize();
+      print('[VideoCallScreen] UI-owned renderers initialized successfully.');
+    } catch (e) {
+      _handleError('Failed to initialize UI renderers: $e');
+    }
   }
 
   Future<void> _retrieveAuthTokenAndInitCall() async {
@@ -81,13 +89,21 @@ class _VideoCallScreenState extends State<VideoCallScreen> {
   void _setupServiceCallbacksAndListeners() {
     // --- RTCPeerService Callbacks ---
     _rtcService.onLocalStreamAvailable = (stream) {
-      if (mounted) setState(() {}); // Trigger rebuild to update RTCVideoView
-      print('[VideoCallScreen] Local stream available.');
+      if (mounted) {
+        setState(() {
+          _localVideoRenderer.srcObject = stream; // Set srcObject on UI's renderer
+        });
+        print('[VideoCallScreen] Local stream available and set to UI renderer.');
+      }
     };
 
     _rtcService.onRemoteStreamAvailable = (stream) {
-      if (mounted) setState(() {}); // Trigger rebuild to update RTCVideoView
-      print('[VideoCallScreen] Remote stream available.');
+      if (mounted) {
+        setState(() {
+          _remoteVideoRenderer.srcObject = stream; // Set srcObject on UI's renderer
+        });
+        print('[VideoCallScreen] Remote stream available and set to UI renderer.');
+      }
     };
 
     _rtcService.onNewIceCandidate = (candidate) {
@@ -95,27 +111,26 @@ class _VideoCallScreenState extends State<VideoCallScreen> {
       if (remoteUserId != null) {
         SignalRTCService.sendIceCandidate(remoteUserId, candidate.toMap());
       } else {
-        print('[VideoCallScreen] No remote user ID to send ICE candidate.');
+        print('[VideoCallScreen] WARNING: Cannot send ICE candidate, remoteUserId is null.');
       }
     };
 
     _rtcService.onPeerConnectionStateChange = (state) {
       print('[VideoCallScreen] PeerConnection State: $state');
-      if (!mounted) return; // Only update if still mounted
+      if (!mounted) return;
       setState(() {
         if (state == RTCPeerConnectionState.RTCPeerConnectionStateConnected) {
           _isCallActive = true;
-          _callStatusMessage = 'Call Connected';
+          _callStatusMessage = null; // Clear status on connection
         } else if (state == RTCPeerConnectionState.RTCPeerConnectionStateDisconnected ||
             state == RTCPeerConnectionState.RTCPeerConnectionStateFailed) {
           _isCallActive = false;
           _callStatusMessage = 'Call Disconnected';
-          _endCallAndPop(); // Centralized cleanup after showing alert
-
+          _endCallAndPop();
         } else if (state == RTCPeerConnectionState.RTCPeerConnectionStateClosed) {
           _isCallActive = false;
           _callStatusMessage = 'Call Ended';
-          _endCallAndPop(); // Centralized cleanup
+          _endCallAndPop();
         }
       });
     };
@@ -124,22 +139,17 @@ class _VideoCallScreenState extends State<VideoCallScreen> {
       _handleError('RTCPeerService Error: $message');
     };
 
-// In video_call_screen.dart, inside _setupServiceCallbacksAndListeners()
-
-    _subscriptions.add(SignalRTCService.receiveOfferStream.listen((arguments) async { // Changed offerData to arguments
-      print('[VideoCallScreen] SignalRTCService.receiveOfferStream: Received Offer from SignalR. Arguments: $arguments');
-      // arguments[0] will be the callerId, arguments[1] will be the offer map
+    _subscriptions.add(SignalRTCService.receiveOfferStream.listen((arguments) async {
+      print('[VideoCallScreen] SignalRTCService.receiveOfferStream: Received Offer. Arguments: $arguments');
       if (arguments.length < 2 || !(arguments[1] is Map<dynamic, dynamic>)) {
         print('[VideoCallScreen] ERROR: ReceiveOffer arguments unexpected format: $arguments');
         _handleError('Received malformed offer data.');
         return;
       }
-      final String remoteCallerId = arguments[0]; // Extract the callerId
-      final Map<String, dynamic> offerData = Map<String, dynamic>.from(arguments[1]); // Extract the offer map
+      final String remoteCallerId = arguments[0];
+      final Map<String, dynamic> offerData = Map<String, dynamic>.from(arguments[1]);
 
-      // IMPORTANT: Set SignalRTCService.callerUserId on the callee side
-      // This is crucial for sending the answer back to the correct caller.
-      if (!widget.isCaller) { // Only set this if this instance is the callee
+      if (!widget.isCaller) {
         SignalRTCService.callerUserId = remoteCallerId;
         print('[VideoCallScreen] Callee: Set SignalRTCService.callerUserId to $remoteCallerId');
       }
@@ -179,7 +189,6 @@ class _VideoCallScreenState extends State<VideoCallScreen> {
         ));
       } catch (e) {
         print('[VideoCallScreen] Error adding ICE candidate: $e');
-        // This error often occurs if candidate arrives before SDP. Can usually be safely ignored.
       }
     }));
 
@@ -188,9 +197,8 @@ class _VideoCallScreenState extends State<VideoCallScreen> {
       if (!mounted) return;
       setState(() {
         _isCallActive = true;
-        _callStatusMessage = 'Call Connected';
+        _callStatusMessage = null; // Clear status on acceptance
       });
-      // If this is the caller, now send the offer
       if (widget.isCaller && SignalRTCService.targetUserId != null) {
         try {
           final offer = await _rtcService.createOffer();
@@ -211,9 +219,6 @@ class _VideoCallScreenState extends State<VideoCallScreen> {
       _handleEndCall('Call Ended: $reason');
     }));
 
-    // The incoming call stream should ideally be handled by HomePage,
-    // but adding it here for completeness if this screen could receive new incoming calls
-    // while already open (less common for a dedicated call screen).
     _subscriptions.add(SignalRTCService.incomingCallStream.listen((incomingCallerId) {
       print('[VideoCallScreen] Received unexpected IncomingCall signal for $incomingCallerId. This screen might already be in a call or should not receive this.');
     }));
@@ -260,7 +265,7 @@ class _VideoCallScreenState extends State<VideoCallScreen> {
 
     setState(() => _callStatusMessage = 'Initializing WebRTC...');
     try {
-      await _rtcService.initWebRTC(); // No need for isCaller here, RTCPeerService just sets up media
+      await _rtcService.initWebRTC(); // RTCPeerService will now create and initialize its internal renderers
       print('[_initCallFlow] - WebRTC init completed.');
 
       if (!mounted) { print('[_initCallFlow] - ABORTING after WebRTC init.'); return; }
@@ -272,12 +277,11 @@ class _VideoCallScreenState extends State<VideoCallScreen> {
       } else {
         print('[_initCallFlow] - Callee path. isCallAcceptedImmediately: ${widget.isCallAcceptedImmediately}');
         if (widget.isCallAcceptedImmediately) {
-
           if (SignalRTCService.callerUserId != null) {
             await SignalRTCService.acceptCall(SignalRTCService.callerUserId!);
             setState(() {
               _isCallActive = true;
-              _callStatusMessage = null; // Clear status as call is accepted
+              _callStatusMessage = null;
             });
             print('[_initCallFlow] - Callee accepted call via SignalR.');
           } else {
@@ -296,7 +300,6 @@ class _VideoCallScreenState extends State<VideoCallScreen> {
     }
 
     if (mounted && _callStatusMessage != null) {
-      // If we reach here and still have a status message, clear it (e.g., if a connection was established)
       setState(() => _callStatusMessage = null);
       print('[_initCallFlow] - Call setup completed.');
     }
@@ -311,7 +314,7 @@ class _VideoCallScreenState extends State<VideoCallScreen> {
     });
     Future.delayed(const Duration(seconds: 3), () {
       if (mounted) {
-        _endCallAndPop(); // Centralized cleanup after showing alert
+        _endCallAndPop();
       }
     });
   }
@@ -323,15 +326,13 @@ class _VideoCallScreenState extends State<VideoCallScreen> {
       _callStatusMessage = message;
       _isCallActive = false;
     });
-    // Give a brief moment for the user to read the message before popping
     Future.delayed(const Duration(milliseconds: 500), () {
       if (mounted) {
-        _endCallAndPop(); // Centralized cleanup after showing alert
+        _endCallAndPop();
       }
     });
   }
 
-  // New centralized method for cleanup and popping the screen
   Future<void> _endCallAndPop() async {
     print('[_VideoCallScreenState] _endCallAndPop called. Initiating cleanup and pop.');
 
@@ -342,30 +343,35 @@ class _VideoCallScreenState extends State<VideoCallScreen> {
 
     // Inform the other user the call is ending (if a remote ID is known)
     String? otherUserId = widget.isCaller ? SignalRTCService.targetUserId : SignalRTCService.callerUserId;
-    if (otherUserId != null) {
-      print('[_VideoCallScreenState] Attempting to send endCall signal to $otherUserId.');
-      try {
-        await SignalRTCService.endCall(otherUserId: otherUserId);
-        print('[_VideoCallScreenState] endCall signal sent successfully.');
-      } catch (e) {
-        print('[_VideoCallScreenState] WARNING: Failed to send endCall signal: $e');
-      }
-    } else {
-      print('[_VideoCallScreenState] No otherUserId found, skipping endCall signal.');
+    print('[_VideoCallScreenState] Attempting to send endCall signal to $otherUserId.');
+    try {
+      await SignalRTCService.endCall(otherUserId: otherUserId);
+      print('[_VideoCallScreenState] endCall signal sent successfully.');
+    } catch (e) {
+      print('[_VideoCallScreenState] WARNING: Failed to send endCall signal: $e');
     }
 
+    // Clear srcObjects to prevent rendering stale streams
+    _localVideoRenderer.srcObject = null;
+    _remoteVideoRenderer.srcObject = null;
+    print('[_VideoCallScreenState] Renderers\' srcObjects cleared.');
 
     // Cancel all active stream subscriptions
-    // This will now work because _subscriptions is guaranteed to be initialized
     for (var subscription in _subscriptions) {
       await subscription.cancel();
     }
     _subscriptions.clear();
     print('[_VideoCallScreenState] All stream subscriptions canceled.');
 
-    // Dispose RTCPeerService
+    // Dispose RTCPeerService resources
     await _rtcService.dispose();
     print('[_VideoCallScreenState] RTCPeerService disposed.');
+
+    // Dispose UI-owned renderers
+    await _localVideoRenderer.dispose();
+    await _remoteVideoRenderer.dispose();
+    print('[_VideoCallScreenState] UI-owned renderers disposed.');
+
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted && Navigator.of(context).canPop()) {
@@ -373,7 +379,6 @@ class _VideoCallScreenState extends State<VideoCallScreen> {
         Navigator.of(context).pop();
       } else if (mounted) {
         print('[_VideoCallScreenState] Cannot pop, but mounted. Maybe pushReplacement was used or it is the root route.');
-
       } else {
         print('[_VideoCallScreenState] Not mounted, cannot pop.');
       }
@@ -415,8 +420,8 @@ class _VideoCallScreenState extends State<VideoCallScreen> {
           children: [
             // Remote Video (full screen)
             Positioned.fill(
-              child: _remoteRenderer.srcObject != null
-                  ? RTCVideoView(_remoteRenderer, objectFit: RTCVideoViewObjectFit.RTCVideoViewObjectFitCover)
+              child: _remoteVideoRenderer.srcObject != null
+                  ? RTCVideoView(_remoteVideoRenderer, objectFit: RTCVideoViewObjectFit.RTCVideoViewObjectFitCover)
                   : Container(
                 color: Colors.black,
                 child: Center(
@@ -434,10 +439,10 @@ class _VideoCallScreenState extends State<VideoCallScreen> {
               right: 20,
               width: 120,
               height: 160,
-              child: _localRenderer.srcObject != null
+              child: _localVideoRenderer.srcObject != null
                   ? ClipRRect(
                 borderRadius: BorderRadius.circular(12),
-                child: RTCVideoView(_localRenderer, objectFit: RTCVideoViewObjectFit.RTCVideoViewObjectFitCover, mirror: true),
+                child: RTCVideoView(_localVideoRenderer, objectFit: RTCVideoViewObjectFit.RTCVideoViewObjectFitCover, mirror: true),
               )
                   : Container(
                 decoration: BoxDecoration(
@@ -481,7 +486,7 @@ class _VideoCallScreenState extends State<VideoCallScreen> {
                   ),
                   FloatingActionButton(
                     heroTag: 'hangupBtn',
-                    onPressed: _endCallAndPop, // Call the centralized hangup method
+                    onPressed: _endCallAndPop,
                     backgroundColor: Colors.redAccent,
                     child: const Icon(Icons.call_end),
                   ),

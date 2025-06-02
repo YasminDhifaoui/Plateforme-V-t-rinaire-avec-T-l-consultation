@@ -1,4 +1,4 @@
-import 'dart:convert'; // Not strictly needed for this simple DTO, but good practice
+// Not strictly needed for this simple DTO, but good practice
 
 class ClientChangePasswordDto {
   final String currentPassword;

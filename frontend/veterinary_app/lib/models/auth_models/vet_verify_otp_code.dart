@@ -1,5 +1,4 @@
 // veterinary_app/models/auth_models/vet_verify_otp_code.dart
-import 'dart:convert';
 
 class VetVerifyOtpCodeDto {
   final String email;

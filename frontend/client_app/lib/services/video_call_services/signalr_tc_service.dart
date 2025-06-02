@@ -6,10 +6,9 @@ import '../../utils/base_url.dart';
 
 class SignalRTCService {
   static HubConnection? connection;
-  static String? callerUserId; // Stored when an incoming call arrives or when accepting a call.
-  static String? targetUserId; // Stored when initiating a call.
+  static String? callerUserId;
+  static String? targetUserId;
 
-  // --- StreamControllers for different events ---
   static final _incomingCallStreamController = StreamController<String>.broadcast();
   static final _callAcceptedStreamController = StreamController<String>.broadcast(); // Pass calleeId or callerId
   static final _callRejectedStreamController = StreamController<String>.broadcast();
@@ -18,7 +17,6 @@ class SignalRTCService {
   static final _receiveAnswerStreamController = StreamController<Map<String, dynamic>>.broadcast();
   static final _receiveIceCandidateStreamController = StreamController<Map<String, dynamic>>.broadcast();
 
-  // --- Public Streams to listen to ---
   static Stream<String> get incomingCallStream => _incomingCallStreamController.stream;
   static Stream<String> get callAcceptedStream => _callAcceptedStreamController.stream;
   static Stream<String> get callRejectedStream => _callRejectedStreamController.stream;
@@ -64,15 +62,27 @@ class SignalRTCService {
 
   static void _registerHandlers() {
     connection!.on('ReceiveOffer', (args) {
-      if (args != null && args.length >= 2) {
-        // args[0] is the callerId, args[1] is the offer data
-        callerUserId = args[0]; // Store callerId when offer received
-        final offerData = args[1] as Map<String, dynamic>;
-        print('[SignalRTCService] Received Offer from ${callerUserId}. Data: $offerData');
-        _receiveOfferStreamController.add(offerData);
+      print('[SignalRTCService] Invocation received: ReceiveOffer with arguments: $args'); // This print will now show [ {callerId: ..., offer: ...} ]
+
+      if (args != null && args.isNotEmpty) {
+        // The server sends a single argument which is a Map/Dictionary
+        final payload = args[0] as Map<dynamic, dynamic>; // Use Map<dynamic, dynamic> for initial safety
+        final String? receivedCallerId = payload['callerId'] as String?;
+        final Map<String, dynamic>? receivedOfferData = payload['offer'] as Map<String, dynamic>?;
+
+        if (receivedCallerId != null && receivedOfferData != null) {
+          print('[SignalRTCService] Offer added to stream controller.');
+
+          callerUserId = receivedCallerId; // Store callerId when offer received
+          print('[SignalRTCService] Received Offer from ${callerUserId}. Data: $receivedOfferData');
+          _receiveOfferStreamController.add(receivedOfferData);
+        } else {
+          print('[SignalRTCService] ERROR: Received offer payload is malformed or missing callerId/offer data: $payload');
+        }
+      } else {
+        print('[SignalRTCService] ERRORRR: ReceiveOffer invocation received with null or empty arguments.');
       }
     });
-
     connection!.on('ReceiveAnswer', (args) {
       if (args != null && args.isNotEmpty) {
         final answerData = args[0] as Map<String, dynamic>;
@@ -128,7 +138,6 @@ class SignalRTCService {
       targetUserId = null;
     });
 
-    // Add logging for connection state changes
     connection!.onclose((error) {
       print('[SignalRTCService] Connection closed: $error');
     });
@@ -142,7 +151,6 @@ class SignalRTCService {
     });
   }
 
-  // Call Management Methods
   static Future<void> initiateCall(String targetId) async {
     if (connection?.state == HubConnectionState.connected) {
       print('[SignalRTCService] Initiating call to: $targetId');
@@ -184,11 +192,9 @@ class SignalRTCService {
     } else {
       print('[SignalRTCService] Cannot send end call signal: Not connected to SignalR hub.');
     }
-    // Note: The `CallEnded` handler will clear `callerUserId`/`targetUserId`
-    // when the other side acknowledges or if the local `endCall` is directly called.
+
   }
 
-  // WebRTC Signaling Methods
   static Future<void> sendOffer(String targetId, Map<String, dynamic> offer) async {
     if (connection?.state == HubConnectionState.connected) {
       print('[SignalRTCService] Sending offer to: $targetId');
@@ -228,12 +234,10 @@ class SignalRTCService {
     } else {
       print('[SignalRTCService] Connection was not active or initialized, skipping stop.');
     }
-    // Clear stored IDs
     callerUserId = null;
     targetUserId = null;
   }
 
-  // Dispose all stream controllers
   static Future<void> dispose() async {
     print('[SignalRTCService] Disposing all StreamControllers.');
     await _incomingCallStreamController.close();
@@ -243,7 +247,6 @@ class SignalRTCService {
     await _receiveOfferStreamController.close();
     await _receiveAnswerStreamController.close();
     await _receiveIceCandidateStreamController.close();
-    // Ensure disconnect is also called to stop the underlying hub connection
     await disconnect();
     print('[SignalRTCService] SignalRTCService disposed completely.');
   }

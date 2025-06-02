@@ -162,12 +162,8 @@ class _VaccinationByAnimalPageState extends State<VaccinationByAnimalPage> {
       return 'Unexpected Date Type';
     }
 
-    if (parsedDate != null) {
-      return DateFormat('dd MMMEEEE HH:mm').format(parsedDate);
-    } else {
-      return 'N/A';
+    return DateFormat('dd MMMEEEE HH:mm').format(parsedDate);
     }
-  }
 
   Future<void> _showAddVaccinationDialogForAnimal() async {
     final addFormKey = GlobalKey<FormState>();

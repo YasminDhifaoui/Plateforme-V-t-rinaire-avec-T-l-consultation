@@ -12,7 +12,7 @@ import 'views/Auth_pages/vet_register_page.dart';
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
 final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
-FlutterLocalNotificationsPlugin();
+    FlutterLocalNotificationsPlugin();
 
 // Define your primary green color centrally
 // Define a secondary accent green for highlights/details
@@ -21,7 +21,7 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   const AndroidInitializationSettings initializationSettingsAndroid =
-  AndroidInitializationSettings('@mipmap/ic_launcher');
+      AndroidInitializationSettings('@mipmap/ic_launcher');
 
   const InitializationSettings initializationSettings = InitializationSettings(
     android: initializationSettingsAndroid,
@@ -52,12 +52,14 @@ class MyApp extends StatelessWidget {
           seedColor: kPrimaryGreen,
           primary: kPrimaryGreen, // Explicitly set primary
           secondary: kAccentGreen, // Explicitly set secondary/accent
-          surface: Colors.white, // Default surface color for cards, dialogs etc.
+          surface:
+              Colors.white, // Default surface color for cards, dialogs etc.
           onSurface: Colors.black87, // Text color on surface
           background: Colors.grey.shade50, // Light background for scaffolds
         ),
         useMaterial3: true,
-        scaffoldBackgroundColor: Colors.grey.shade50, // Consistent light background
+        scaffoldBackgroundColor:
+            Colors.grey.shade50, // Consistent light background
         appBarTheme: const AppBarTheme(
           backgroundColor: kPrimaryGreen, // Green app bars
           foregroundColor: Colors.white, // White icons and text on app bars
@@ -69,10 +71,15 @@ class MyApp extends StatelessWidget {
             backgroundColor: kPrimaryGreen, // Green elevated buttons
             foregroundColor: Colors.white, // White text on elevated buttons
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12), // Rounded corners for buttons
+              borderRadius: BorderRadius.circular(
+                12,
+              ), // Rounded corners for buttons
             ),
             padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
-            textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+            textStyle: const TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+            ),
             elevation: 4, // Subtle shadow for buttons
           ),
         ),
@@ -83,8 +90,7 @@ class MyApp extends StatelessWidget {
         ),
         cardTheme: const CardThemeData(
           elevation: 6, // Consistent card elevation
-          shape: RoundedRectangleBorder(
-          ),
+          shape: RoundedRectangleBorder(),
           color: Colors.white, // White card background
         ),
         inputDecorationTheme: InputDecorationTheme(
@@ -102,25 +108,27 @@ class MyApp extends StatelessWidget {
           fillColor: Colors.white, // White fill for text fields
         ),
         // Define text themes for consistent typography
-        textTheme: const TextTheme(
-          headlineLarge: TextStyle(color: Colors.black87),
-          headlineMedium: TextStyle(color: Colors.black87),
-          headlineSmall: TextStyle(color: Colors.black87),
-          titleLarge: TextStyle(color: Colors.black87),
-          titleMedium: TextStyle(color: Colors.black87),
-          titleSmall: TextStyle(color: Colors.black87),
-          bodyLarge: TextStyle(color: Colors.black87),
-          bodyMedium: TextStyle(color: Colors.black87),
-          bodySmall: TextStyle(color: Colors.black54),
-          labelLarge: TextStyle(color: Colors.white), // Default for buttons
-          labelMedium: TextStyle(color: Colors.black87),
-          labelSmall: TextStyle(color: Colors.black54),
-        ).apply(
-          bodyColor: Colors.black87, // Default text color
-          displayColor: Colors.black87,
-        ),
+        textTheme:
+            const TextTheme(
+              headlineLarge: TextStyle(color: Colors.black87),
+              headlineMedium: TextStyle(color: Colors.black87),
+              headlineSmall: TextStyle(color: Colors.black87),
+              titleLarge: TextStyle(color: Colors.black87),
+              titleMedium: TextStyle(color: Colors.black87),
+              titleSmall: TextStyle(color: Colors.black87),
+              bodyLarge: TextStyle(color: Colors.black87),
+              bodyMedium: TextStyle(color: Colors.black87),
+              bodySmall: TextStyle(color: Colors.black54),
+              labelLarge: TextStyle(color: Colors.white), // Default for buttons
+              labelMedium: TextStyle(color: Colors.black87),
+              labelSmall: TextStyle(color: Colors.black54),
+            ).apply(
+              bodyColor: Colors.black87, // Default text color
+              displayColor: Colors.black87,
+            ),
       ),
-      home: const AppWrapper(), // App starts with AppWrapper to manage global state
+      home:
+          const AppWrapper(), // App starts with AppWrapper to manage global state
     );
   }
 }
@@ -139,10 +147,12 @@ class _AppWrapperState extends State<AppWrapper> with WidgetsBindingObserver {
   // This method will be called from the 2FA verification page after a successful login
   void initSignalRAndListenGlobally(String token) async {
     print(
-        '[AppWrapper.initSignalRAndListenGlobally] Attempting to initialize SignalR.');
+      '[AppWrapper.initSignalRAndListenGlobally] Attempting to initialize SignalR.',
+    );
     if (token.isEmpty) {
       print(
-          '[AppWrapper.initSignalRAndListenGlobally] WARNING: Token is empty. Cannot initialize SignalRTCService.');
+        '[AppWrapper.initSignalRAndListenGlobally] WARNING: Token is empty. Cannot initialize SignalRTCService.',
+      );
       return;
     }
 
@@ -150,31 +160,45 @@ class _AppWrapperState extends State<AppWrapper> with WidgetsBindingObserver {
       if (SignalRTCService.connection != null &&
           SignalRTCService.connection!.state == HubConnectionState.connected) {
         print(
-            '[AppWrapper.initSignalRAndListenGlobally] SignalRTCService already connected. State: ${SignalRTCService.connection?.state}. Skipping re-initialization.');
+          '[AppWrapper.initSignalRAndListenGlobally] SignalRTCService already connected. State: ${SignalRTCService.connection?.state}. Skipping re-initialization.',
+        );
       } else {
         print(
-            '[AppWrapper.initSignalRAndListenGlobally] SignalRTCService not connected or null. Attempting init...');
+          '[AppWrapper.initSignalRAndListenGlobally] SignalRTCService not connected or null. Attempting init...',
+        );
         await SignalRTCService.init(token);
         print(
-            '[AppWrapper.initSignalRAndListenGlobally] SignalRTCService.init completed successfully.');
+          '[AppWrapper.initSignalRAndListenGlobally] SignalRTCService.init completed successfully.',
+        );
       }
 
-      _incomingCallSubscription?.cancel(); // Cancel previous subscription if it exists
-      _incomingCallSubscription =
-          SignalRTCService.incomingCallStream.listen((callerId) {
-            print(
-                '[AppWrapper.initSignalRAndListenGlobally] Incoming call detected from: $callerId');
-            _navigateToIncomingCallScreen(callerId);
-          }, onError: (error) {
-            print(
-                '[AppWrapper.initSignalRAndListenGlobally] Error on incomingCallStream: $error');
-          }, onDone: () {
-            print('[AppWrapper.initSignalRAndListenGlobally] incomingCallStream done.');
-          });
-      print('[AppWrapper.initSignalRAndListenGlobally] Incoming call stream listener set up.');
+      _incomingCallSubscription
+          ?.cancel(); // Cancel previous subscription if it exists
+      _incomingCallSubscription = SignalRTCService.incomingCallStream.listen(
+        (callerId) {
+          print(
+            '[AppWrapper.initSignalRAndListenGlobally] Incoming call detected from: $callerId',
+          );
+          _navigateToIncomingCallScreen(callerId);
+        },
+        onError: (error) {
+          print(
+            '[AppWrapper.initSignalRAndListenGlobally] Error on incomingCallStream: $error',
+          );
+        },
+        onDone: () {
+          print(
+            '[AppWrapper.initSignalRAndListenGlobally] incomingCallStream done.',
+          );
+        },
+      );
+      print(
+        '[AppWrapper.initSignalRAndListenGlobally] Incoming call stream listener set up.',
+      );
     } catch (e) {
       print(
-          '[AppWrapper.initSignalRAndListenGlobally] ERROR during SignalRTCService initialization or stream setup: $e');
+        '[AppWrapper.initSignalRAndListenGlobally] ERROR during SignalRTCService initialization or stream setup: $e',
+      );
     }
   }
 
@@ -189,26 +213,27 @@ class _AppWrapperState extends State<AppWrapper> with WidgetsBindingObserver {
 
     if (!isIncomingCallScreenActive && navigatorKey.currentState != null) {
       print(
-          '[AppWrapper._navigateToIncomingCallScreen] Pushing IncomingCallScreen for $callerId.');
+        '[AppWrapper._navigateToIncomingCallScreen] Pushing IncomingCallScreen for $callerId.',
+      );
       navigatorKey.currentState!.push(
         MaterialPageRoute(
-          builder: (context) => IncomingCallScreen(
-            callerId: callerId,
-            callerName: callerId,
-          ),
+          builder: (context) =>
+              IncomingCallScreen(callerId: callerId, callerName: callerId),
           settings: const RouteSettings(name: '/incoming_call_screen'),
         ),
       );
     } else {
       print(
-          '[AppWrapper._navigateToIncomingCallScreen] IncomingCallScreen is already active or navigator is null. Not pushing again.');
+        '[AppWrapper._navigateToIncomingCallScreen] IncomingCallScreen is already active or navigator is null. Not pushing again.',
+      );
     }
   }
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     print(
-        '[AppWrapper.didChangeAppLifecycleState] App lifecycle state changed to: $state');
+      '[AppWrapper.didChangeAppLifecycleState] App lifecycle state changed to: $state',
+    );
     if (state == AppLifecycleState.resumed) {
       // You might re-initialize SignalR here if needed, depending on token management
     }
@@ -236,14 +261,20 @@ class _AppWrapperState extends State<AppWrapper> with WidgetsBindingObserver {
 
 // MODIFIED: MyHomePage now accepts a callback for when login is successful.
 class MyHomePage extends StatelessWidget {
-  const MyHomePage({super.key, required this.title, this.onLoginSuccessCallback});
+  const MyHomePage({
+    super.key,
+    required this.title,
+    this.onLoginSuccessCallback,
+  });
 
   final String title;
   final Function(String token)? onLoginSuccessCallback; // New callback property
 
   @override
   Widget build(BuildContext context) {
-    final TextTheme textTheme = Theme.of(context).textTheme; // Access theme text styles
+    final TextTheme textTheme = Theme.of(
+      context,
+    ).textTheme; // Access theme text styles
 
     return Scaffold(
       appBar: AppBar(
@@ -251,7 +282,10 @@ class MyHomePage extends StatelessWidget {
         automaticallyImplyLeading: false,
         title: Text(
           title,
-          style: textTheme.titleLarge?.copyWith(color: Colors.white, fontWeight: FontWeight.bold), // Bold title
+          style: textTheme.titleLarge?.copyWith(
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+          ), // Bold title
         ),
         // backgroundColor and foregroundColor are now handled by AppBarTheme in ThemeData
       ),
@@ -261,12 +295,17 @@ class MyHomePage extends StatelessWidget {
             // Welcome Section with Info and Icon
             Container(
               decoration: BoxDecoration(
-                color: kPrimaryGreen.withOpacity(0.15), // Slightly darker background for header
+                color: kPrimaryGreen.withOpacity(
+                  0.15,
+                ), // Slightly darker background for header
                 borderRadius: const BorderRadius.only(
-                  bottomLeft: Radius.circular(30), // Rounded bottom corners for a card-like effect
+                  bottomLeft: Radius.circular(
+                    30,
+                  ), // Rounded bottom corners for a card-like effect
                   bottomRight: Radius.circular(30),
                 ),
-                boxShadow: [ // Subtle shadow for depth
+                boxShadow: [
+                  // Subtle shadow for depth
                   BoxShadow(
                     color: Colors.black.withOpacity(0.05),
                     blurRadius: 10,
@@ -275,7 +314,10 @@ class MyHomePage extends StatelessWidget {
                 ],
               ),
               width: double.infinity,
-              padding: const EdgeInsets.symmetric(vertical: 40, horizontal: 30), // More vertical padding
+              padding: const EdgeInsets.symmetric(
+                vertical: 40,
+                horizontal: 30,
+              ), // More vertical padding
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -297,8 +339,9 @@ class MyHomePage extends StatelessWidget {
                     'Dedicated to empowering veterinary professionals with the tools and resources they need to provide exceptional care.',
                     style: textTheme.bodyLarge?.copyWith(color: Colors.black87),
                   ),
-                  const SizedBox(height: 25), // Increased spacing before services
-
+                  const SizedBox(
+                    height: 25,
+                  ), // Increased spacing before services
                   // Updated Services List
                   _buildServiceItem(
                     context,
@@ -314,7 +357,8 @@ class MyHomePage extends StatelessWidget {
                   const SizedBox(height: 12),
                   _buildServiceItem(
                     context,
-                    Icons.vaccines_rounded, // Icon for animal documentation/vaccinations
+                    Icons
+                        .vaccines_rounded, // Icon for animal documentation/vaccinations
                     'Animal Doc & Vacc',
                   ),
                 ],
@@ -331,7 +375,8 @@ class MyHomePage extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Icon(
-                        Icons.handshake_rounded, // More welcoming icon for 'Get Started'
+                        Icons
+                            .handshake_rounded, // More welcoming icon for 'Get Started'
                         size: 35,
                         color: kPrimaryGreen,
                       ),
@@ -349,7 +394,9 @@ class MyHomePage extends StatelessWidget {
                   Text(
                     'Login or register to unlock the full potential of our platform. Your journey to enhanced veterinary practice starts here!',
                     textAlign: TextAlign.center,
-                    style: textTheme.bodyMedium?.copyWith(color: Colors.black54),
+                    style: textTheme.bodyMedium?.copyWith(
+                      color: Colors.black54,
+                    ),
                   ),
                 ],
               ),
@@ -362,7 +409,9 @@ class MyHomePage extends StatelessWidget {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => VetLoginPage(onLoginSuccessCallback: onLoginSuccessCallback),
+                    builder: (context) => VetLoginPage(
+                      onLoginSuccessCallback: onLoginSuccessCallback,
+                    ),
                   ),
                 );
               },
@@ -374,7 +423,8 @@ class MyHomePage extends StatelessWidget {
             // Register Button with Icon and Tooltip
             ElevatedButton.icon(
               style: ElevatedButton.styleFrom(
-                backgroundColor: kAccentGreen, // Accent green for register button
+                backgroundColor:
+                    kAccentGreen, // Accent green for register button
                 elevation: 2, // Slightly less elevation for secondary button
               ),
               onPressed: () {
@@ -411,7 +461,9 @@ class MyHomePage extends StatelessWidget {
         Expanded(
           child: Text(
             text,
-            style: textTheme.bodyLarge?.copyWith(color: Colors.black87), // Themed text
+            style: textTheme.bodyLarge?.copyWith(
+              color: Colors.black87,
+            ), // Themed text
           ),
         ),
       ],

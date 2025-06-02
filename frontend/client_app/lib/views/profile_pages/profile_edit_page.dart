@@ -136,14 +136,12 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
                       firstDate: DateTime(1900),
                       lastDate: DateTime.now(),
                     );
-                    if (pickedDate != null) {
-                      setState(() {
-                        _selectedBirthDate = pickedDate;
-                        _birthDateController.text =
-                            DateFormat('dd/MM/yyyy').format(pickedDate);
-                      });
-                    }
-                  },
+                    setState(() {
+                      _selectedBirthDate = pickedDate;
+                      _birthDateController.text =
+                          DateFormat('dd/MM/yyyy').format(pickedDate!);
+                    });
+                                    },
                   decoration: InputDecoration(
                     labelText: "Birth Date",
                     prefixIcon: const Icon(Icons.calendar_today),

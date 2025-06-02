@@ -1,24 +1,48 @@
+import 'dart:async'; // Essential for StreamController
+
 import 'package:flutter_webrtc/flutter_webrtc.dart';
 
 class RTCPeerService {
   // Singleton instance
   static final RTCPeerService _instance = RTCPeerService._internal();
   factory RTCPeerService() => _instance;
-  RTCPeerService._internal();
+
+  // Private constructor to ensure singleton pattern
+  RTCPeerService._internal() {
+    // Initialize renderers immediately when the singleton is created
+    // They are then disposed and recreated on a per-call basis in initWebRTC
+    _localRenderer = RTCVideoRenderer();
+    _remoteRenderer = RTCVideoRenderer();
+    _localRenderer!.initialize();
+    _remoteRenderer!.initialize();
+  }
 
   // Public renderers for UI access
-  // These are initialized once and then re-initialized/reset their state
-  // rather than being replaced with new instances.
-  RTCVideoRenderer localRenderer = RTCVideoRenderer();
-  RTCVideoRenderer remoteRenderer = RTCVideoRenderer();
+  RTCVideoRenderer? _localRenderer;
+  RTCVideoRenderer? _remoteRenderer;
 
   // Private peer connection and stream
   RTCPeerConnection? _peerConnection;
   MediaStream? _localStream;
 
-  // Flag to prevent RTCPeerService's own dispose from running multiple times
-  // This flag is still useful for the service's own lifecycle
-  bool _isDisposed = false;
+  // New: Store the remote user ID here for consistent use
+  String? _currentRemoteUserId; // Renamed for clarity
+
+  // --- Callbacks for the UI (e.g., VideoCallScreen) to subscribe to ---
+  // These StreamControllers should be long-lived and NOT closed until app shutdown
+  final _localStreamController = StreamController<MediaStream>.broadcast();
+  Stream<MediaStream> get onLocalStreamAvailable => _localStreamController.stream;
+
+  final _remoteStreamController = StreamController<MediaStream>.broadcast();
+  Stream<MediaStream> get onRemoteStreamAvailable => _remoteStreamController.stream;
+
+  final _iceCandidateController = StreamController<RTCIceCandidate>.broadcast();
+  Stream<RTCIceCandidate> get onNewIceCandidate => _iceCandidateController.stream;
+
+  final _peerConnectionStateController = StreamController<RTCPeerConnectionState>.broadcast();
+  Stream<RTCPeerConnectionState> get onPeerConnectionStateChange => _peerConnectionStateController.stream;
+  final _errorController = StreamController<String>.broadcast();
+  Stream<String> get onError => _errorController.stream;
 
   // Configuration for WebRTC
   final Map<String, dynamic> _configuration = {
@@ -37,42 +61,96 @@ class RTCPeerService {
     'optional': [],
   };
 
-  // --- Callbacks for the UI (e.g., VideoCallScreen) to subscribe to ---
-  Function(MediaStream)? onLocalStreamAvailable;
-  Function(MediaStream)? onRemoteStreamAvailable;
-  Function(RTCIceCandidate)? onNewIceCandidate;
-  Function(RTCPeerConnectionState)? onPeerConnectionStateChange;
-  Function(String)? onError; // General error callback
+  // --- Public Getters for UI ---
+  RTCVideoRenderer? get localRenderer => _localRenderer;
+  RTCVideoRenderer? get remoteRenderer => _remoteRenderer;
+  MediaStream? get localStream => _localStream;
 
-  Future<void> initRenderers() async {
-    print('[RTCPeerService] Initializing/re-initializing renderers.');
-
-    // Dispose previous streams from renderers if they exist
-    if (localRenderer.srcObject != null) {
-      localRenderer.srcObject = null;
-    }
-    if (remoteRenderer.srcObject != null) {
-      remoteRenderer.srcObject = null;
-    }
-
-
-    await localRenderer.initialize();
-    await remoteRenderer.initialize();
-    print('[RTCPeerService] Renderers initialized.');
+  void setCurrentRemoteUserId(String userId) {
+    _currentRemoteUserId = userId;
+    print('[RTCPeerService] Current Remote User ID set to: $_currentRemoteUserId');
   }
 
-  Future<void> initWebRTC() async {
-    print('[RTCPeerService] Initializing WebRTC...');
-    try {
-      await initRenderers();  if (_peerConnection != null) {
-        if (_peerConnection!.connectionState != RTCPeerConnectionState.RTCPeerConnectionStateClosed) {
-          print('[RTCPeerService] Closing existing peer connection...');
-          await _peerConnection!.close();
-        }
-        _peerConnection = null; // Clear reference for new creation
-      }
+  // Helper to clean up only WebRTC objects, NOT StreamControllers
+  Future<void> _cleanUpPreviousWebRTCObjects() async {
+    print('[RTCPeerService] Cleaning up previous WebRTC objects...');
 
-      _isDisposed = false; // Reset disposition flag for a new call session
+    // Close peer connection
+    if (_peerConnection != null) {
+      // Unsubscribe existing listeners *before* closing to prevent errors if callbacks fire
+      _peerConnection?.onIceCandidate = null;
+      _peerConnection?.onTrack = null;
+      _peerConnection?.onIceConnectionState = null;
+      _peerConnection?.onSignalingState = null;
+      _peerConnection?.onConnectionState = null;
+
+      try {
+        await _peerConnection!.close();
+      } catch (e) {
+        print('[RTCPeerService] Error closing peer connection: $e');
+      } finally {
+        _peerConnection = null;
+        print('[RTCPeerService] PeerConnection closed.');
+      }
+    }
+
+    // Stop and dispose local stream tracks
+    if (_localStream != null) {
+      _localStream!.getTracks().forEach((track) {
+        try {
+          track.stop();
+        } catch (e) {
+          print('[RTCPeerService] Error stopping local track: $e');
+        }
+      });
+      try {
+        await _localStream!.dispose();
+      } catch (e) {
+        print('[RTCPeerService] Error disposing local stream: $e');
+      } finally {
+        _localStream = null;
+        print('[RTCPeerService] Local stream disposed.');
+      }
+    }
+
+    // Importantly, renderers are not fully disposed here, only their srcObjects are cleared
+    // and they will be reused or re-initialized in initWebRTC.
+    // If you always want new renderers, you would dispose them here.
+    if (_localRenderer != null) {
+      print('[RTCPeerService] Old localRenderer disposed.');
+      await _localRenderer!.dispose(); // Might throw if already disposed by the FlutterWebRTC plugin
+      _localRenderer = null; // Clear it after disposing
+    }
+    if (_remoteRenderer != null) {
+      print('[RTCPeerService] Old remoteRenderer disposed.');
+      await _remoteRenderer!.dispose(); // Might throw if already disposed
+      _remoteRenderer = null; // Clear it after disposing
+    }
+
+    // Clear the stored remote user ID
+    _currentRemoteUserId = null;
+
+    print('[RTCPeerService] Previous WebRTC objects cleaned up.');
+  }
+
+  // Initializes WebRTC for a new call. This should be called when a call starts.
+  Future<void> initWebRTC() async {
+    print('[RTCPeerService] Initializing WebRTC for a new call...');
+
+    // Always clean up previous WebRTC objects before setting up a new call
+    await _cleanUpPreviousWebRTCObjects();
+
+    try {
+      // Re-initialize renderers (if they were disposed in cleanup, or if reusing)
+      // In this current structure, renderers are initialized once in constructor
+      // and only their srcObject is cleared in cleanup. So no re-initialize here.
+      // If you changed _cleanUpPreviousCallResources to dispose renderers, uncomment:
+
+      //if (_remoteRenderer == null) {
+      //  _remoteRenderer = RTCVideoRenderer();
+       // await _remoteRenderer!.initialize();
+       // }
+      print('[RTCPeerService] Renderers (re)initialized or ready.');
 
       // Get local media stream (camera and microphone)
       _localStream = await navigator.mediaDevices.getUserMedia({
@@ -91,15 +169,20 @@ class RTCPeerService {
           ],
         },
       });
+      if (_localRenderer == null) {
+        _localRenderer = RTCVideoRenderer();
 
-      print('[RTCPeerService] Got local stream. Video tracks: ${_localStream?.getVideoTracks().length}');
-      if (_localStream != null) {
-        localRenderer.srcObject = _localStream; // Assign local stream to renderer
-        onLocalStreamAvailable?.call(_localStream!); // Notify UI about local stream
-        print('[RTCPeerService] Local stream set and notified.');
+       _localRenderer!.srcObject = _localStream; // Assign local stream to renderer
+        await _localRenderer!.initialize();
+        if (!_localStreamController.isClosed) {
+          _localStreamController.add(_localStream!); // Notify UI about local stream
+        }
+        print('[RTCPeerService] Local stream set and notified. Video tracks: ${_localStream?.getVideoTracks().length}');
       } else {
         print('[RTCPeerService] WARNING: Local stream is null!');
-        onError?.call('Failed to get local media stream.');
+        if (!_errorController.isClosed) {
+          _errorController.add('Failed to get local media stream.');
+        }
         throw Exception('Local stream is null');
       }
 
@@ -116,19 +199,20 @@ class RTCPeerService {
       // Set up ICE candidate handler
       _peerConnection?.onIceCandidate = (RTCIceCandidate candidate) {
         print('[RTCPeerService] onIceCandidate: ${candidate.candidate}');
-        onNewIceCandidate?.call(candidate); // Notify UI to send candidate via SignalR
+        if (!_iceCandidateController.isClosed) {
+          _iceCandidateController.add(candidate); // Notify UI to send candidate via SignalR
+        }
       };
 
       // Set up track handler for remote stream
       _peerConnection?.onTrack = (RTCTrackEvent event) {
         print('[RTCPeerService] onTrack: ${event.track.id}, streams: ${event.streams.length}');
-        // Check if stream is actually new or changed before re-assigning
-        if (event.streams.isNotEmpty && remoteRenderer.srcObject?.id != event.streams[0].id) {
-          remoteRenderer.srcObject = event.streams[0];
-          onRemoteStreamAvailable?.call(event.streams[0]); // Notify UI about remote stream
+        if (event.streams.isNotEmpty && !_remoteStreamController.isClosed) {
+          _remoteRenderer!.srcObject = event.streams[0]; // Set remote stream to renderer
+          _remoteStreamController.add(event.streams[0]); // Notify UI about remote stream
           print('[RTCPeerService] Remote stream set and notified.');
-        } else if (event.streams.isEmpty) {
-          print('[RTCPeerService] onTrack received event with empty streams.');
+        } else {
+          print('[RTCPeerService] onTrack received event with empty streams or controller closed.');
         }
       };
 
@@ -141,20 +225,32 @@ class RTCPeerService {
       };
       _peerConnection?.onConnectionState = (RTCPeerConnectionState state) {
         print('[RTCPeerService] PeerConnection state: $state');
-        onPeerConnectionStateChange?.call(state); // Notify UI about overall connection state
+        if (!_peerConnectionStateController.isClosed) {
+          _peerConnectionStateController.add(state); // Notify UI about overall connection state
+        }
       };
 
     } catch (e) {
-      print('WebRTC initialization failed: $e');
-      onError?.call('Failed to initialize WebRTC: $e');
-      rethrow;
+      print('[RTCPeerService] WebRTC initialization failed: $e');
+      if (!_errorController.isClosed) {
+        _errorController.add('Failed to initialize WebRTC: $e');
+      }
+      // Ensure renderers are disposed if init fails and they were newly created
+      // If renderers are long-lived (as in current code), only clear srcObject.
+      if (_localRenderer != null) _localRenderer!.srcObject = null;
+      if (_remoteRenderer != null) _remoteRenderer!.srcObject = null;
+
+      await _cleanUpPreviousWebRTCObjects(); // Clean up any partial setup
+      rethrow; // Propagate the error up
     }
   }
 
   Future<RTCSessionDescription?> createOffer() async {
     if (_peerConnection == null) {
       print('[RTCPeerService] Error: PeerConnection not initialized for createOffer.');
-      onError?.call('PeerConnection not initialized for offer creation.');
+      if (!_errorController.isClosed) {
+        _errorController.add('PeerConnection not initialized for offer creation.');
+      }
       return null;
     }
     try {
@@ -164,7 +260,9 @@ class RTCPeerService {
       return offer;
     } catch (e) {
       print('[RTCPeerService] Error creating offer: $e');
-      onError?.call('Error creating offer: $e');
+      if (!_errorController.isClosed) {
+        _errorController.add('Error creating offer: $e');
+      }
       return null;
     }
   }
@@ -172,7 +270,9 @@ class RTCPeerService {
   Future<RTCSessionDescription?> createAnswer() async {
     if (_peerConnection == null) {
       print('[RTCPeerService] Error: PeerConnection not initialized for createAnswer.');
-      onError?.call('PeerConnection not initialized for answer creation.');
+      if (!_errorController.isClosed) {
+        _errorController.add('PeerConnection not initialized for answer creation.');
+      }
       return null;
     }
     try {
@@ -182,7 +282,9 @@ class RTCPeerService {
       return answer;
     } catch (e) {
       print('[RTCPeerService] Error creating answer: $e');
-      onError?.call('Error creating answer: $e');
+      if (!_errorController.isClosed) {
+        _errorController.add('Error creating answer: $e');
+      }
       return null;
     }
   }
@@ -190,7 +292,9 @@ class RTCPeerService {
   Future<void> setRemoteDescription(RTCSessionDescription description) async {
     if (_peerConnection == null) {
       print('[RTCPeerService] Error: PeerConnection not initialized for setRemoteDescription.');
-      onError?.call('PeerConnection not initialized to set remote description.');
+      if (!_errorController.isClosed) {
+        _errorController.add('PeerConnection not initialized to set remote description.');
+      }
       return;
     }
     try {
@@ -198,30 +302,36 @@ class RTCPeerService {
       print('[RTCPeerService] Remote description (${description.type}) set.');
     } catch (e) {
       print('[RTCPeerService] Error setting remote description: $e');
-      onError?.call('Error setting remote description: $e');
+      if (!_errorController.isClosed) {
+        _errorController.add('Error setting remote description: $e');
+      }
     }
   }
 
   Future<void> addIceCandidate(RTCIceCandidate candidate) async {
     if (_peerConnection == null) {
       print('[RTCPeerService] Error: PeerConnection not initialized for addIceCandidate.');
-      onError?.call('PeerConnection not initialized to add ICE candidate.');
+      if (!_errorController.isClosed) {
+        _errorController.add('PeerConnection not initialized to add ICE candidate.');
+      }
       return;
     }
     try {
       await _peerConnection!.addCandidate(candidate);
-      print('[RTCPeerService] ICE candidate added.');
+      // print('[RTCPeerService] ICE candidate added.'); // Often too verbose for production
     } catch (e) {
       print('[RTCPeerService] Error adding ICE candidate: $e');
       // This error might happen if a candidate arrives before SDP negotiation is complete.
-      // Often safe to ignore or log for debugging.
+      // Often safe to ignore, but log for debugging.
     }
   }
 
   Future<void> switchCamera() async {
     if (_localStream == null || _localStream!.getVideoTracks().isEmpty) {
       print('[RTCPeerService] No local video stream to switch camera.');
-      onError?.call('No local video stream to switch camera.');
+      if (!_errorController.isClosed) {
+        _errorController.add('No local video stream to switch camera.');
+      }
       return;
     }
     try {
@@ -230,11 +340,12 @@ class RTCPeerService {
       print('[RTCPeerService] Camera switched.');
     } catch (e) {
       print('[RTCPeerService] Error switching camera: $e');
-      onError?.call('Error switching camera: $e');
+      if (!_errorController.isClosed) {
+        _errorController.add('Error switching camera: $e');
+      }
     }
   }
 
-  // These methods now control the state of the media tracks directly
   void toggleAudioMute() {
     final audioTracks = _localStream?.getAudioTracks();
     if (audioTracks != null && audioTracks.isNotEmpty) {
@@ -251,57 +362,45 @@ class RTCPeerService {
     }
   }
 
+  // This dispose method should ONLY be called when the entire application is shutting down
+  // or the user explicitly logs out and all WebRTC functionality is no longer needed.
+  // It closes the long-lived StreamControllers.
   Future<void> dispose() async {
-    if (_isDisposed) {
-      print('[RTCPeerService] Already disposed. Skipping.');
-      return;
+    print('[RTCPeerService] Disposing RTCPeerService (full shutdown)...');
+
+    // Clean up any active WebRTC objects first
+    await _cleanUpPreviousWebRTCObjects();
+
+    // Dispose renderers fully
+    if (_localRenderer != null) {
+      _localRenderer!.srcObject = null; // Clear association
+      await _localRenderer!.dispose();
+      _localRenderer = null;
+      print('[RTCPeerService] Final localRenderer disposed.');
     }
-    _isDisposed = true; // Set flag immediately
-
-    print('[RTCPeerService] Disposing RTCPeerService resources...');
-
-    // Close peer connection
-    if (_peerConnection != null) {
-      await _peerConnection!.close();
-      _peerConnection = null;
-      print('[RTCPeerService] PeerConnection closed.');
-    }
-
-    // Stop and dispose local stream tracks
-    _localStream?.getTracks().forEach((track) {
-      track.stop(); // Stop the track
-      print('[RTCPeerService] Local stream track stopped: ${track.id}');
-    });
-    if (_localStream != null) {
-      await _localStream!.dispose(); // Dispose the stream itself
-      _localStream = null;
-      print('[RTCPeerService] Local stream disposed.');
+    if (_remoteRenderer != null) {
+      _remoteRenderer!.srcObject = null; // Clear association
+      await _remoteRenderer!.dispose();
+      _remoteRenderer = null;
+      print('[RTCPeerService] Final remoteRenderer disposed.');
     }
 
-    // Unassign srcObject from renderers before disposing them
-    // This is crucial to avoid "Can't set srcObject: The RTCVideoRenderer is disposed"
-    if (localRenderer.srcObject != null) {
-      localRenderer.srcObject = null;
-    }
-    if (remoteRenderer.srcObject != null) {
-      remoteRenderer.srcObject = null;
-    }
+    // Close stream controllers only if they are not already closed
+    if (!_localStreamController.isClosed) await _localStreamController.close();
+    if (!_remoteStreamController.isClosed) await _remoteStreamController.close();
+    if (!_iceCandidateController.isClosed) await _iceCandidateController.close();
+    if (!_peerConnectionStateController.isClosed) await _peerConnectionStateController.close();
+    if (!_errorController.isClosed) await _errorController.close();
 
-    // Dispose the renderers
-    // It's safe to dispose even if srcObject is null, or it's already disposed.
-    // The key is that `initialize()` will re-enable them for the next call.
-    await localRenderer.dispose();
-    await remoteRenderer.dispose();
-    print('[RTCPeerService] Renderers disposed.');
-
-    // Clear callbacks to prevent memory leaks or calling on stale widgets
-    onLocalStreamAvailable = null;
-    onRemoteStreamAvailable = null;
-    onNewIceCandidate = null;
-    onPeerConnectionStateChange = null;
-    onError = null;
-    print('[RTCPeerService] All RTCPeerService callbacks cleared.');
-
-    print('[RTCPeerService] RTCPeerService resources cleaned up.');
+    print('[RTCPeerService] RTCPeerService fully disposed (all controllers closed).');
+  }
+  Future<void> endCurrentCall() async {
+    print('[RTCPeerService] Public endCurrentCall called. Triggering WebRTC object cleanup.');
+    await _cleanUpPreviousWebRTCObjects(); // This method already exists and does the cleanup
+    _currentRemoteUserId = null; // Clear the currentRemoteUserId for a clean slate
+    // You might also want to explicitly clear the srcObject of the renderers
+    // if you haven't already, although _cleanUpPreviousCallResources should handle the streams.
+    // _localRenderer?.srcObject = null;
+    // _remoteRenderer?.srcObject = null;
   }
 }

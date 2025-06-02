@@ -1,19 +1,20 @@
-// views/video_call_pages/incoming_call_screen.dart
-import 'dart:async'; // Required for StreamSubscription
+import 'dart:async'; // Import for StreamSubscription
 
 import 'package:client_app/views/video_call_pages/video_call_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_webrtc/flutter_webrtc.dart';
+import 'package:permission_handler/permission_handler.dart';
 import '../../services/video_call_services/signalr_tc_service.dart';
 import '../../services/video_call_services/rtc_peer_service.dart';
 
 class IncomingCallScreen extends StatefulWidget {
   final String callerId;
-  final String callerName; // Optional: Add caller details
+  final String callerName;
 
   const IncomingCallScreen({
     Key? key,
     required this.callerId,
-    this.callerName = "Unknown", // Default to Unknown if name isn't passed
+    this.callerName = "Unknown",
   }) : super(key: key);
 
   @override
@@ -21,30 +22,33 @@ class IncomingCallScreen extends StatefulWidget {
 }
 
 class _IncomingCallScreenState extends State<IncomingCallScreen> {
-  // Use StreamSubscription to manage listeners
   late StreamSubscription _callEndedSubscription;
   late StreamSubscription _callRejectedSubscription;
+  StreamSubscription? _offerSubscription;
+  bool _isAccepting = false;
 
   @override
   void initState() {
     super.initState();
     print('[IncomingCallScreen] initState: Setting up stream listeners.');
-    // Subscribe to call ended stream
-    _callEndedSubscription = SignalRTCService.callEndedStream.listen((reason) {
-      _handleCallEnded(reason);
-    });
+    // Set the caller ID in SignalRTCService for the
+    // callee path immediately
+    // This is crucial for sending back the answer and ICE candidates.
+    SignalRTCService.callerUserId = widget.callerId;
+    print('[IncomingCallScreen] Set SignalRTCService.callerUserId to ${widget.callerId}');
 
-    // Subscribe to call rejected stream
-    _callRejectedSubscription = SignalRTCService.callRejectedStream.listen((reason) {
-      _handleCallRejected(reason);
-    });
+    _callEndedSubscription = SignalRTCService.callEndedStream.listen(_handleCallEnded);
+    _callRejectedSubscription = SignalRTCService.callRejectedStream.listen(_handleCallRejected);
   }
 
-  // Listen for if the caller cancels before we accept
   void _handleCallEnded(String reason) {
     print('IncomingCallScreen: Call ended by caller. Reason: $reason');
     if (mounted) {
-      Navigator.pop(context); // Pop this incoming call screen
+      // If the VideoCallScreen is on top, let it handle the pop via its own _rtcService.onPeerConnectionStateChange
+      // Otherwise, pop this incoming call screen
+      if (Navigator.of(context).canPop()) {
+        Navigator.pop(context);
+      }
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Call ended by caller: $reason')),
       );
@@ -54,7 +58,9 @@ class _IncomingCallScreenState extends State<IncomingCallScreen> {
   void _handleCallRejected(String reason) {
     print('IncomingCallScreen: Rejected signal from caller. Reason: $reason');
     if (mounted) {
-      Navigator.pop(context); // Pop this incoming call screen
+      if (Navigator.of(context).canPop()) {
+        Navigator.pop(context);
+      }
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Call status: $reason')),
       );
@@ -64,10 +70,151 @@ class _IncomingCallScreenState extends State<IncomingCallScreen> {
   @override
   void dispose() {
     print('[IncomingCallScreen] dispose: Cancelling stream subscriptions.');
-    // Clean up subscriptions
     _callEndedSubscription.cancel();
     _callRejectedSubscription.cancel();
+    _offerSubscription?.cancel();
+    // Clear the callerId in SignalRTCService when this screen is disposed,
+    // as it's no longer handling a specific incoming call.
+    //SignalRTCService.callerUserId = null;
+    print('[IncomingCallScreen] Cleared SignalRTCService.callerUserId....');
     super.dispose();
+  }
+
+  // Inside _IncomingCallScreenState class
+
+  Future<void> _acceptCall() async {
+    if (_isAccepting) {
+      print('..................................................[IncomingCallScreen] _acceptCall: Already in acceptance process, returning.');
+      return;
+    }
+    _isAccepting = true; // Set flag at the very beginning
+    print('[IncomingCallScreen] Accept button pressed for ${widget.callerId}');
+
+    try {
+      // --- STEP 1: Request Permissions ---
+      print('[IncomingCallScreen] Requesting camera and microphone permissions...');
+      final cameraStatus = await Permission.camera.request();
+      final microphoneStatus = await Permission.microphone.request();
+
+      if (!cameraStatus.isGranted || !microphoneStatus.isGranted) {
+        print('Camera and microphone permissions are required to accept the call.');
+        _isAccepting = false; // Reset flag on failure
+        if (mounted) Navigator.pop(context);
+        return;
+      }
+      print('[IncomingCallScreen] Permissions granted.');
+
+
+      // --- STEP 2: Initialize WebRTC Service ---
+      print('[IncomingCallScreen] Initializing RTCPeerService...');
+      await RTCPeerService().initWebRTC(); // This should now handle renderers internally
+      print('[IncomingCallScreen] RTCPeerService initialized and renderers set up.');
+
+      // --- STEP 3: Accept Call via SignalR ---
+      print('[IncomingCallScreen] Sending accept call signal via SignalRTCService...');
+      await SignalRTCService.acceptCall(widget.callerId);
+      print('[IncomingCallScreen] SignalRTCService accepted call. Waiting for offer...');
+
+      // --- STEP 4: Listen for Offer ---
+      // Make sure we cancel previous subscriptions if any are lingering (though dispose should handle)
+      _offerSubscription?.cancel();
+      print('[IncomingCallScreen] Attaching offer stream listener.');
+
+      _offerSubscription = SignalRTCService.receiveOfferStream.listen((offerData) async {
+        print('[IncomingCallScreen] Received offer: $offerData');
+        _offerSubscription?.cancel(); // Cancel subscription after receiving the first offer
+        _offerSubscription = null;
+
+        try {
+          // --- STEP 5: Set Remote Description and Create Answer ---
+          print('[IncomingCallScreen] Setting remote description (offer)...');
+          await RTCPeerService().setRemoteDescription(
+            RTCSessionDescription(offerData['sdp'], offerData['type']),
+          );
+          print('[IncomingCallScreen] Remote Description (Offer) set. Creating Answer...');
+
+          final answer = await RTCPeerService().createAnswer();
+          if (answer != null) {
+            // --- STEP 6: Send Answer ---
+            print('[IncomingCallScreen] Sending answer to caller...');
+            await SignalRTCService.sendAnswer(widget.callerId, {
+              'sdp': answer.sdp,
+              'type': answer.type,
+            });
+            print('[IncomingCallScreen] Answer sent to caller.');
+
+            // --- STEP 7: Navigate to VideoCallScreen ---
+            if (mounted) {
+              print('[IncomingCallScreen] Navigating to VideoCallScreen...');
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => VideoCallScreen(
+                    targetUserId: widget.callerId,
+                    isCaller: false,
+                    isCallAcceptedImmediately: true,
+                    callerUserId: widget.callerId, // Pass callerUserId for callee side
+                  ),
+                ),
+              );
+              print('[IncomingCallScreen] Navigation complete.');
+            } else {
+              print('[IncomingCallScreen] Widget not mounted, cannot navigate.');
+            }
+          } else {
+            print('[IncomingCallScreen] ERROR: Answer is null. Cannot send answer.');
+            throw Exception('Failed to create answer.');
+          }
+        } catch (e) {
+          print('Error handling offer: $e');
+          print('[IncomingCallScreen] EXCEPTION during offer handling: $e');
+          await SignalRTCService.rejectCall(widget.callerId, reason: 'Failed to handle offer');
+          if (mounted) {
+            Navigator.pop(context);
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('Failed to handle offer: $e')),
+            );
+          }
+        } finally {
+          _isAccepting = false; // Reset flag
+        }
+      }, onError: (error, stackTrace) { // Add onError to catch stream errors
+        print('[IncomingCallScreen] ERROR in offer stream listener: $error');
+        print('[IncomingCallScreen] Stack Trace from offer stream listener: $stackTrace');
+        print('Error in offer stream: $error');
+      }, onDone: () {
+        print('[IncomingCallScreen] Offer stream listener completed.'); // Log when stream is done
+      });
+
+      // --- STEP 8: Add a timeout for receiving the offer ---
+      Future.delayed(const Duration(seconds: 15), () {
+        if (_offerSubscription != null && mounted) {
+          print('[IncomingCallScreen] No offer received within timeout. Rejecting call.');
+          _offerSubscription?.cancel();
+          _offerSubscription = null;
+          SignalRTCService.rejectCall(widget.callerId, reason: 'Offer timeout');
+          if (mounted) {
+            Navigator.pop(context);
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Call failed: No offer received.')),
+            );
+          }
+          _isAccepting = false;
+        }
+      });
+
+    } catch (e) {
+      print('Error accepting call: $e');
+      print('[IncomingCallScreen] EXCEPTION in _acceptCall: $e');
+      await SignalRTCService.rejectCall(widget.callerId, reason: 'Failed to initialize call setup');
+      if (mounted) {
+        Navigator.pop(context);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to accept call: $e')),
+        );
+      }
+      _isAccepting = false; // Reset flag on error
+    }
   }
 
   @override
@@ -80,7 +227,7 @@ class _IncomingCallScreenState extends State<IncomingCallScreen> {
           children: [
             const CircleAvatar(
               radius: 60,
-              backgroundImage: AssetImage('assets/profile_placeholder.png'), // Ensure this asset exists
+              backgroundImage: AssetImage('assets/images/doctor.png'),
             ),
             const SizedBox(height: 20),
             Text(
@@ -100,66 +247,23 @@ class _IncomingCallScreenState extends State<IncomingCallScreen> {
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                // Reject Button
                 FloatingActionButton(
-                  heroTag: 'reject_call', // Unique heroTag
+                  heroTag: 'reject_call',
                   backgroundColor: Colors.red,
                   onPressed: () async {
                     print('[IncomingCallScreen] Reject button pressed for ${widget.callerId}');
                     await SignalRTCService.rejectCall(widget.callerId, reason: 'Rejected by user');
                     if (mounted) {
-                      Navigator.pop(context); // Close incoming call screen
+                      Navigator.pop(context);
                     }
                   },
                   child: const Icon(Icons.call_end, size: 30),
                 ),
                 const SizedBox(width: 40),
-                // Accept Button
                 FloatingActionButton(
-                  heroTag: 'accept_call', // Unique heroTag
+                  heroTag: 'accept_call',
                   backgroundColor: Colors.green,
-                  onPressed: () async {
-                    print('[IncomingCallScreen] Accept button pressed for ${widget.callerId}');
-                    try {
-                      // 1. Initialize WebRTC for the callee
-                      // RTCPeerService().initRenderers() is crucial for video output
-                      await RTCPeerService().initRenderers();
-                      await RTCPeerService().initWebRTC(); // No longer needs `isCaller` param
-                      print('[IncomingCallScreen] RTCPeerService initialized.');
-
-                      // 2. Accept the call via SignalR
-                      // SignalRTCService.callerUserId should be set by the 'IncomingCall' handler in HomePage
-                      // However, explicitly passing widget.callerId here is safer.
-                      await SignalRTCService.acceptCall(widget.callerId);
-                      print('[IncomingCallScreen] SignalRTCService accepted call.');
-
-                      // 3. Navigate to the Video Call Screen
-                      if (mounted) {
-                        // Use pushReplacement to replace this screen with VideoCallScreen
-                        Navigator.pushReplacement(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => VideoCallScreen(
-                              targetUserId: widget.callerId, // For callee, target is the caller
-                              isCaller: false, // Important: Set as receiver
-                              isCallAcceptedImmediately: true, // Signal it's accepted
-                            ),
-                          ),
-                        );
-                        print('[IncomingCallScreen] Navigated to VideoCallScreen.');
-                      }
-                    } catch (e) {
-                      print('Error accepting call: $e');
-                      // If WebRTC init or SignalR accept fails, reject the call and pop
-                      await SignalRTCService.rejectCall(widget.callerId, reason: 'Failed to initialize call setup');
-                      if (mounted) {
-                        Navigator.pop(context);
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text('Failed to accept call: $e')),
-                        );
-                      }
-                    }
-                  },
+                  onPressed: _acceptCall,
                   child: const Icon(Icons.videocam, size: 30),
                 ),
               ],
