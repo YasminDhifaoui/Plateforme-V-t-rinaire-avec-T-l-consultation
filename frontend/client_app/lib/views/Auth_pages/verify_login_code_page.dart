@@ -13,7 +13,7 @@ import '../../main.dart'; // Needed for navigatorKey if used for global navigati
 
 class VerifyLoginCodePage extends StatefulWidget {
   final String email;
-  final Function(String token)? onLoginSuccessCallback;
+  final Function(String token, String userId, String username)? onLoginSuccessCallback;
 
   const VerifyLoginCodePage({
     Key? key,
@@ -33,8 +33,7 @@ class _VerifyLoginCodePageState extends State<VerifyLoginCodePage> {
   String responseMessage = '';
   bool isLoading = false;
 
-  // Corrected: _showSuccessDialog now accepts the token as a parameter
-  void _showSuccessDialog(BuildContext context, String username, String token) {
+  void _showSuccessDialog(BuildContext context, String username, String token, String userId) {
     final TextTheme textTheme = Theme.of(context).textTheme;
     showDialog(
       context: context,
@@ -71,9 +70,8 @@ class _VerifyLoginCodePageState extends State<VerifyLoginCodePage> {
                       Navigator.pushReplacement(
                         context,
                         MaterialPageRoute(
-                          // CORRECTED: Pass the 'username' variable (from API response)
-                          // and the 'token' variable (from API response)
-                          builder: (context) => HomePage(username: username, token: token),
+                          // Pass all required initial data to HomePage
+                          builder: (context) => HomePage(username: username, token: token, initialUserId: userId,),
                         ),
                       );
                     },
@@ -97,7 +95,11 @@ class _VerifyLoginCodePageState extends State<VerifyLoginCodePage> {
   }
 
   void verifyCode() async {
-    if (!_formKey.currentState!.validate()) return;
+    print('[VerifyLoginCodePage] verifyCode() called.'); // DEBUG: Function entry
+    if (!_formKey.currentState!.validate()) {
+      print('[VerifyLoginCodePage] Form validation failed.'); // DEBUG: Validation failed
+      return;
+    }
 
     setState(() {
       isLoading = true;
@@ -111,18 +113,18 @@ class _VerifyLoginCodePageState extends State<VerifyLoginCodePage> {
       );
 
       final result = await _apiService.verifyLoginCode(verifyDto);
-      print('Result: $result');
+      print('[VerifyLoginCodePage] API Response Result: $result'); // DEBUG: API response
 
       if (result['success'] == true && result['data'] != null) {
         final data = result['data'];
         final token = data['token'];
         final userData = data['data']; // this is a nested map
-        final userId = userData['clientId']; // Assuming this is the correct key for user ID
+        final userId = userData['clientId']; // Assuming this is the correct key for user ID for clients
         final username = userData['username']; // Assuming this is the correct key for username
 
-        print('Token: $token');
-        print('User ID: $userId');
-        print('Username: $username');
+        print('[VerifyLoginCodePage] Extracted Token: $token'); // DEBUG: Extracted values
+        print('[VerifyLoginCodePage] Extracted User ID: $userId');
+        print('[VerifyLoginCodePage] Extracted Username: $username');
 
         if (token == null || token.toString().isEmpty ||
             userId == null || userId.toString().isEmpty ||
@@ -131,7 +133,7 @@ class _VerifyLoginCodePageState extends State<VerifyLoginCodePage> {
             responseMessage = 'Invalid token or user data received.';
             isLoading = false;
           });
-          // Show error via SnackBar
+          print('[VerifyLoginCodePage] Error: Invalid token or user data received. Token: ${token}, UserID: ${userId}, Username: ${username}'); // DEBUG: Invalid data
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
@@ -148,22 +150,24 @@ class _VerifyLoginCodePageState extends State<VerifyLoginCodePage> {
           return;
         }
 
-        // CORRECTED: Pass username to _storeSession
         await _storeSession(token.toString(), userId.toString(), username.toString());
+        print('[VerifyLoginCodePage] Session stored locally.'); // DEBUG: Session stored
 
         // *** CRUCIAL: Call the global SignalR initialization callback here ***
-        // Pass the token received from the API response
-        widget.onLoginSuccessCallback?.call(token.toString());
+        print('[VerifyLoginCodePage] Calling onLoginSuccessCallback...'); // DEBUG: About to call callback
+        print('[VerifyLoginCodePage] Callback is null: ${widget.onLoginSuccessCallback == null}'); // DEBUG: Check if callback is null
+
+        widget.onLoginSuccessCallback?.call(token.toString(), userId.toString(), username.toString());
+        print('[VerifyLoginCodePage] onLoginSuccessCallback called.'); // DEBUG: Callback called
 
         if (mounted) {
-          // Pass the 'username' and 'token' variables from the API response
-          _showSuccessDialog(context, username.toString(), token.toString());
+          _showSuccessDialog(context, username.toString(), token.toString(), userId.toString());
         }
       } else {
         setState(() {
           responseMessage = result['message'] ?? 'Verification failed.';
         });
-        // Show error via SnackBar
+        print('[VerifyLoginCodePage] API Success is false or data is null. Message: ${responseMessage}'); // DEBUG: API failed
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
@@ -182,7 +186,7 @@ class _VerifyLoginCodePageState extends State<VerifyLoginCodePage> {
       setState(() {
         responseMessage = 'An error occurred: $e';
       });
-      // Show error via SnackBar
+      print('[VerifyLoginCodePage] Catch block error: $e'); // DEBUG: Caught error
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -205,9 +209,8 @@ class _VerifyLoginCodePageState extends State<VerifyLoginCodePage> {
     }
   }
 
-  // CORRECTED: _storeSession now accepts username parameter
   Future<void> _storeSession(String token, String userId, String username) async {
-    await TokenService.saveToken(token, userId, username); // Call TokenService.saveToken with username
+    await TokenService.saveToken(token, userId, username);
   }
 
   @override
@@ -217,7 +220,7 @@ class _VerifyLoginCodePageState extends State<VerifyLoginCodePage> {
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
-        backgroundColor: kPrimaryBlue, // Using kPrimaryBlue from app_colors.dart
+        backgroundColor: kPrimaryBlue,
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.white),
@@ -244,7 +247,7 @@ class _VerifyLoginCodePageState extends State<VerifyLoginCodePage> {
                       'Enter Verification Code',
                       textAlign: TextAlign.center,
                       style: textTheme.headlineMedium?.copyWith(
-                        color: kPrimaryBlue, // Using kPrimaryBlue
+                        color: kPrimaryBlue,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
@@ -259,7 +262,7 @@ class _VerifyLoginCodePageState extends State<VerifyLoginCodePage> {
                       widget.email,
                       textAlign: TextAlign.center,
                       style: textTheme.titleMedium?.copyWith(
-                        color: kPrimaryBlue, // Using kPrimaryBlue
+                        color: kPrimaryBlue,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
@@ -272,14 +275,14 @@ class _VerifyLoginCodePageState extends State<VerifyLoginCodePage> {
                       decoration: InputDecoration(
                         labelText: 'Verification Code',
                         hintText: '******',
-                        prefixIcon: const Icon(Icons.vpn_key, color: kAccentBlue), // Using kAccentBlue
+                        prefixIcon: const Icon(Icons.vpn_key, color: kAccentBlue),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(10),
-                          borderSide: BorderSide(color: kPrimaryBlue.withOpacity(0.6)), // Using kPrimaryBlue
+                          borderSide: BorderSide(color: kPrimaryBlue.withOpacity(0.6)),
                         ),
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(10),
-                          borderSide: const BorderSide(color: kPrimaryBlue, width: 2), // Using kPrimaryBlue
+                          borderSide: const BorderSide(color: kPrimaryBlue, width: 2),
                         ),
                         errorBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(10),
@@ -306,11 +309,11 @@ class _VerifyLoginCodePageState extends State<VerifyLoginCodePage> {
                     SizedBox(
                       width: double.infinity,
                       child: isLoading
-                          ? CircularProgressIndicator(color: kPrimaryBlue) // Using kPrimaryBlue
+                          ? CircularProgressIndicator(color: kPrimaryBlue)
                           : ElevatedButton(
                         onPressed: verifyCode,
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: kPrimaryBlue, // Using kPrimaryBlue
+                          backgroundColor: kPrimaryBlue,
                           foregroundColor: Colors.white,
                           padding: const EdgeInsets.symmetric(vertical: 16),
                           shape: RoundedRectangleBorder(

@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "756043924770",
+    "project_id": "vetappmsgnotification",
+    "storage_bucket": "vetappmsgnotification.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:756043924770:android:7edac163354d0f80a7517b",
+        "android_client_info": {
+          "package_name": "com.example.client_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC5Pft6oiKVpjixJ9E0LmQM9EGsBE6fOMU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:756043924770:android:701f8c18433480baa7517b",
+        "android_client_info": {
+          "package_name": "com.example.veterinary_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC5Pft6oiKVpjixJ9E0LmQM9EGsBE6fOMU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

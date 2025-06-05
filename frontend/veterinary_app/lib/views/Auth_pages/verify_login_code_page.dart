@@ -7,7 +7,8 @@ import '../home_page.dart'; // Still needed as you navigate to it from here
 
 class VerifyLoginCodePage extends StatefulWidget {
   final String email;
-  final Function(String token)? onLoginSuccessCallback;
+  // MODIFIED: Callback now accepts token, userId, and username
+  final Function(String token, String userId, String username)? onLoginSuccessCallback;
 
   const VerifyLoginCodePage({
     super.key,
@@ -60,9 +61,7 @@ class _VerifyLoginCodePageState extends State<VerifyLoginCodePage> {
 
       final result = await _apiService.verifyLoginCode(verifyDto);
 
-      // --- CRUCIAL DEBUG PRINT ---
       print('API Verification Result Full: $result');
-      // --- END CRUCIAL DEBUG PRINT ---
 
       if (result['success'] == true && result['data'] != null) {
         final data = result['data']; // This 'data' is the outer map returned by the API
@@ -73,20 +72,20 @@ class _VerifyLoginCodePageState extends State<VerifyLoginCodePage> {
 
         // Safely access username and userId from the nested userData map
         final username = userData?['username'] as String? ?? '';
-        final userId = userData?['userId'] as String? ?? '';
+        final userId = userData?['vetId'] as String? ?? ''; // Correctly extracted as 'vetId'
 
         print('Extracted Token: "$token"');
-        print('Extracted User ID: "$userId"');
+        print('Extracted User ID (vetId): "$userId"');
         print('Extracted Username: "$username"');
-
-
 
         await _storeSession(token, userId, username);
 
-        widget.onLoginSuccessCallback?.call(token);
+        // MODIFIED: Pass all three values to the callback
+        widget.onLoginSuccessCallback?.call(token, userId, username);
 
         if (mounted) {
           _showSnackBar('Verification successful! Welcome, $username.', isSuccess: true);
+          // Navigate to HomePage with extracted username and token
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(

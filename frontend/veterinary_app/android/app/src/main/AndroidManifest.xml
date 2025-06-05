@@ -20,6 +20,20 @@
         android:usesCleartextTraffic="true"
 
     android:icon="@mipmap/launcher_icon">
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_channel_id"
+            android:value="high_importance_channel" />  <!-- THIS MUST MATCH THE ID IN YOUR FLUTTER CODE -->
+
+        <!-- Also ensure you have a default notification icon -->
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_icon"
+            android:resource="@mipmap/ic_launcher" /> <!-- Make sure @mipmap/ic_launcher actually exists -->
+
+        <!-- Optional: set a default notification color (good practice) -->
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_color"
+            android:resource="@color/ic_launcher_background" /> <!-- Define this color in xml/colors.xml -->
+
         <activity
             android:name=".MainActivity"
             android:exported="true"

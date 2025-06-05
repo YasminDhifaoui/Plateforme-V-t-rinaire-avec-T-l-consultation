@@ -11,7 +11,8 @@ import '../../utils/app_colors.dart'; // Import for kPrimaryBlue, kAccentBlue
 import 'package:client_app/main.dart'; // Assuming main.dart holds kPrimaryBlue, kAccentBlue etc.
 
 class ClientLoginPage extends StatefulWidget {
-  final Function(String token)? onLoginSuccessCallback;
+  // CORRECTED: This signature is now consistent with main.dart and VerifyLoginCodePage
+  final Function(String token, String userId, String username)? onLoginSuccessCallback;
 
   const ClientLoginPage({super.key, this.onLoginSuccessCallback});
 
@@ -57,6 +58,7 @@ class _ClientLoginPageState extends State<ClientLoginPage> {
             MaterialPageRoute(
               builder: (context) => VerifyLoginCodePage(
                 email: emailController.text.trim(),
+                // This line is CORRECT! It passes the callback down.
                 onLoginSuccessCallback: widget.onLoginSuccessCallback,
               ),
             ),

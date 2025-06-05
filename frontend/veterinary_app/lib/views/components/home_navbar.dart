@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:veterinary_app/services/auth_services/token_service.dart';
 import 'package:veterinary_app/views/profile_pages/profile_page.dart';
 
-import '../../services/notification_handle/message_notifier.dart';
+// Removed: import '../../services/notification_handle/message_notifier.dart';
 import '../../utils/app_colors.dart';
 import '../conv_pages/conv_page.dart';
 
@@ -30,29 +30,22 @@ class HomeNavbar extends StatefulWidget implements PreferredSizeWidget {
 
 class _HomeNavbarState extends State<HomeNavbar> {
   String? _jwtToken;
-  int _unreadMessageCount = 0;
+  // Removed: int _unreadMessageCount = 0;
 
   @override
   void initState() {
     super.initState();
     _loadJwtToken();
-    // Listen to unreadMessageNotifier for updates
-    unreadMessageNotifier.addListener(_updateUnreadMessageCount);
+    // Removed: unreadMessageNotifier.addListener(_updateUnreadMessageCount);
   }
 
   @override
   void dispose() {
-    // Remove the listener to prevent memory leaks
-    unreadMessageNotifier.removeListener(_updateUnreadMessageCount);
+    // Removed: unreadMessageNotifier.removeListener(_updateUnreadMessageCount);
     super.dispose();
   }
 
-  void _updateUnreadMessageCount() {
-    print('Navbar received update: ${unreadMessageNotifier.value}');
-    setState(() {
-      _unreadMessageCount = unreadMessageNotifier.value;
-    });
-  }
+  // Removed: void _updateUnreadMessageCount() { ... }
 
   Future<void> _loadJwtToken() async {
     String? token = await TokenService.getToken();
@@ -96,57 +89,22 @@ class _HomeNavbarState extends State<HomeNavbar> {
       ),
 
       actions: [
-        // Messages/Chat Icon with Badge
-        ValueListenableBuilder<int>(
-          valueListenable: unreadMessageNotifier,
-          builder: (context, count, child) {
-            return IconButton(
-              icon: Stack(
-                children: [
-                  const Icon(Icons.chat_bubble_outline_rounded, color: Colors.white), // Modern chat icon, white
-                  if (count > 0)
-                    Positioned(
-                      right: 0,
-                      top: 0,
-                      child: Container(
-                        padding: const EdgeInsets.all(3), // Slightly more padding
-                        decoration: BoxDecoration(
-                          color: Colors.red.shade600, // Prominent red for unread count
-                          borderRadius: BorderRadius.circular(10), // More rounded
-                          border: Border.all(color: Colors.white, width: 1), // White border for contrast
-                        ),
-                        constraints: const BoxConstraints(
-                          minWidth: 18, // Slightly larger min size
-                          minHeight: 18,
-                        ),
-                        child: Text(
-                          '$count',
-                          style: textTheme.labelSmall?.copyWith( // Use themed labelSmall
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 11, // Adjust font size for badge
-                          ),
-                          textAlign: TextAlign.center,
-                        ),
-                      ),
-                    ),
-                ],
-              ),
-              tooltip: 'Messages',
-              onPressed: () {
-                if (_jwtToken != null) {
-                  unreadMessageNotifier.value = 0; // Reset count on opening chat
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => ConversationsPage(token: _jwtToken!),
-                    ),
-                  );
-                } else {
-                  _showSnackBar('Authentication token not available. Please log in.', isSuccess: false);
-                }
-              },
-            );
+        // Messages/Chat Icon (Badge removed)
+        IconButton(
+          icon: const Icon(Icons.chat_bubble_outline_rounded, color: Colors.white), // Modern chat icon, white
+          tooltip: 'Messages',
+          onPressed: () {
+            if (_jwtToken != null) {
+              // Removed: unreadMessageNotifier.value = 0; // Reset count on opening chat
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => ConversationsPage(token: _jwtToken!),
+                ),
+              );
+            } else {
+              _showSnackBar('Authentication token not available. Please log in.', isSuccess: false);
+            }
           },
         ),
 

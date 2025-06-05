@@ -1,26 +1,23 @@
 import 'dart:convert';
-import 'dart:io'; // NEW: Import for File
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
-// import '../../main.dart'; // Commented out if kAccentGreen is from app_colors.dart
-import '../../main.dart';
-import '../../models/chat_models/chat_model.dart';
-import '../../services/chat_services/chat_signal_service.dart';
-import '../../utils/base_url.dart';
-import '../video_call_pages/video_call_screen.dart';
-import '../../utils/app_colors.dart'; // Import for kPrimaryBlue, kAccentBlue
+import 'package:client_app/services/auth_services/token_service.dart'; // Import TokenService
+import 'package:client_app/services/chat_services/chat_signal_service.dart';
+import 'package:client_app/utils/base_url.dart';
+import 'package:client_app/views/video_call_pages/video_call_screen.dart';
+import 'package:client_app/utils/app_colors.dart';
 
-// For file picking - changed to file_selector
 import 'package:file_selector/file_selector.dart';
-// For opening URLs (e.g., PDFs in browser)
 import 'package:url_launcher/url_launcher.dart';
-// For camera and gallery access
 import 'package:image_picker/image_picker.dart';
-// For saving images
 import 'package:image_gallery_saver_plus/image_gallery_saver_plus.dart';
-import 'package:path_provider/path_provider.dart'; // For temporary file path
-import 'package:permission_handler/permission_handler.dart'; // For permission handling
+import 'package:path_provider/path_provider.dart';
+import 'package:permission_handler/permission_handler.dart';
+
+import '../../models/chat_models/chat_model.dart';
+import '../../services/notification_services/notification_service.dart'; // Make sure this path is correct
 
 class ChatPage extends StatefulWidget {
   final String token;
@@ -42,6 +39,7 @@ class _ChatPageState extends State<ChatPage> {
   final TextEditingController _controller = TextEditingController();
   final ScrollController _scrollController = ScrollController();
   final SignalService _signalService = SignalService();
+  final NotificationService _notificationService = NotificationService(); // <-- NEW: Instantiate NotificationService
   final ImagePicker _picker = ImagePicker();
 
   List<ChatMessage> _messages = [];
@@ -49,7 +47,6 @@ class _ChatPageState extends State<ChatPage> {
   String? _currentUserId;
   String? _currentUsername;
 
-  // This state variable controls the visibility of the "Scroll to Bottom" button
   bool _showScrollToBottomButton = false;
 
   @override
@@ -60,6 +57,11 @@ class _ChatPageState extends State<ChatPage> {
 
     _signalService.onMessageReceived = (from, message, fileUrl, fileName, fileType) {
       if (from.trim().toLowerCase() == _currentUsername?.trim().toLowerCase()) {
+        // This is a message sent by "me" and reflected back by SignalR,
+        // so we don't add it again if it was already added locally on send.
+        // Or, you can check for a unique message ID to prevent duplicates.
+        // For simplicity, if it's from current user's username, we skip.
+        // A more robust solution involves checking for a unique message ID.
         return;
       }
 
@@ -69,26 +71,23 @@ class _ChatPageState extends State<ChatPage> {
             senderName: _getDisplayName(from),
             text: message,
             isSender: false,
-            sentAt: DateTime.now(), // Use DateTime.now() for received messages
+            sentAt: DateTime.now(),
             fileUrl: fileUrl,
             fileName: fileName,
             fileType: fileType,
           ),
         );
-        // Sort messages by sentAt timestamp to maintain chronological order
         _messages.sort((a, b) => a.sentAt.compareTo(b.sentAt));
       });
 
-      _scrollToBottom(); // Scrolls to bottom when a new message is received
+      _scrollToBottom();
     };
 
     _fetchMessages();
-
-    // Add listener to scroll controller to show/hide the scroll-to-bottom button
     _scrollController.addListener(_scrollListener);
   }
 
-  void _extractTokenDetails(String token) {
+  void _extractTokenDetails(String token) async { // Made async to await TokenService.getUserId/getUsername
     try {
       final parts = token.split('.');
       if (parts.length != 3) return;
@@ -97,14 +96,32 @@ class _ChatPageState extends State<ChatPage> {
       final payloadString = utf8.decode(base64Url.decode(payloadBase64));
       final decoded = json.decode(payloadString);
 
+      // Assuming 'Id' is the user's ID and 'sub' is the username from the token payload
       _currentUserId = decoded['Id']?.toString();
       _currentUsername = decoded['sub']?.toString();
+
+      // Alternatively, you can use TokenService to get these values if they are stored there
+      // _currentUserId = await TokenService.getUserId();
+      // _currentUsername = await TokenService.getUsername();
+
+      print('Current User ID: $_currentUserId, Username: $_currentUsername');
+
     } catch (e) {
-      print("Error decoding token: $e");
+      print("Error decoding token in ChatPage: $e");
     }
   }
 
   Future<void> _fetchMessages() async {
+    // Ensure _currentUserId is set before fetching messages
+    if (_currentUserId == null) {
+      // Potentially wait or show an error
+      await Future.delayed(Duration(milliseconds: 100)); // Small delay to ensure token details are extracted
+      if (_currentUserId == null) {
+        _showSnackBar('Cannot fetch messages: Current user ID is unknown.', isSuccess: false);
+        return;
+      }
+    }
+
     try {
       final response = await http.get(
         Uri.parse(
@@ -119,10 +136,8 @@ class _ChatPageState extends State<ChatPage> {
             response.body,
             _currentUserId ?? '',
           );
-          // Sort messages by sentAt timestamp after fetching history
           _messages.sort((a, b) => a.sentAt.compareTo(b.sentAt));
         });
-        // Scrolls to bottom after fetching and setting initial messages
         _scrollToBottom();
       } else {
         print('Failed to fetch messages: ${response.statusCode}');
@@ -144,35 +159,52 @@ class _ChatPageState extends State<ChatPage> {
     }
   }
 
-  void _sendMessage(String message) {
-    if (_currentUserId == null) {
-      _showSnackBar('User not authenticated. Cannot send message.', isSuccess: false);
+  void _sendMessage(String message) async { // Make async
+    if (_currentUserId == null || _currentUsername == null) {
+      _showSnackBar('User authentication details not available. Please re-login.', isSuccess: false);
       return;
     }
     if (message.trim().isEmpty) return;
 
+    // Send message via SignalR for real-time delivery
     _signalService.sendMessage(widget.receiverId, message);
 
+    // Add message to local UI immediately
     setState(() {
       _messages.add(
         ChatMessage(
           senderName: "You",
           text: message,
           isSender: true,
-          sentAt: DateTime.now(), // Use DateTime.now() for sent messages
+          sentAt: DateTime.now(),
         ),
       );
-      // Sort messages by sentAt timestamp after sending a new message
       _messages.sort((a, b) => a.sentAt.compareTo(b.sentAt));
     });
 
     _controller.clear();
-    _scrollToBottom(); // Scrolls to bottom after sending a message
+    _scrollToBottom();
+
+    // --- NEW: Trigger FCM notification via backend ---
+    final notificationResult = await _notificationService.sendChatMessageNotification(
+      recipientId: widget.receiverId,
+      senderId: _currentUserId!,
+      senderName: _currentUsername!, // Use the actual username for notification
+      messageContent: message,
+      // No file details for a text message
+    );
+
+    if (!notificationResult['success']) {
+      print('Failed to send chat notification: ${notificationResult['message']}');
+      // Optionally, show a subtle error to the user if the notification part failed
+      // _showSnackBar('Could not send notification to recipient.', isSuccess: false);
+    }
+    // --- END NEW ---
   }
 
   Future<void> _pickAndSendFile() async {
-    if (_currentUserId == null) {
-      _showSnackBar('User not authenticated. Cannot send file.', isSuccess: false);
+    if (_currentUserId == null || _currentUsername == null) {
+      _showSnackBar('User authentication details not available. Please re-login.', isSuccess: false);
       return;
     }
 
@@ -204,30 +236,49 @@ class _ChatPageState extends State<ChatPage> {
           fileType = 'other';
         }
 
+        // Send file via SignalR for real-time delivery
         _signalService.sendMessage(
           widget.receiverId,
-          null,
+          null, // No text message for file
           fileUrl: uploadedFileUrl,
           fileName: fileName,
           fileType: fileType,
         );
 
+        // Add file message to local UI immediately
         setState(() {
           _messages.add(
             ChatMessage(
               senderName: "You",
               text: null,
               isSender: true,
-              sentAt: DateTime.now(), // Use DateTime.now() for sent files
+              sentAt: DateTime.now(),
               fileUrl: uploadedFileUrl,
               fileName: fileName,
               fileType: fileType,
             ),
           );
-          // Sort messages by sentAt timestamp after sending a new file
           _messages.sort((a, b) => a.sentAt.compareTo(b.sentAt));
         });
-        _scrollToBottom(); // Scrolls to bottom after sending a file
+        _scrollToBottom();
+
+        // --- NEW: Trigger FCM notification via backend for file message ---
+        final notificationResult = await _notificationService.sendChatMessageNotification(
+          recipientId: widget.receiverId,
+          senderId: _currentUserId!,
+          senderName: _currentUsername!, // Use the actual username for notification
+          messageContent: 'Sent a file: ${fileName}', // A descriptive message for notification
+          fileUrl: uploadedFileUrl,
+          fileName: fileName,
+          fileType: fileType,
+        );
+
+        if (!notificationResult['success']) {
+          print('Failed to send file notification: ${notificationResult['message']}');
+          // Optionally, show a subtle error to the user if the notification part failed
+        }
+        // --- END NEW ---
+
       } else {
         _showSnackBar('File upload failed.', isSuccess: false);
       }
@@ -235,8 +286,8 @@ class _ChatPageState extends State<ChatPage> {
   }
 
   Future<void> _takeAndSendPicture() async {
-    if (_currentUserId == null) {
-      _showSnackBar('User not authenticated. Cannot send picture.', isSuccess: false);
+    if (_currentUserId == null || _currentUsername == null) {
+      _showSnackBar('User authentication details not available. Please re-login.', isSuccess: false);
       return;
     }
 
@@ -253,6 +304,7 @@ class _ChatPageState extends State<ChatPage> {
       if (uploadedFileUrl != null) {
         String fileType = 'image';
 
+        // Send picture via SignalR for real-time delivery
         _signalService.sendMessage(
           widget.receiverId,
           null,
@@ -261,22 +313,40 @@ class _ChatPageState extends State<ChatPage> {
           fileType: fileType,
         );
 
+        // Add picture message to local UI immediately
         setState(() {
           _messages.add(
             ChatMessage(
               senderName: "You",
               text: null,
               isSender: true,
-              sentAt: DateTime.now(), // Use DateTime.now() for sent pictures
+              sentAt: DateTime.now(),
               fileUrl: uploadedFileUrl,
               fileName: fileName,
               fileType: fileType,
             ),
           );
-          // Sort messages by sentAt timestamp after sending a new picture
           _messages.sort((a, b) => a.sentAt.compareTo(b.sentAt));
         });
-        _scrollToBottom(); // Scrolls to bottom after sending a picture
+        _scrollToBottom();
+
+        // --- NEW: Trigger FCM notification via backend for picture message ---
+        final notificationResult = await _notificationService.sendChatMessageNotification(
+          recipientId: widget.receiverId,
+          senderId: _currentUserId!,
+          senderName: _currentUsername!, // Use the actual username for notification
+          messageContent: 'Sent a picture: ${fileName}', // A descriptive message for notification
+          fileUrl: uploadedFileUrl,
+          fileName: fileName,
+          fileType: fileType,
+        );
+
+        if (!notificationResult['success']) {
+          print('Failed to send picture notification: ${notificationResult['message']}');
+          // Optionally, show a subtle error to the user if the notification part failed
+        }
+        // --- END NEW ---
+
       } else {
         _showSnackBar('Picture upload failed.', isSuccess: false);
       }
@@ -364,31 +434,16 @@ class _ChatPageState extends State<ChatPage> {
     });
   }
 
-  // The _scrollToTop method is no longer used by the FAB, but kept for reference
-  void _scrollToTop() {
-    if (_scrollController.hasClients) {
-      _scrollController.animateTo(
-        0.0, // Explicitly animate to 0.0 for the top
-        duration: const Duration(milliseconds: 300),
-        curve: Curves.easeOut,
-      );
-    }
-  }
-
-  // Named listener for _scrollController to manage button visibility
   void _scrollListener() {
     final double currentScroll = _scrollController.position.pixels;
     final double maxScroll = _scrollController.position.maxScrollExtent;
-    const double threshold = 50.0; // Pixels from the bottom to show the button
+    const double threshold = 50.0;
 
-    // Show button if not at the very bottom
     if (currentScroll < maxScroll - threshold && !_showScrollToBottomButton) {
       setState(() {
         _showScrollToBottomButton = true;
       });
-    }
-    // Hide button if at or near the very bottom
-    else if (currentScroll >= maxScroll - threshold && _showScrollToBottomButton) {
+    } else if (currentScroll >= maxScroll - threshold && _showScrollToBottomButton) {
       setState(() {
         _showScrollToBottomButton = false;
       });
@@ -402,7 +457,7 @@ class _ChatPageState extends State<ChatPage> {
           message,
           style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Colors.white),
         ),
-        backgroundColor: isSuccess ? kAccentBlue : Colors.red.shade600, // Consistent color usage
+        backgroundColor: isSuccess ? kAccentBlue : Colors.red.shade600,
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
         margin: const EdgeInsets.all(10),
@@ -415,7 +470,7 @@ class _ChatPageState extends State<ChatPage> {
     _signalService.onMessageReceived = null;
     _signalService.disconnect();
     _controller.dispose();
-    _scrollController.removeListener(_scrollListener); // Remove the named listener
+    _scrollController.removeListener(_scrollListener);
     _scrollController.dispose();
     super.dispose();
   }
@@ -453,7 +508,7 @@ class _ChatPageState extends State<ChatPage> {
             decoration: BoxDecoration(
               color: bubbleColor,
               borderRadius: radius,
-              boxShadow: [
+              boxShadow: const [ // Made const
                 BoxShadow(
                   color: Colors.black12,
                   blurRadius: 4,
@@ -542,7 +597,7 @@ class _ChatPageState extends State<ChatPage> {
                   Positioned(
                     bottom: 20,
                     child: FloatingActionButton(
-                      backgroundColor: kAccentBlue, // Consistent color usage
+                      backgroundColor: kAccentBlue,
                       onPressed: () {
                         Navigator.of(context).pop();
                         _downloadAndSaveImage(fullImageUrl, imageFileName);
@@ -584,11 +639,11 @@ class _ChatPageState extends State<ChatPage> {
                   width: 200,
                   height: 200,
                   color: Colors.grey[300],
-                  child: Column(
+                  child: const Column( // Made const
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Icon(Icons.broken_image, color: Colors.red, size: 40),
-                      Text('Image failed to load', style: textTheme.bodySmall?.copyWith(color: Colors.red)),
+                      Text('Image failed to load', style: TextStyle(color: Colors.red)), // Directly set style
                     ],
                   ),
                 ),
@@ -688,17 +743,17 @@ class _ChatPageState extends State<ChatPage> {
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(24),
-                    borderSide: BorderSide(color: kAccentBlue, width: 1.5), // Consistent color usage
+                    borderSide: BorderSide(color: kAccentBlue, width: 1.5),
                   ),
                   prefixIcon: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       IconButton(
-                        icon: const Icon(Icons.attach_file_rounded, color: kAccentBlue), // Consistent color usage
+                        icon: const Icon(Icons.attach_file_rounded, color: kAccentBlue),
                         onPressed: _pickAndSendFile,
                       ),
                       IconButton(
-                        icon: const Icon(Icons.camera_alt_rounded, color: kAccentBlue), // Consistent color usage
+                        icon: const Icon(Icons.camera_alt_rounded, color: kAccentBlue),
                         onPressed: _takeAndSendPicture,
                       ),
                     ],
@@ -713,7 +768,7 @@ class _ChatPageState extends State<ChatPage> {
             ),
             const SizedBox(width: 8),
             CircleAvatar(
-              backgroundColor: kAccentBlue, // Consistent color usage
+              backgroundColor: kAccentBlue,
               radius: 24,
               child: IconButton(
                 icon: const Icon(Icons.send_rounded, color: Colors.white),
@@ -737,7 +792,7 @@ class _ChatPageState extends State<ChatPage> {
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.background,
       appBar: AppBar(
-        backgroundColor: kAccentBlue, // Consistent color usage
+        backgroundColor: kAccentBlue,
         foregroundColor: Colors.white,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios_rounded),
@@ -749,7 +804,7 @@ class _ChatPageState extends State<ChatPage> {
             CircleAvatar(
               backgroundColor: Colors.white,
               radius: 18,
-              child: Icon(Icons.person_rounded, color: kAccentBlue, size: 20), // Consistent color usage
+              child: Icon(Icons.person_rounded, color: kAccentBlue, size: 20),
             ),
             const SizedBox(width: 10),
             Flexible(
@@ -780,7 +835,7 @@ class _ChatPageState extends State<ChatPage> {
               },
               child: Container(
                 decoration: BoxDecoration(
-                  color: kAccentBlue, // Consistent color usage
+                  color: kAccentBlue,
                   shape: BoxShape.circle,
                   boxShadow: const [
                     BoxShadow(
@@ -806,8 +861,7 @@ class _ChatPageState extends State<ChatPage> {
           Expanded(
             child: ListView.builder(
               controller: _scrollController,
-              // Adjusted bottom padding to make space for the FAB
-              padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 0).copyWith(bottom: 100.0), // Increased padding
+              padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 0).copyWith(bottom: 100.0),
               itemCount: _messages.length,
               itemBuilder: (context, index) =>
                   _buildMessageBubble(_messages[index], textTheme),
@@ -816,17 +870,15 @@ class _ChatPageState extends State<ChatPage> {
           _buildMessageInput(textTheme),
         ],
       ),
-      // Floating Action Button for scrolling to bottom (latest messages)
       floatingActionButton: _showScrollToBottomButton
           ? FloatingActionButton(
-        onPressed: _scrollToBottom, // Now scrolls to bottom
+        onPressed: _scrollToBottom,
         backgroundColor: kAccentBlue,
-        mini: true, // Make it smaller
-        child: const Icon(Icons.arrow_downward, color: Colors.white), // Changed icon
-        tooltip: 'Scroll to Latest Messages', // Changed tooltip
+        mini: true,
+        child: const Icon(Icons.arrow_downward, color: Colors.white),
+        tooltip: 'Scroll to Latest Messages',
       )
           : null,
-      // Position the Floating Action Button
       floatingActionButtonLocation: FloatingActionButtonLocation.centerTop,
     );
   }

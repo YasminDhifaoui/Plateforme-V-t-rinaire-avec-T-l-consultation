@@ -26,7 +26,10 @@ dependencies:
       url: https://github.com/flutter-webrtc/flutter-webrtc.git
       ref: main
   signalr_core: ^1.1.1
+
   flutter_local_notifications: ^17.0.0
+  firebase_core: ^2.0.0
+  firebase_messaging: ^14.0.0
 
   flutter_launcher_icons: "^0.13.1"
   flutter_native_splash: "^2.3.11"

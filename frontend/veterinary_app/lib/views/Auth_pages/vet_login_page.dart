@@ -13,8 +13,8 @@ import '../../utils/app_colors.dart'; // <--- KEEP THIS LINE
 // import 'package:veterinary_app/main.dart'; // <-- DELETE THIS LINE
 
 class VetLoginPage extends StatefulWidget {
-  // NEW: Callback from MyHomePage/AppWrapper
-  final Function(String token)? onLoginSuccessCallback;
+  // MODIFIED: Callback now accepts token, userId, AND username
+  final Function(String token, String userId, String username)? onLoginSuccessCallback;
 
   const VetLoginPage({super.key, this.onLoginSuccessCallback}); // MODIFIED Constructor
 
@@ -80,7 +80,12 @@ class _VetLoginPageState extends State<VetLoginPage> {
               builder: (context) => VerifyLoginCodePage(
                 email: emailController.text.trim(),
                 // Pass the callback to the 2FA verification page
-                onLoginSuccessCallback: widget.onLoginSuccessCallback,
+                // This anonymous function now matches the NEW signature of VerifyLoginCodePage's callback.
+                // It then correctly calls VetLoginPage's own onLoginSuccessCallback
+                // which now also expects all three parameters.
+                onLoginSuccessCallback: (token, userId, username) {
+                  widget.onLoginSuccessCallback?.call(token, userId, username); // MODIFIED call
+                },
               ),
             ),
           );

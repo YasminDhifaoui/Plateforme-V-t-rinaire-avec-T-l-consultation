@@ -1,14 +1,13 @@
 import 'dart:convert';
-import 'dart:io'; // NEW: Import for File
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
-// import '../../main.dart'; // Commented out if kAccentGreen is from app_colors.dart
-import '../../models/chat_models/chat_model.dart';
-import '../../services/chat_services/chat_signal_service.dart';
-import '../../utils/app_colors.dart'; // Assuming kAccentGreen is defined here
-import '../../utils/base_url.dart';
-import '../video_call_pages/video_call_screen.dart';
+import 'package:veterinary_app/services/auth_services/token_service.dart'; // Import TokenService for vet app
+import 'package:veterinary_app/services/chat_services/chat_signal_service.dart';
+import 'package:veterinary_app/utils/app_colors.dart'; // Assuming kAccentGreen is defined here
+import 'package:veterinary_app/utils/base_url.dart';
+import 'package:veterinary_app/views/video_call_pages/video_call_screen.dart';
 
 // For file picking - changed to file_selector
 import 'package:file_selector/file_selector.dart';
@@ -20,6 +19,9 @@ import 'package:image_picker/image_picker.dart';
 import 'package:image_gallery_saver_plus/image_gallery_saver_plus.dart';
 import 'package:path_provider/path_provider.dart'; // For temporary file path
 import 'package:permission_handler/permission_handler.dart'; // For permission handling
+
+import '../../models/chat_models/chat_model.dart';
+import '../../services/notification_services/notification_service.dart';
 
 class ChatPage extends StatefulWidget {
   final String token;
@@ -41,6 +43,7 @@ class _ChatPageState extends State<ChatPage> {
   final TextEditingController _controller = TextEditingController();
   final ScrollController _scrollController = ScrollController();
   final SignalService _signalService = SignalService();
+  final NotificationService _notificationService = NotificationService(); // Correctly instantiated
   final ImagePicker _picker = ImagePicker();
 
   List<ChatMessage> _messages = [];
@@ -54,7 +57,7 @@ class _ChatPageState extends State<ChatPage> {
   @override
   void initState() {
     super.initState();
-    _extractTokenDetails(widget.token);
+    _initializeChatPage(); // Use the new initialization method
     _signalService.connect(widget.token);
 
     _signalService.onMessageReceived = (from, message, fileUrl, fileName, fileType) {
@@ -81,29 +84,30 @@ class _ChatPageState extends State<ChatPage> {
       _scrollToBottom(); // Scrolls to bottom when a new message is received
     };
 
-    _fetchMessages();
-
-    // Add listener to scroll controller to show/hide the scroll-to-bottom button
     _scrollController.addListener(_scrollListener);
   }
 
-  void _extractTokenDetails(String token) {
-    try {
-      final parts = token.split('.');
-      if (parts.length != 3) return;
+  // Async initialization method to get current user details from TokenService
+  Future<void> _initializeChatPage() async {
+    _currentUserId = await TokenService.getUserId();
+    _currentUsername = await TokenService.getUsername();
+    print('[ChatPage] Current User ID: $_currentUserId, Username: $_currentUsername');
 
-      final payloadBase64 = base64.normalize(parts[1]);
-      final payloadString = utf8.decode(base64Url.decode(payloadBase64));
-      final decoded = json.decode(payloadString);
-
-      _currentUserId = decoded['Id']?.toString();
-      _currentUsername = decoded['sub']?.toString();
-    } catch (e) {
-      print("Error decoding token: $e");
+    if (_currentUserId == null || _currentUsername == null) {
+      _showSnackBar('Your session details are missing. Please log in again.', isSuccess: false);
+      // Optionally, navigate back to login page if essential data is missing
     }
+
+    _fetchMessages(); // Fetch messages after current user details are loaded
   }
 
   Future<void> _fetchMessages() async {
+    // Ensure _currentUserId is set before fetching messages
+    if (_currentUserId == null) {
+      _showSnackBar('Cannot fetch messages: Current user ID is unknown.', isSuccess: false);
+      return;
+    }
+
     try {
       final response = await http.get(
         Uri.parse(
@@ -143,9 +147,9 @@ class _ChatPageState extends State<ChatPage> {
     }
   }
 
-  void _sendMessage(String message) {
-    if (_currentUserId == null) {
-      _showSnackBar('User not authenticated. Cannot send message.', isSuccess: false);
+  void _sendMessage(String message) async {
+    if (_currentUserId == null || _currentUsername == null) {
+      _showSnackBar('User authentication details not available. Please re-login.', isSuccess: false);
       return;
     }
     if (message.trim().isEmpty) return;
@@ -158,20 +162,33 @@ class _ChatPageState extends State<ChatPage> {
           senderName: "You",
           text: message,
           isSender: true,
-          sentAt: DateTime.now(), // Use DateTime.now() for sent messages
+          sentAt: DateTime.now(),
         ),
       );
-      // Sort messages by sentAt timestamp after sending a new message
       _messages.sort((a, b) => a.sentAt.compareTo(b.sentAt));
     });
 
     _controller.clear();
-    _scrollToBottom(); // Scrolls to bottom after sending a message
+    _scrollToBottom();
+
+    // Trigger FCM notification via backend for the recipient
+    final notificationResult = await _notificationService.sendChatMessageNotification(
+      recipientId: widget.receiverId,
+      senderId: _currentUserId!,
+      senderName: _currentUsername!, // This will be the vet's username
+      messageContent: message,
+      // No file details for a text message
+    );
+
+    if (!notificationResult['success']) {
+      print('[ChatPage] Failed to send chat notification: ${notificationResult['message']}');
+      // Optionally, show a subtle error to the user if the notification part failed
+    }
   }
 
   Future<void> _pickAndSendFile() async {
-    if (_currentUserId == null) {
-      _showSnackBar('User not authenticated. Cannot send file.', isSuccess: false);
+    if (_currentUserId == null || _currentUsername == null) {
+      _showSnackBar('User authentication details not available. Please re-login.', isSuccess: false);
       return;
     }
 
@@ -217,16 +234,30 @@ class _ChatPageState extends State<ChatPage> {
               senderName: "You",
               text: null,
               isSender: true,
-              sentAt: DateTime.now(), // Use DateTime.now() for sent files
+              sentAt: DateTime.now(),
               fileUrl: uploadedFileUrl,
               fileName: fileName,
               fileType: fileType,
             ),
           );
-          // Sort messages by sentAt timestamp after sending a new file
           _messages.sort((a, b) => a.sentAt.compareTo(b.sentAt));
         });
-        _scrollToBottom(); // Scrolls to bottom after sending a file
+        _scrollToBottom();
+
+        // Trigger FCM notification via backend for file message
+        final notificationResult = await _notificationService.sendChatMessageNotification(
+          recipientId: widget.receiverId,
+          senderId: _currentUserId!,
+          senderName: _currentUsername!, // This will be the vet's username
+          messageContent: 'Sent a file: ${fileName}', // A descriptive message for notification
+          fileUrl: uploadedFileUrl,
+          fileName: fileName,
+          fileType: fileType,
+        );
+
+        if (!notificationResult['success']) {
+          print('[ChatPage] Failed to send file notification: ${notificationResult['message']}');
+        }
       } else {
         _showSnackBar('File upload failed.', isSuccess: false);
       }
@@ -234,8 +265,8 @@ class _ChatPageState extends State<ChatPage> {
   }
 
   Future<void> _takeAndSendPicture() async {
-    if (_currentUserId == null) {
-      _showSnackBar('User not authenticated. Cannot send picture.', isSuccess: false);
+    if (_currentUserId == null || _currentUsername == null) {
+      _showSnackBar('User authentication details not available. Please re-login.', isSuccess: false);
       return;
     }
 
@@ -266,16 +297,30 @@ class _ChatPageState extends State<ChatPage> {
               senderName: "You",
               text: null,
               isSender: true,
-              sentAt: DateTime.now(), // Use DateTime.now() for sent pictures
+              sentAt: DateTime.now(),
               fileUrl: uploadedFileUrl,
               fileName: fileName,
               fileType: fileType,
             ),
           );
-          // Sort messages by sentAt timestamp after sending a new picture
           _messages.sort((a, b) => a.sentAt.compareTo(b.sentAt));
         });
-        _scrollToBottom(); // Scrolls to bottom after sending a picture
+        _scrollToBottom();
+
+        // Trigger FCM notification via backend for picture message
+        final notificationResult = await _notificationService.sendChatMessageNotification(
+          recipientId: widget.receiverId,
+          senderId: _currentUserId!,
+          senderName: _currentUsername!, // This will be the vet's username
+          messageContent: 'Sent a picture: ${fileName}', // A descriptive message for notification
+          fileUrl: uploadedFileUrl,
+          fileName: fileName,
+          fileType: fileType,
+        );
+
+        if (!notificationResult['success']) {
+          print('[ChatPage] Failed to send picture notification: ${notificationResult['message']}');
+        }
       } else {
         _showSnackBar('Picture upload failed.', isSuccess: false);
       }
@@ -541,7 +586,7 @@ class _ChatPageState extends State<ChatPage> {
                   Positioned(
                     bottom: 20,
                     child: FloatingActionButton(
-                      backgroundColor: kAccentGreen, // Consistent color usage
+                      backgroundColor: kAccentGreen,
                       onPressed: () {
                         Navigator.of(context).pop();
                         _downloadAndSaveImage(fullImageUrl, imageFileName);
@@ -583,11 +628,11 @@ class _ChatPageState extends State<ChatPage> {
                   width: 200,
                   height: 200,
                   color: Colors.grey[300],
-                  child: Column(
+                  child: const Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Icon(Icons.broken_image, color: Colors.red, size: 40),
-                      Text('Image failed to load', style: textTheme.bodySmall?.copyWith(color: Colors.red)),
+                      Text('Image failed to load', style: TextStyle(color: Colors.red)),
                     ],
                   ),
                 ),
@@ -660,7 +705,7 @@ class _ChatPageState extends State<ChatPage> {
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
         decoration: BoxDecoration(
           color: Colors.white,
-          boxShadow: [
+          boxShadow: const [
             BoxShadow(
               color: Colors.black12,
               blurRadius: 8,
@@ -687,17 +732,17 @@ class _ChatPageState extends State<ChatPage> {
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(24),
-                    borderSide: BorderSide(color: kAccentGreen, width: 1.5), // Consistent color usage
+                    borderSide: BorderSide(color: kAccentGreen, width: 1.5),
                   ),
                   prefixIcon: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       IconButton(
-                        icon: const Icon(Icons.attach_file_rounded, color: kAccentGreen), // Consistent color usage
+                        icon: const Icon(Icons.attach_file_rounded, color: kAccentGreen),
                         onPressed: _pickAndSendFile,
                       ),
                       IconButton(
-                        icon: const Icon(Icons.camera_alt_rounded, color: kAccentGreen), // Consistent color usage
+                        icon: const Icon(Icons.camera_alt_rounded, color: kAccentGreen),
                         onPressed: _takeAndSendPicture,
                       ),
                     ],
@@ -712,7 +757,7 @@ class _ChatPageState extends State<ChatPage> {
             ),
             const SizedBox(width: 8),
             CircleAvatar(
-              backgroundColor: kAccentGreen, // Consistent color usage
+              backgroundColor: kAccentGreen,
               radius: 24,
               child: IconButton(
                 icon: const Icon(Icons.send_rounded, color: Colors.white),
@@ -736,7 +781,7 @@ class _ChatPageState extends State<ChatPage> {
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.background,
       appBar: AppBar(
-        backgroundColor: kAccentGreen, // Consistent color usage
+        backgroundColor: kAccentGreen,
         foregroundColor: Colors.white,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios_rounded),
@@ -748,7 +793,7 @@ class _ChatPageState extends State<ChatPage> {
             CircleAvatar(
               backgroundColor: Colors.white,
               radius: 18,
-              child: Icon(Icons.person_rounded, color: kAccentGreen, size: 20), // Consistent color usage
+              child: Icon(Icons.person_rounded, color: kAccentGreen, size: 20),
             ),
             const SizedBox(width: 10),
             Flexible(
@@ -779,7 +824,7 @@ class _ChatPageState extends State<ChatPage> {
               },
               child: Container(
                 decoration: BoxDecoration(
-                  color: kAccentGreen, // Consistent color usage
+                  color: kAccentGreen,
                   shape: BoxShape.circle,
                   boxShadow: const [
                     BoxShadow(
@@ -805,8 +850,7 @@ class _ChatPageState extends State<ChatPage> {
           Expanded(
             child: ListView.builder(
               controller: _scrollController,
-              // Adjusted bottom padding to make space for the FAB
-              padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 0).copyWith(bottom: 160.0), // Increased padding to 160.0
+              padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 0).copyWith(bottom: 160.0),
               itemCount: _messages.length,
               itemBuilder: (context, index) =>
                   _buildMessageBubble(_messages[index], textTheme),
@@ -815,17 +859,15 @@ class _ChatPageState extends State<ChatPage> {
           _buildMessageInput(textTheme),
         ],
       ),
-      // Floating Action Button for scrolling to bottom (latest messages)
       floatingActionButton: _showScrollToBottomButton
           ? FloatingActionButton(
-        onPressed: _scrollToBottom, // Now scrolls to bottom
+        onPressed: _scrollToBottom,
         backgroundColor: kAccentGreen,
-        mini: true, // Make it smaller
-        child: const Icon(Icons.arrow_downward, color: Colors.white), // Changed icon
-        tooltip: 'Scroll to Latest Messages', // Changed tooltip
+        mini: true,
+        child: const Icon(Icons.arrow_downward, color: Colors.white),
+        tooltip: 'Scroll to Latest Messages',
       )
           : null,
-      // Position the Floating Action Button
       floatingActionButtonLocation: FloatingActionButtonLocation.centerTop,
     );
   }
