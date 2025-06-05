@@ -6,6 +6,7 @@ import 'package:client_app/services/auth_services/token_service.dart'; // Assumi
 import '../../models/profile_models/client_change_password.dart';
 import '../../services/auth_services/client_auth_services.dart';
 import '../../services/profile_services/change_pass_service.dart'; // Your ApiService
+import '../../utils/app_colors.dart'; // Import for kPrimaryBlue, kAccentBlue
 
 class ClientChangePasswordPage extends StatefulWidget {
   const ClientChangePasswordPage({super.key});

@@ -4,6 +4,7 @@ import 'package:client_app/models/auth_models/client_reset_password.dart'; // Im
 
 // Import your blue color constants. Ensure these are correctly defined.
 import 'package:client_app/main.dart';
+import '../../utils/app_colors.dart'; // Import for kPrimaryBlue, kAccentBlue
 
 import 'client_login_page.dart'; // Adjust path if using a separate constants.dart
 

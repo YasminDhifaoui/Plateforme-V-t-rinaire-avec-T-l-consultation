@@ -3,6 +3,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../services/auth_services/token_service.dart';
 import '../../services/vet_services/veterinaire_service.dart';
 import '../../models/vet_models/veterinaire.dart';
+import '../../utils/app_colors.dart';
 import '../chat_pages/ChatPage.dart';
 import '../rendezvous_pages/add_rendezvous_page.dart';
 

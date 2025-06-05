@@ -7,6 +7,7 @@ import 'package:intl/intl.dart';
 import 'package:client_app/services/animal_services/animal_service.dart';
 import 'package:client_app/models/animals_models/animal.dart';
 import 'package:client_app/services/auth_services/token_service.dart'; // <--- Import TokenService
+import '../../utils/app_colors.dart'; // Import for kPrimaryBlue, kAccentBlue
 
 import 'package:client_app/main.dart'; // For kPrimaryBlue, kAccentBlue
 

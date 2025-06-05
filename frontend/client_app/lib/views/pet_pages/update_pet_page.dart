@@ -7,6 +7,7 @@ import '../../services/animal_services/animal_update_service.dart';
 
 // Import your blue color constants. Ensure these are correctly defined.
 import 'package:client_app/main.dart'; // Adjust path if using a separate constants.dart
+import '../../utils/app_colors.dart'; // Import for kPrimaryBlue, kAccentBlue
 
 class UpdatePetPage extends StatefulWidget {
   final Animal animal;

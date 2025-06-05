@@ -8,6 +8,7 @@ import 'package:client_app/services/rendezvous_services/delete_rendezvous.dart';
 // import 'package:client_app/utils/logout_helper.dart'; // Keep if used for general logout logic
 
 import '../vet_pages/veterinary_page.dart';
+import '../../utils/app_colors.dart'; // Import for kPrimaryBlue, kAccentBlue
 
 // Import your blue color constants. Ensure these are correctly defined.
 import 'package:client_app/main.dart'; // Adjust path if using a separate constants.dart

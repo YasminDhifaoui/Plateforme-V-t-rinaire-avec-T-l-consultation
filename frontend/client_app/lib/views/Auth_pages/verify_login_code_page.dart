@@ -4,9 +4,12 @@ import 'package:client_app/models/auth_models/client_verify_login.dart';
 import 'package:client_app/services/auth_services/client_auth_services.dart';
 import 'package:client_app/views/home_page.dart'; // Assuming this is your client's actual home page
 
-// Import the blue color constants from main.dart
-import 'package:client_app/main.dart';
-import 'package:client_app/views/Auth_pages/client_login_page.dart'; // Needed for navigation back to login if required
+// CORRECTED IMPORT: Import the blue color constants from your centralized app_colors.dart
+import 'package:client_app/utils/app_colors.dart'; // <--- KEEP THIS LINE
+
+// This import is still needed for navigatorKey if you use it for global navigation
+import '../../main.dart'; // Needed for navigatorKey if used for global navigation (e.g., in AuthService.logout)
+
 
 class VerifyLoginCodePage extends StatefulWidget {
   final String email;
@@ -25,13 +28,13 @@ class VerifyLoginCodePage extends StatefulWidget {
 class _VerifyLoginCodePageState extends State<VerifyLoginCodePage> {
   final _formKey = GlobalKey<FormState>();
   final TextEditingController codeController = TextEditingController();
-  final ApiService _apiService = ApiService();
+  final ApiService _apiService = ApiService(); // Assuming ApiService is your client_auth_services
 
   String responseMessage = '';
   bool isLoading = false;
 
-  // Custom dialog for success message
-  void _showSuccessDialog(BuildContext context, String username) {
+  // Corrected: _showSuccessDialog now accepts the token as a parameter
+  void _showSuccessDialog(BuildContext context, String username, String token) {
     final TextTheme textTheme = Theme.of(context).textTheme;
     showDialog(
       context: context,
@@ -68,7 +71,9 @@ class _VerifyLoginCodePageState extends State<VerifyLoginCodePage> {
                       Navigator.pushReplacement(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => HomePage(username: username),
+                          // CORRECTED: Pass the 'username' variable (from API response)
+                          // and the 'token' variable (from API response)
+                          builder: (context) => HomePage(username: username, token: token),
                         ),
                       );
                     },
@@ -143,13 +148,16 @@ class _VerifyLoginCodePageState extends State<VerifyLoginCodePage> {
           return;
         }
 
-        await _storeSession(token.toString(), userId.toString()); // Ensure userId is string for token service
+        // CORRECTED: Pass username to _storeSession
+        await _storeSession(token.toString(), userId.toString(), username.toString());
 
         // *** CRUCIAL: Call the global SignalR initialization callback here ***
-        widget.onLoginSuccessCallback?.call(token.toString()); // Ensure token is string
+        // Pass the token received from the API response
+        widget.onLoginSuccessCallback?.call(token.toString());
 
         if (mounted) {
-          _showSuccessDialog(context, username); // Show success dialog
+          // Pass the 'username' and 'token' variables from the API response
+          _showSuccessDialog(context, username.toString(), token.toString());
         }
       } else {
         setState(() {
@@ -197,8 +205,9 @@ class _VerifyLoginCodePageState extends State<VerifyLoginCodePage> {
     }
   }
 
-  Future<void> _storeSession(String token, String userId) async {
-    await TokenService.saveToken(token, userId);
+  // CORRECTED: _storeSession now accepts username parameter
+  Future<void> _storeSession(String token, String userId, String username) async {
+    await TokenService.saveToken(token, userId, username); // Call TokenService.saveToken with username
   }
 
   @override
@@ -208,7 +217,7 @@ class _VerifyLoginCodePageState extends State<VerifyLoginCodePage> {
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
-        backgroundColor: kPrimaryBlue,
+        backgroundColor: kPrimaryBlue, // Using kPrimaryBlue from app_colors.dart
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.white),
@@ -235,7 +244,7 @@ class _VerifyLoginCodePageState extends State<VerifyLoginCodePage> {
                       'Enter Verification Code',
                       textAlign: TextAlign.center,
                       style: textTheme.headlineMedium?.copyWith(
-                        color: kPrimaryBlue,
+                        color: kPrimaryBlue, // Using kPrimaryBlue
                         fontWeight: FontWeight.bold,
                       ),
                     ),
@@ -250,7 +259,7 @@ class _VerifyLoginCodePageState extends State<VerifyLoginCodePage> {
                       widget.email,
                       textAlign: TextAlign.center,
                       style: textTheme.titleMedium?.copyWith(
-                        color: kPrimaryBlue,
+                        color: kPrimaryBlue, // Using kPrimaryBlue
                         fontWeight: FontWeight.bold,
                       ),
                     ),
@@ -263,14 +272,14 @@ class _VerifyLoginCodePageState extends State<VerifyLoginCodePage> {
                       decoration: InputDecoration(
                         labelText: 'Verification Code',
                         hintText: '******',
-                        prefixIcon: const Icon(Icons.vpn_key, color: kAccentBlue),
+                        prefixIcon: const Icon(Icons.vpn_key, color: kAccentBlue), // Using kAccentBlue
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(10),
-                          borderSide: BorderSide(color: kPrimaryBlue.withOpacity(0.6)),
+                          borderSide: BorderSide(color: kPrimaryBlue.withOpacity(0.6)), // Using kPrimaryBlue
                         ),
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(10),
-                          borderSide: const BorderSide(color: kPrimaryBlue, width: 2),
+                          borderSide: const BorderSide(color: kPrimaryBlue, width: 2), // Using kPrimaryBlue
                         ),
                         errorBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(10),
@@ -287,7 +296,6 @@ class _VerifyLoginCodePageState extends State<VerifyLoginCodePage> {
                         if (value == null || value.isEmpty) {
                           return 'Verification code is required';
                         }
-                        // Optional: Add regex for 6 digits if that's the fixed format
                         if (value.length != 6 || !RegExp(r'^[0-9]+$').hasMatch(value)) {
                           return 'Please enter a valid 6-digit code';
                         }
@@ -298,11 +306,11 @@ class _VerifyLoginCodePageState extends State<VerifyLoginCodePage> {
                     SizedBox(
                       width: double.infinity,
                       child: isLoading
-                          ? CircularProgressIndicator(color: kPrimaryBlue)
+                          ? CircularProgressIndicator(color: kPrimaryBlue) // Using kPrimaryBlue
                           : ElevatedButton(
                         onPressed: verifyCode,
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: kPrimaryBlue,
+                          backgroundColor: kPrimaryBlue, // Using kPrimaryBlue
                           foregroundColor: Colors.white,
                           padding: const EdgeInsets.symmetric(vertical: 16),
                           shape: RoundedRectangleBorder(
@@ -314,7 +322,6 @@ class _VerifyLoginCodePageState extends State<VerifyLoginCodePage> {
                       ),
                     ),
                     const SizedBox(height: 20),
-                    // Displaying API response message if any (for errors not handled by SnackBar)
                     if (responseMessage.isNotEmpty && !isLoading && !responseMessage.toLowerCase().contains('success'))
                       Text(
                         responseMessage,
@@ -325,8 +332,6 @@ class _VerifyLoginCodePageState extends State<VerifyLoginCodePage> {
                         ),
                       ),
                     const SizedBox(height: 20),
-                    // Resend Code button
-
                   ],
                 ),
               ),

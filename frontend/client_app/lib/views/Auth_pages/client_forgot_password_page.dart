@@ -1,3 +1,4 @@
+import '../../utils/app_colors.dart'; // Import for kPrimaryBlue, kAccentBlue
 import 'package:client_app/views/components/login_navbar.dart'; // Keep this import if LoginNavbar is custom and needed elsewhere
 import 'package:flutter/material.dart';
 import 'package:client_app/models/auth_models/client_forget_password.dart';

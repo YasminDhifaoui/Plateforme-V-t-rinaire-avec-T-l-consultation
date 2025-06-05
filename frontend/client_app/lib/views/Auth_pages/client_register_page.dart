@@ -4,6 +4,7 @@ import 'package:client_app/views/Auth_pages/client_confirm_email_page.dart';
 import 'package:client_app/views/Auth_pages/client_login_page.dart';
 import 'package:client_app/views/components/login_navbar.dart'; // Keep if it's a custom widget, otherwise AppBar is fine
 import 'package:flutter/material.dart';
+import '../../utils/app_colors.dart'; // Import for kPrimaryBlue, kAccentBlue
 
 // Import the blue color constants from main.dart
 import 'package:client_app/main.dart'; // Assuming main.dart holds kPrimaryBlue, kAccentBlue etc.

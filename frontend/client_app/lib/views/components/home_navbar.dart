@@ -5,6 +5,7 @@ import 'package:client_app/services/auth_services/token_service.dart';
 import '../conv_pages/conv_page.dart';
 // Import the blue color constants from main.dart or your constants file
 import 'package:client_app/main.dart'; // Adjust path if using a separate constants.dart
+import '../../utils/app_colors.dart'; // Import for kPrimaryBlue, kAccentBlue
 
 class HomeNavbar extends StatefulWidget implements PreferredSizeWidget {
   final String username;

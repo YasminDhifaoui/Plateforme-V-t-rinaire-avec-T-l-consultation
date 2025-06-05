@@ -9,6 +9,7 @@ import '../../models/chat_models/chat_model.dart';
 import '../../services/chat_services/chat_signal_service.dart';
 import '../../utils/base_url.dart';
 import '../video_call_pages/video_call_screen.dart';
+import '../../utils/app_colors.dart'; // Import for kPrimaryBlue, kAccentBlue
 
 // For file picking - changed to file_selector
 import 'package:file_selector/file_selector.dart';

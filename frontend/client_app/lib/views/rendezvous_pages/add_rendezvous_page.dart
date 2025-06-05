@@ -9,7 +9,9 @@ import 'package:client_app/models/vet_models/veterinaire.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../services/auth_services/token_service.dart';
-import 'package:client_app/main.dart'; // Import for kPrimaryBlue, kAccentBlue
+import 'package:client_app/main.dart';
+
+import '../../utils/app_colors.dart'; // Import for kPrimaryBlue, kAccentBlue
 
 class AddRendezvousPage extends StatefulWidget {
   final Veterinaire vet;

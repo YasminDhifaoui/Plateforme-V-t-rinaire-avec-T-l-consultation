@@ -2,6 +2,7 @@ import 'package:client_app/services/animal_services/animal_add_service.dart';
 import 'package:flutter/material.dart';
 // Import your blue color constants. Ensure these are correctly defined.
 import 'package:client_app/main.dart'; // Adjust path if using a separate constants.dart
+import '../../utils/app_colors.dart'; // Import for kPrimaryBlue, kAccentBlue
 
 class AddPetPage extends StatefulWidget {
   const AddPetPage({Key? key}) : super(key: key);

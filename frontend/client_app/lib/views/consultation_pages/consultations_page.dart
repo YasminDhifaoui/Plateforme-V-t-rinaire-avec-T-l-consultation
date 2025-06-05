@@ -10,6 +10,7 @@ import '../../models/vet_models/veterinaire.dart';
 import '../../services/auth_services/token_service.dart';
 import '../../services/consultation_services/consultation_service.dart';
 import 'package:url_launcher/url_launcher.dart';
+import '../../utils/app_colors.dart'; // Import for kPrimaryBlue, kAccentBlue
 
 // Import your blue color constants. Ensure these are correctly defined.
 // If your colors are in a different file (e.g., constants.dart), adjust this import:

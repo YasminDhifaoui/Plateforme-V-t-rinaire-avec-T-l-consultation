@@ -5,7 +5,9 @@ import 'package:flutter/material.dart';
 // import 'package:client_app/utils/logout_helper.dart'; // Keep if used for general logout logic
 
 // Import your blue color constants. Ensure these are correctly defined.
-import 'package:client_app/main.dart'; // Adjust path if using a separate constants.dart
+import 'package:client_app/main.dart';
+
+import '../../utils/app_colors.dart'; // Adjust path if using a separate constants.dart
 
 class VaccinationPage extends StatelessWidget {
   final String animalId;

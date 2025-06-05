@@ -8,6 +8,7 @@ import '../../services/animal_services/animal_delete_service.dart';
 // import '../components/home_navbar.dart'; // Replaced with standard AppBar for this page
 import 'add_pet_page.dart';
 import 'update_pet_page.dart';
+import '../../utils/app_colors.dart'; // Import for kPrimaryBlue, kAccentBlue
 
 // Import your blue color constants. Ensure these are correctly defined.
 import 'package:client_app/main.dart'; // Adjust path if using a separate constants.dart

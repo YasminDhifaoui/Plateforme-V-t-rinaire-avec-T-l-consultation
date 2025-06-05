@@ -9,10 +9,13 @@ import 'package:client_app/views/components/home_navbar.dart'; // Assuming this 
 // Import the blue color constants from main.dart
 import 'package:client_app/main.dart';
 
+import '../utils/app_colors.dart';
+
 class HomePage extends StatefulWidget {
   final String username;
+  final String token;
 
-  const HomePage({Key? key, required this.username}) : super(key: key);
+  const HomePage({Key? key, required this.username,required this.token}) : super(key: key);
 
   @override
   State<HomePage> createState() => _HomePageState();

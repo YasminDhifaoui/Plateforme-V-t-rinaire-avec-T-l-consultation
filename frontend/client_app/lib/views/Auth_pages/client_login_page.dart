@@ -5,6 +5,7 @@ import 'package:client_app/views/components/login_navbar.dart'; // Keep this imp
 import 'package:client_app/views/Auth_pages/verify_login_code_page.dart'; // Corrected import for VerifyLoginCodePage
 import 'package:client_app/views/Auth_pages/client_forgot_password_page.dart';
 import 'package:flutter/material.dart';
+import '../../utils/app_colors.dart'; // Import for kPrimaryBlue, kAccentBlue
 
 // Import the blue color constants from main.dart
 import 'package:client_app/main.dart'; // Assuming main.dart holds kPrimaryBlue, kAccentBlue etc.

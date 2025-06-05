@@ -1,15 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:veterinary_app/models/auth_models/vet_login.dart'; // Ensure this is correct for VetLoginDto
 import 'package:veterinary_app/services/auth_services/vet_auth_services.dart'; // Ensure this contains ApiService and loginClient method
+import 'package:veterinary_app/services/auth_services/token_service.dart'; // Import TokenService
 import 'package:veterinary_app/views/Auth_pages/vet_register_page.dart';
 import 'package:veterinary_app/views/Auth_pages/verify_login_code_page.dart';
 import 'package:veterinary_app/views/Auth_pages/vet_forgot_password_page.dart';
-// import 'package:veterinary_app/views/components/login_navbar.dart'; // Removed custom LoginNavbar, using standard AppBar
 
-// Assuming kPrimaryGreen and kAccentGreen are defined in main.dart
-import 'package:veterinary_app/main.dart';
+// CORRECTED: Import kPrimaryGreen and kAccentGreen from your centralized app_colors.dart
+import '../../utils/app_colors.dart'; // <--- KEEP THIS LINE
 
-import '../../utils/app_colors.dart'; // Adjust path if using a separate constants.dart
+// REMOVED: Importing main.dart for colors is a bad practice and can lead to circular dependencies.
+// import 'package:veterinary_app/main.dart'; // <-- DELETE THIS LINE
 
 class VetLoginPage extends StatefulWidget {
   // NEW: Callback from MyHomePage/AppWrapper
@@ -53,7 +54,7 @@ class _VetLoginPageState extends State<VetLoginPage> {
 
     setState(() {
       isLoading = true; // Set loading true
-      responseMessage = '';
+      responseMessage = ''; // Clear previous message
     });
 
     final loginDto = VetLoginDto(
@@ -69,6 +70,8 @@ class _VetLoginPageState extends State<VetLoginPage> {
       _showSnackBar(responseMessage, isSuccess: result["success"] == true);
 
       if (result["success"] == true) {
+        // No need to store token/username here directly.
+        // It's handled by VerifyLoginCodePage after 2FA.
         if (mounted) {
           // NAVIGATE TO 2FA Verification page
           Navigator.push( // Use push, not pushReplacement here
@@ -134,7 +137,7 @@ class _VetLoginPageState extends State<VetLoginPage> {
       appBar: AppBar(
         // AppBar styling is handled by AppBarTheme in main.dart
         title: Text(
-          '',
+          '', // Empty title as requested
           style: textTheme.titleLarge?.copyWith(color: Colors.white),
         ),
         leading: IconButton(
@@ -151,7 +154,6 @@ class _VetLoginPageState extends State<VetLoginPage> {
             margin: const EdgeInsets.symmetric(vertical: 40, horizontal: 20), // Adjusted margin
             decoration: BoxDecoration(
               color: Theme.of(context).cardTheme.color, // Use themed card color (white)
-              //borderRadius: Theme.of(context).cardTheme.shape?.borderRadius, // Use themed card border radius
               boxShadow: [
                 BoxShadow(
                   color: Colors.black.withOpacity(0.1),
@@ -167,7 +169,7 @@ class _VetLoginPageState extends State<VetLoginPage> {
                   Text(
                     "Welcome Back, Veterinarian!",
                     style: textTheme.headlineSmall?.copyWith(
-                      color: kPrimaryGreen, // Themed title color
+                      color: kPrimaryGreen, // Themed title color from app_colors.dart
                       fontWeight: FontWeight.bold,
                     ),
                     textAlign: TextAlign.center,
@@ -217,7 +219,7 @@ class _VetLoginPageState extends State<VetLoginPage> {
                   SizedBox(
                     width: double.infinity,
                     child: isLoading // Show CircularProgressIndicator when loading
-                        ? Center(child: CircularProgressIndicator(color: kPrimaryGreen)) // Themed loading indicator
+                        ? Center(child: CircularProgressIndicator(color: kPrimaryGreen)) // Themed loading indicator from app_colors.dart
                         : ElevatedButton(
                       onPressed: loginUser,
                       // Button styling is handled by ElevatedButtonThemeData in main.dart
@@ -250,7 +252,7 @@ class _VetLoginPageState extends State<VetLoginPage> {
                         );
                       },
                       style: TextButton.styleFrom(
-                        foregroundColor: kPrimaryGreen, // Themed text button color
+                        foregroundColor: kPrimaryGreen, // Themed text button color from app_colors.dart
                       ),
                       child: Text(
                         "Forgot your password?",
@@ -278,7 +280,7 @@ class _VetLoginPageState extends State<VetLoginPage> {
                           );
                         },
                         style: TextButton.styleFrom(
-                          foregroundColor: kAccentGreen, // Use accent green for register link
+                          foregroundColor: kAccentGreen, // Use accent green for register link from app_colors.dart
                         ),
                         child: Text(
                           "Register here",

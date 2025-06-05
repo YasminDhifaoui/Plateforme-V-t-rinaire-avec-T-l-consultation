@@ -1,3 +1,4 @@
+import '../../utils/app_colors.dart'; // Import for kPrimaryBlue, kAccentBlue
 import 'package:client_app/models/auth_models/client_confirm_email.dart';
 import 'package:client_app/services/auth_services/client_auth_services.dart';
 import 'package:flutter/material.dart';

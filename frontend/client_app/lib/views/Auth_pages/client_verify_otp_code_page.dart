@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:client_app/models/auth_models/client_verify_otp_code.dart'; // Import the new DTO
 import 'package:client_app/services/auth_services/client_auth_services.dart'; // Your ApiService
 import 'package:client_app/main.dart'; // For kPrimaryBlue, kAccentBlue. Adjust path if using separate constants.
+import '../../utils/app_colors.dart'; // Import for kPrimaryBlue, kAccentBlue
 
 
 import 'client_login_page.dart';

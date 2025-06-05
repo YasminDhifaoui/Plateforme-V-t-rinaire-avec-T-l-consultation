@@ -8,6 +8,7 @@ import 'package:client_app/services/animal_services/animal_service.dart';
 import 'package:client_app/models/animals_models/animal.dart';
 import 'package:client_app/services/vet_services/veterinaire_service.dart';
 import 'package:client_app/models/vet_models/veterinaire.dart';
+import '../../utils/app_colors.dart'; // Import for kPrimaryBlue, kAccentBlue
 
 // Import your blue color constants. Ensure these are correctly defined.
 import 'package:client_app/main.dart'; // Adjust path if using a separate constants.dart
