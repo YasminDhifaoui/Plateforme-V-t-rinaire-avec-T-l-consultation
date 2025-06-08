@@ -85,4 +85,5 @@ class DefaultFirebaseOptions {
     storageBucket: 'vetappmsgnotification.firebasestorage.app',
     measurementId: 'G-2V38TEL4EQ',
   );
+
 }

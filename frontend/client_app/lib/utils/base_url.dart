@@ -8,7 +8,7 @@ class BaseUrl {
       case Environment.emulator:
         return 'http://10.0.2.2:5000';
       case Environment.realDevice:
-        return 'http://192.168.1.50:5000';
+        return 'http://192.168.101.102:5000';//storia
     }
   }
 }

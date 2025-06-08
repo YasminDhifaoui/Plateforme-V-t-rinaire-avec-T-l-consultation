@@ -53,6 +53,8 @@ class _ChatPageState extends State<ChatPage> {
 
   // This state variable controls the visibility of the "Scroll to Bottom" button
   bool _showScrollToBottomButton = false;
+  String receiverAppType = 'client';
+
 
   @override
   void initState() {
@@ -174,6 +176,8 @@ class _ChatPageState extends State<ChatPage> {
     // Trigger FCM notification via backend for the recipient
     final notificationResult = await _notificationService.sendChatMessageNotification(
       recipientId: widget.receiverId,
+      recipientAppType: receiverAppType, // Pass the correct type
+
       senderId: _currentUserId!,
       senderName: _currentUsername!, // This will be the vet's username
       messageContent: message,
@@ -247,6 +251,8 @@ class _ChatPageState extends State<ChatPage> {
         // Trigger FCM notification via backend for file message
         final notificationResult = await _notificationService.sendChatMessageNotification(
           recipientId: widget.receiverId,
+          recipientAppType: receiverAppType, // Pass the correct type
+
           senderId: _currentUserId!,
           senderName: _currentUsername!, // This will be the vet's username
           messageContent: 'Sent a file: ${fileName}', // A descriptive message for notification
@@ -310,6 +316,8 @@ class _ChatPageState extends State<ChatPage> {
         // Trigger FCM notification via backend for picture message
         final notificationResult = await _notificationService.sendChatMessageNotification(
           recipientId: widget.receiverId,
+          recipientAppType: receiverAppType, // Pass the correct type
+
           senderId: _currentUserId!,
           senderName: _currentUsername!, // This will be the vet's username
           messageContent: 'Sent a picture: ${fileName}', // A descriptive message for notification

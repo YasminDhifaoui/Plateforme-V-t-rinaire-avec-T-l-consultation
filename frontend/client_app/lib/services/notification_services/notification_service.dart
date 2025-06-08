@@ -1,15 +1,16 @@
-import 'dart:convert';
-import 'dart:convert';
+// client_app/lib/services/notification_services/notification_service.dart
 
+import 'dart:convert';
 import 'package:http/http.dart' as http;
-import 'package:client_app/services/auth_services/token_service.dart';
-import 'package:client_app/utils/base_url.dart';
+import '../../utils/base_url.dart';
+import '../auth_services/token_service.dart';
 
 class NotificationService {
   final String _baseUrl = BaseUrl.api;
 
   Future<Map<String, dynamic>> sendChatMessageNotification({
     required String recipientId,
+    required String recipientAppType, // This is the crucial parameter
     required String senderId,
     required String senderName,
     required String messageContent,
@@ -28,6 +29,7 @@ class NotificationService {
 
       final Map<String, dynamic> requestBody = {
         'recipientId': recipientId,
+        'recipientAppType': recipientAppType, // This is the value being sent
         'senderId': senderId,
         'senderName': senderName,
         'messageContent': messageContent,
@@ -40,9 +42,14 @@ class NotificationService {
         requestBody['fileType'] = fileType;
       }
 
-      print('[NotificationService] Sending chat notification trigger request to: $uri');
-      print('[NotificationService] Request Body: ${json.encode(requestBody)}');
-      print('[NotificationService] Request Headers: {Content-Type: application/json, Authorization: Bearer $token}');
+      // --- CRITICAL DEBUG PRINTS ---
+      print('[NotificationService DEBUG] Preparing to send chat notification:');
+      print('  Target URL: $uri');
+      print('  Recipient ID (from Flutter): $recipientId');
+      print('  Recipient App Type (from Flutter): $recipientAppType'); // <<< THIS IS THE VALUE WE NEED TO CHECK
+      print('  Sender ID (from Flutter): $senderId');
+      print('  Full Request Body: ${json.encode(requestBody)}');
+      // --- END CRITICAL DEBUG PRINTS ---
 
       final response = await http.post(
         uri,
@@ -53,19 +60,16 @@ class NotificationService {
         body: json.encode(requestBody),
       );
 
-      // --- ADDED DEBUG PRINTS FOR RESPONSE ---
       print('[NotificationService] Raw Response Status Code: ${response.statusCode}');
       print('[NotificationService] Raw Response Body: ${response.body}');
       print('[NotificationService] Raw Response Headers: ${response.headers}');
-      // --- END ADDED DEBUG PRINTS ---
 
-      // Only attempt JSON decode if the response body is not empty
       if (response.body.isEmpty) {
         print('[NotificationService] Response body is empty.');
         return {'success': false, 'message': 'Empty response from server. Status: ${response.statusCode}'};
       }
 
-      final Map<String, dynamic> responseBody = json.decode(response.body); // This is where the error occurs
+      final Map<String, dynamic> responseBody = json.decode(response.body);
 
       if (response.statusCode == 200) {
         print('[NotificationService] Backend notification trigger response (200 OK): $responseBody');
@@ -76,7 +80,7 @@ class NotificationService {
       }
     } catch (e) {
       print('[NotificationService] Exception during notification trigger: $e');
-      return {'success': false, 'message': 'Network or unexpected error: ${e.toString()}'}; // Use e.toString() for full error
+      return {'success': false, 'message': 'Network or unexpected error: ${e.toString()}'};
     }
   }
 }

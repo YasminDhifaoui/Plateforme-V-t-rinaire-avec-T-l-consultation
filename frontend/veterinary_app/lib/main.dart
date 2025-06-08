@@ -150,7 +150,7 @@ Future<void> handleFCMNavigation(Map<String, dynamic> data) async {
         navigatorKey.currentState!.push(
           MaterialPageRoute(
             builder: (context) => ChatPage(
-              token: currentVetToken!,
+              token: currentVetToken,
               receiverId: senderId,
               receiverUsername: senderName,
             ),

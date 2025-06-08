@@ -2,7 +2,6 @@ import 'dart:convert';
 import 'dart:convert';
 
 import 'package:http/http.dart' as http;
-
 import '../../utils/base_url.dart';
 import '../auth_services/token_service.dart';
 
@@ -11,6 +10,8 @@ class NotificationService {
 
   Future<Map<String, dynamic>> sendChatMessageNotification({
     required String recipientId,
+    required String recipientAppType, // <<< NEW PARAMETER HERE
+
     required String senderId,
     required String senderName,
     required String messageContent,
@@ -29,6 +30,8 @@ class NotificationService {
 
       final Map<String, dynamic> requestBody = {
         'recipientId': recipientId,
+        'recipientAppType': recipientAppType, // <<< ADDED TO REQUEST BODY
+
         'senderId': senderId,
         'senderName': senderName,
         'messageContent': messageContent,

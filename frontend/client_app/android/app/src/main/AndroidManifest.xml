@@ -71,5 +71,17 @@
         <meta-data
             android:name="flutterEmbedding"
             android:value="2" />
+
+        <!-- END FCM NOTIFICATION CHANNEL -->
+
+        <!-- ADD THIS SERVICE FOR FCM MESSAGING (CRITICAL) -->
+        <!-- This service is essential for Firebase to deliver messages to your app. -->
+        <service
+            android:name="com.google.firebase.messaging.FirebaseMessagingService"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.google.firebase.MESSAGING_EVENT" />
+            </intent-filter>
+        </service>
     </application>
 </manifest>

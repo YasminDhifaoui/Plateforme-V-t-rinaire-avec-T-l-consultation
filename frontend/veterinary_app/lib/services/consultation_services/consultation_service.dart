@@ -5,7 +5,7 @@ import 'package:veterinary_app/models/consultation_models/consulattion_model.dar
 import 'package:veterinary_app/utils/base_url.dart';
 
 class ConsultationService {
-  static final String _baseUrl = '${BaseUrl.api}';
+  static final String _baseUrl = BaseUrl.api;
   static final String _getEndpoint =
       '$_baseUrl/api/vet/consultationsvet/get-consultations';
 

@@ -48,6 +48,8 @@ class _ChatPageState extends State<ChatPage> {
   String? _currentUsername;
 
   bool _showScrollToBottomButton = false;
+  String receiverAppType = 'vet';
+
 
   @override
   void initState() {
@@ -160,6 +162,7 @@ class _ChatPageState extends State<ChatPage> {
   }
 
   void _sendMessage(String message) async { // Make async
+
     if (_currentUserId == null || _currentUsername == null) {
       _showSnackBar('User authentication details not available. Please re-login.', isSuccess: false);
       return;
@@ -184,11 +187,12 @@ class _ChatPageState extends State<ChatPage> {
 
     _controller.clear();
     _scrollToBottom();
-
     // --- NEW: Trigger FCM notification via backend ---
     final notificationResult = await _notificationService.sendChatMessageNotification(
       recipientId: widget.receiverId,
-      senderId: _currentUserId!,
+      recipientAppType: receiverAppType, // Pass the correct type
+
+    senderId: _currentUserId!,
       senderName: _currentUsername!, // Use the actual username for notification
       messageContent: message,
       // No file details for a text message
@@ -265,7 +269,9 @@ class _ChatPageState extends State<ChatPage> {
         // --- NEW: Trigger FCM notification via backend for file message ---
         final notificationResult = await _notificationService.sendChatMessageNotification(
           recipientId: widget.receiverId,
-          senderId: _currentUserId!,
+          recipientAppType: receiverAppType, // Pass the correct type
+
+        senderId: _currentUserId!,
           senderName: _currentUsername!, // Use the actual username for notification
           messageContent: 'Sent a file: ${fileName}', // A descriptive message for notification
           fileUrl: uploadedFileUrl,
@@ -333,6 +339,8 @@ class _ChatPageState extends State<ChatPage> {
         // --- NEW: Trigger FCM notification via backend for picture message ---
         final notificationResult = await _notificationService.sendChatMessageNotification(
           recipientId: widget.receiverId,
+          recipientAppType: receiverAppType, // Pass the correct type
+
           senderId: _currentUserId!,
           senderName: _currentUsername!, // Use the actual username for notification
           messageContent: 'Sent a picture: ${fileName}', // A descriptive message for notification

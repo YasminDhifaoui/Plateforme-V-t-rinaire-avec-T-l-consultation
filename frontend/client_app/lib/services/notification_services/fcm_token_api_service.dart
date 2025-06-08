@@ -4,8 +4,7 @@ import 'package:http/http.dart' as http;
 import 'package:client_app/utils/base_url.dart'; // Ensure BaseUrl is defined here
 
 class FcmTokenApiService {
-  static final String _baseUrl = BaseUrl.api; // Your C# backend base URL
-
+  static final String _baseUrl = BaseUrl.api;
   static Future<void> saveUserFcmToken(String userId, String fcmToken, String appType) async {
     final Uri uri = Uri.parse('$_baseUrl/api/users/savefcmtoken'); // Your backend endpoint for saving tokens
     try {

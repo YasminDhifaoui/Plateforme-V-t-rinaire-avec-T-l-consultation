@@ -46,7 +46,7 @@ android {
 
 dependencies {
     coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.0.4")
-    implementation(platform("com.google.firebase:firebase-bom:32.7.4")) // Corrected syntax
+    implementation(platform("com.google.firebase:firebase-bom:32.3.1")) // Corrected syntax
     // Add the Firebase SDK for Google Analytics (optional, but good for FCM)
     implementation("com.google.firebase:firebase-analytics-ktx") // Corrected syntax for Kotlin
     // Add the Firebase SDK for Cloud Messaging

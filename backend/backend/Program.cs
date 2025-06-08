@@ -34,6 +34,9 @@ using backend.Repo.VetRepo.ProductRepo;
 using Microsoft.AspNetCore.SignalR;
 using backend;
 using Microsoft.AspNetCore.Http.Connections;
+using FirebaseAdmin;
+using Google.Apis.Auth.OAuth2;
+using backend.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -62,6 +65,21 @@ builder.Services.AddCors(options => {
 
 builder.Services.AddControllers();
 
+// >>> START: ADD FIREBASE ADMIN SDK INITIALIZATION HERE <<<
+var serviceAccountKeyPath = Path.Combine(AppContext.BaseDirectory, "vetappmsgnotification-firebase-adminsdk-fbsvc-14aad25448.json");
+
+if (!File.Exists(serviceAccountKeyPath))
+{
+    throw new FileNotFoundException($"Firebase service account key file not found at: {serviceAccountKeyPath}. Please ensure it's in the project root and 'Copy to Output Directory' is set to 'Copy always'.");
+}
+
+FirebaseApp.Create(new AppOptions()
+{
+    Credential = GoogleCredential.FromJson(File.ReadAllText(serviceAccountKeyPath))
+});
+
+Console.WriteLine("[Backend Startup] Firebase Admin SDK initialized successfully from FirebaseServiceAccountKey.json.");
+// >>> END: ADD FIREBASE ADMIN SDK INITIALIZATION HERE <<<
 
 
 // Swagger Configuration
@@ -118,6 +136,8 @@ builder.Services.AddScoped<IConsultationRepo, consultationRepo>();
 builder.Services.AddScoped<IVaccinationRepo, VaccinationRepo>();
 builder.Services.AddScoped<IAdminProfileRepo, AdminProfileRepo>();
 builder.Services.AddScoped<IProductRepository, ProductRepo>();
+builder.Services.AddScoped<INotificationService, NotificationService>();
+builder.Services.AddScoped<IFcmTokenService, FcmTokenService>();
 
 
 
