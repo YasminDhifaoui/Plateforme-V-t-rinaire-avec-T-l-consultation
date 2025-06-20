@@ -1,13 +1,13 @@
 {
   "project_info": {
-    "project_number": "756043924770",
-    "project_id": "vetappmsgnotification",
-    "storage_bucket": "vetappmsgnotification.firebasestorage.app"
+    "project_number": "1074624618309",
+    "project_id": "notificationpfevet-new",
+    "storage_bucket": "notificationpfevet-new.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:756043924770:android:7edac163354d0f80a7517b",
+        "mobilesdk_app_id": "1:1074624618309:android:cc2ce62702b786bcc9682c",
         "android_client_info": {
           "package_name": "com.example.client_app"
         }
@@ -15,7 +15,7 @@
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyC5Pft6oiKVpjixJ9E0LmQM9EGsBE6fOMU"
+          "current_key": "AIzaSyCr8NJrTVCmnZf9MnwoFfLGY488nB_05D4"
         }
       ],
       "services": {
@@ -26,7 +26,7 @@
     },
     {
       "client_info": {
-        "mobilesdk_app_id": "1:756043924770:android:701f8c18433480baa7517b",
+        "mobilesdk_app_id": "1:1074624618309:android:0479c0df63fdd42bc9682c",
         "android_client_info": {
           "package_name": "com.example.veterinary_app"
         }
@@ -34,7 +34,7 @@
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyC5Pft6oiKVpjixJ9E0LmQM9EGsBE6fOMU"
+          "current_key": "AIzaSyCr8NJrTVCmnZf9MnwoFfLGY488nB_05D4"
         }
       ],
       "services": {
